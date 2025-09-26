@@ -611,20 +611,26 @@ function calculateLeaveMinutes(sDate, sTime, eDate, eTime) {
                 return;
             }
 
-            // --- ตรวจสอบจำนวนวันลาไม่เกินสิทธิ ---
-            const leaveDisplay = document.getElementById("leaveDaysDisplay").innerText;
-            const leaveDaysMatch = leaveDisplay.match(/รวมวันลา: (\d+(\.\d+)?) วัน/);
-            const leaveDays = leaveDaysMatch ? parseFloat(leaveDaysMatch[1]) : 0;
+
+            // --- ตรวจสอบจำนวนวันลาไม่เกินสิทธิ (รองรับนาที) ---
+            const leaveDisplayText = document.getElementById("leaveDaysDisplay").innerText;
+            const leaveMinutesMatch = leaveDisplayText.match(/รวมเวลา: (\d+) นาที/);
+            const leaveMinutes = leaveMinutesMatch ? parseInt(leaveMinutesMatch[1]) : 0;
+            
+            // แปลงนาทีเป็นวัน (วันทำงาน 8 ชั่วโมง = 480 นาที)
+            const leaveDays = leaveMinutes / 480;
+            
             const leaveSet1 = JSON.parse(localStorage.getItem("leaveSet1"));
-            const leaveType = document.getElementById("leaveType").value;
+            const leaveTypeValue = document.getElementById("leaveType").value;
             let maxDays = 0;
-            switch (leaveType) {
+            switch (leaveTypeValue) {
                 case "AL": maxDays = leaveSet1[3]; break;
                 case "SL": maxDays = leaveSet1[4]; break;
                 case "BL": maxDays = leaveSet1[5]; break;
             }
+            
             if (leaveDays > maxDays) {
-                alert(`จำนวนวันลาที่ขอ (${leaveDays}) เกินวันลาคงเหลือ (${maxDays})`);
+                alert(`จำนวนวันลาที่ขอ (${leaveDays.toFixed(2)}) เกินวันลาคงเหลือ (${maxDays})`);
                 return;
             }
 
