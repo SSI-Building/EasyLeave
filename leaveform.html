@@ -535,13 +535,13 @@ function calculateLeaveMinutes(sDate, sTime, eDate, eTime) {
             const leaveDisplay = document.getElementById("leaveDaysDisplay");
 
             function updateLeaveDays() {
-                const leaveDays = calculateLeaveDays(
+                const leaveMinutes = calculateLeaveMinutes(
                     startDate.value,
                     startTime.value,
                     endDate.value,
                     endTime.value
                 );
-                leaveDisplay.innerText = `รวมวันลา: ${leaveDays} วัน`;
+                leaveDisplay.innerText = `รวมเวลา: ${leaveMinutes} นาที`;
             }
             
             // จับเหตุการณ์ change สำหรับ input ทั้ง 4 ตัว
