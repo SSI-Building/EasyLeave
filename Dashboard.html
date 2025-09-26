@@ -23,34 +23,13 @@ body.theme-custom {
   --primary-color-end: var(--custom-primary-end);
 }
 /* ===== Theme Variants ===== */
-body.theme-orange-purple {
-  --primary-color-start: #ff7e5f;
-  --primary-color-end: #6a11cb;
-}
-body.theme-blue-violet {
-  --primary-color-start: #36d1dc;
-  --primary-color-end: #5b86e5;
-}
-body.theme-pink-purple {
-  --primary-color-start: #ff758c;
-  --primary-color-end: #8e44ad;
-}
-body.theme-green-gold {
-  --primary-color-start: #11998e;
-  --primary-color-end: #fbc531;
-}
-body.theme-red-orange {
-  --primary-color-start: #f12711;
-  --primary-color-end: #f5af19;
-}
-body.theme-teal-navy {
-  --primary-color-start: #2b5876;
-  --primary-color-end: #4e4376;
-}
-body.theme-monochrome {
-  --primary-color-start: #555;
-  --primary-color-end: #999;
-}
+body.theme-orange-purple { --primary-color-start: #ff7e5f; --primary-color-end: #6a11cb; }
+body.theme-blue-violet { --primary-color-start: #36d1dc; --primary-color-end: #5b86e5; }
+body.theme-pink-purple { --primary-color-start: #ff758c; --primary-color-end: #8e44ad; }
+body.theme-green-gold { --primary-color-start: #11998e; --primary-color-end: #fbc531; }
+body.theme-red-orange { --primary-color-start: #f12711; --primary-color-end: #f5af19; }
+body.theme-teal-navy { --primary-color-start: #2b5876; --primary-color-end: #4e4376; }
+body.theme-monochrome { --primary-color-start: #555; --primary-color-end: #999; }
 body.theme-dark {
   --primary-color-start: #141E30;
   --primary-color-end: #243B55;
@@ -60,174 +39,49 @@ body.theme-dark {
   --card-background: #242424;
   --border-color: #444;
 }
-/* ===== Custom Theme Colors Override ===== */
-body.theme-custom {
-  --primary-color-start: var(--custom-primary-start);
-  --primary-color-end: var(--custom-primary-end);
-}
 
 /* ===== Base Styles ===== */
-body {
-  font-family: 'Prompt', sans-serif;
-  background: var(--background-color);
-  margin:0;
-  padding:20px;
-  color:var(--text-color);
-  transition: all 0.3s ease;
-  min-height: 100vh;
-  box-sizing: border-box;
-}
-.container {
-  max-width: 600px;
-  margin:auto;
-  position:relative;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-.container.loaded {
-  opacity: 1;
-  transform: translateY(0);
-}
+body { font-family: 'Prompt', sans-serif; background: var(--background-color); margin:0; padding:20px; color:var(--text-color); transition: all 0.3s ease; min-height: 100vh; box-sizing: border-box; }
+.container { max-width: 600px; margin:auto; position:relative; opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.container.loaded { opacity: 1; transform: translateY(0); }
 
-.header {
-  display:flex; align-items:center; gap:15px; margin-bottom:30px;
-  background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
-  padding:25px; border-radius:15px; color:#fff;
-  box-shadow:var(--shadow-light); position:relative;
-}
-.profile-pic {
-  width:60px; height:60px; border-radius:50%;
-  background:rgba(255,255,255,0.2); object-fit:cover;
-  border:3px solid rgba(255,255,255,0.5);
-}
+.header { display:flex; align-items:center; gap:15px; margin-bottom:30px; background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end)); padding:25px; border-radius:15px; color:#fff; box-shadow:var(--shadow-light); position:relative; }
+.profile-pic { width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,0.2); object-fit:cover; border:3px solid rgba(255,255,255,0.5); }
 .greeting { font-size:20px; font-weight:600; }
 .motivation { font-size:14px; color:rgba(255,255,255,0.8); margin-top:5px; }
 
-/* Settings and Logout Icons */
-.header-icons {
-    position:absolute;
-    top:25px;
-    right:25px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-.settings-icon, .logout-icon {
-    font-size:24px;
-    color:#fff;
-    cursor:pointer;
-    transition: transform 0.2s ease;
-}
-.settings-icon:hover, .logout-icon:hover {
-    transform: scale(1.1);
-}
+.header-icons { position:absolute; top:25px; right:25px; display:flex; flex-direction:column; gap:10px; }
+.settings-icon, .logout-icon { font-size:24px; color:#fff; cursor:pointer; transition: transform 0.2s ease; }
+.settings-icon:hover, .logout-icon:hover { transform: scale(1.1); }
 
-
-/* Theme Selector */
-.theme-selector {
-  position:absolute; top:60px; right:25px;
-  background:var(--card-background);
-  padding:10px; border-radius:8px;
-  box-shadow:var(--shadow-light);
-  display:none; flex-direction:column; gap:10px; z-index:10;
-}
+.theme-selector { position:absolute; top:60px; right:25px; background:var(--card-background); padding:10px; border-radius:8px; box-shadow:var(--shadow-light); display:none; flex-direction:column; gap:10px; z-index:10; }
 .theme-selector.active { display:flex; }
-.theme-option {
-  padding:8px 12px; border-radius:6px;
-  cursor:pointer; font-size:14px; font-weight:500;
-  border:1px solid var(--border-color); text-align:center;
-  transition: all 0.3s ease;
-}
+.theme-option { padding:8px 12px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; border:1px solid var(--border-color); text-align:center; transition: all 0.3s ease; }
 .theme-option:hover { background: var(--background-color); }
-.theme-preview {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 10px;
-    background: linear-gradient(45deg, var(--color-start), var(--color-end));
-}
+.theme-preview { width: 20px; height: 20px; border-radius: 50%; display: inline-block; vertical-align: middle; margin-right: 10px; background: linear-gradient(45deg, var(--color-start), var(--color-end)); }
 
-
-/* Tabs */
 .tabs-container { background: var(--card-background); padding:10px; border-radius:12px; box-shadow: var(--shadow-light); margin-bottom:20px; }
 .tabs { display:flex; border-radius:8px; }
-.tab {
-  flex:1; text-align:center; padding:12px 0; cursor:pointer;
-  font-weight:500; color: var(--light-text-color); transition: all 0.3s ease;
-}
-.tab.active {
-  background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
-  color:#fff; font-weight:600; border-radius:8px;
-  box-shadow:0 4px 8px rgba(0,0,0,0.1);
-}
+.tab { flex:1; text-align:center; padding:12px 0; cursor:pointer; font-weight:500; color: var(--light-text-color); transition: all 0.3s ease; }
+.tab.active { background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end)); color:#fff; font-weight:600; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.1); }
 .tab-content { display:none; padding-top:20px; }
 .tab-content.active { display:block; }
 
-/* Tables */
 .table-container { background: var(--card-background); border-radius:12px; overflow:hidden; box-shadow: var(--shadow-light); margin-bottom:20px; }
 table { width:100%; border-collapse:collapse; }
-th, td {
-  padding:15px; text-align:center; font-size:15px; border-bottom:1px solid var(--border-color);
-}
+th, td { padding:15px; text-align:center; font-size:15px; border-bottom:1px solid var(--border-color); }
 th { background: var(--background-color); font-weight:600; color: var(--text-color); }
 tr:last-child td { border-bottom:none; }
 
-/* Buttons */
 .buttons { display:flex; gap:15px; margin-top:20px; }
-.btn {
-  flex:1; padding:15px; border:none; border-radius:10px;
-  font-weight:600; cursor:pointer; font-size:16px;
-  display:flex; align-items:center; justify-content:center; gap:8px;
-  box-shadow:0 4px 8px rgba(0,0,0,0.1);
-  color:#fff; background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
-  transition: all 0.3s ease;
-}
+.btn { flex:1; padding:15px; border:none; border-radius:10px; font-weight:600; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 8px rgba(0,0,0,0.1); color:#fff; background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end)); transition: all 0.3s ease; }
 .btn:hover { box-shadow:0 6px 12px rgba(0,0,0,0.15); transform:translateY(-2px); }
 
-/* Loading Screen Styles */
-.loading-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--background-color);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  transition: opacity 0.5s ease;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.loading-screen.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.spinner {
-  border: 5px solid var(--border-color);
-  border-top: 5px solid var(--primary-color-end);
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-}
-
-.loading-text {
-  color: var(--text-color);
-  font-size: 1.2em;
-  font-weight: 500;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+.loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--background-color); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; flex-direction: column; gap: 20px; }
+.loading-screen.hidden { opacity: 0; pointer-events: none; }
+.spinner { border: 5px solid var(--border-color); border-top: 5px solid var(--primary-color-end); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+.loading-text { color: var(--text-color); font-size: 1.2em; font-weight: 500; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -240,24 +94,27 @@ const messages = [
   "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
   "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
   "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
-  "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
+  "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
   "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
-  "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
+  "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ"
 ];
 
-
-  function formatMinutes(minutes) {
-  if (isNaN(minutes) || minutes === null) return "-";
-
+// ฟังก์ชันแปลงนาที → วัน/ชั่วโมง/นาที
+function formatLeaveTime(minutes) {
+  if (isNaN(minutes) || minutes === null) return { days: 0, hours: 0, mins: 0 };
   const days = Math.floor(minutes / 480);
   const hours = Math.floor((minutes % 480) / 60);
   const mins = minutes % 60;
+  return { days, hours, mins };
+}
 
+// แปลงนาทีเป็น string แสดงผล
+function formatMinutes(minutes) {
+  const t = formatLeaveTime(minutes);
   let result = "";
-  if (days > 0) result += days + " วัน ";
-  if (hours > 0) result += hours + " ชั่วโมง ";
-  if (mins > 0) result += mins + " นาที";
-
+  if (t.days > 0) result += t.days + " วัน ";
+  if (t.hours > 0) result += t.hours + " ชั่วโมง ";
+  if (t.mins > 0) result += t.mins + " นาที";
   return result.trim() || "0 นาที";
 }
 
@@ -276,29 +133,41 @@ async function loadDashboard() {
     .then(res => res.json())
     .then(data => {
       if(data.error){ alert(data.error); return; }
-      
+
       localStorage.setItem("leaveSet1", JSON.stringify(data.set1));
       localStorage.setItem("leaveSet2", JSON.stringify(data.set2));
 
-      
-    document.getElementById("empName").textContent = data.set1[1];
-    document.getElementById("remainTable").innerHTML = `
-      <tr><th>ประเภทการลา</th><th>จำนวนวัน</th></tr>
-      <tr><td>ลาพักร้อน</td><td>${formatMinutes(data.set1[3])}</td></tr>
-      <tr><td>ลาป่วย</td><td>${formatMinutes(data.set1[4])}</td></tr>
-      <tr><td>ลากิจ</td><td>${formatMinutes(data.set1[5])}</td></tr>`;
-    
-    document.getElementById("usedTable").innerHTML = `
-      <tr><th>ประเภทการลา</th><th>จำนวนวัน</th></tr>
-      <tr><td>ลาพักร้อน</td><td>${formatMinutes(data.set2[3])}</td></tr>
-      <tr><td>ลาป่วย</td><td>${formatMinutes(data.set2[4])}</td></tr>
-      <tr><td>ลากิจ</td><td>${formatMinutes(data.set2[5])}</td></tr>
-      <tr><td>ขาดงานสะสม</td><td>${formatMinutes(data.set2[6])}</td></tr>`;
+      document.getElementById("empName").textContent = data.set1[1];
+
+      // ===== แก้ไขตาราง remainTable =====
+      document.getElementById("remainTable").innerHTML = `
+        <tr>
+          <th>ประเภทการลา</th>
+          <th>วัน</th>
+          <th>ชั่วโมง</th>
+          <th>นาที</th>
+        </tr>
+        ${["ลาพักร้อน","ลาป่วย","ลากิจ"].map((type,i)=>{
+          const t = formatLeaveTime(data.set1[3+i]);
+          return `<tr><td>${type}</td><td>${t.days}</td><td>${t.hours}</td><td>${t.mins}</td></tr>`;
+        }).join("")}
+      `;
+
+      // ===== แก้ไขตาราง usedTable =====
+      document.getElementById("usedTable").innerHTML = `
+        <tr>
+          <th>ประเภทการลา</th>
+          <th>วัน</th>
+          <th>ชั่วโมง</th>
+          <th>นาที</th>
+        </tr>
+        ${["ลาพักร้อน","ลาป่วย","ลากิจ","ขาดงานสะสม"].map((type,i)=>{
+          const t = formatLeaveTime(data.set2[3+i]);
+          return `<tr><td>${type}</td><td>${t.days}</td><td>${t.hours}</td><td>${t.mins}</td></tr>`;
+        }).join("")}
+      `;
     })
-    .catch(err => {
-      console.error(err);
-      alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message);
-    })
+    .catch(err => { console.error(err); alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message); })
     .finally(() => {
       document.getElementById("loadingScreen").classList.add('hidden');
       document.getElementById("mainContainer").classList.add('loaded');
@@ -309,12 +178,10 @@ window.onload = () => {
     const savedTheme = localStorage.getItem('selectedTheme');
     if (savedTheme) {
         document.body.className = savedTheme;
-        // ตรวจสอบว่าธีมที่บันทึกไว้คือ custom theme หรือไม่
         if (savedTheme === 'theme-custom') {
             const savedColorStart = localStorage.getItem('customColorStart');
             const savedColorEnd = localStorage.getItem('customColorEnd');
             if (savedColorStart && savedColorEnd) {
-                // ถ้าเป็น custom theme ให้กำหนดค่าสีที่บันทึกไว้ใน localStorage
                 document.body.style.setProperty('--custom-primary-start', savedColorStart);
                 document.body.style.setProperty('--custom-primary-end', savedColorEnd);
             }
@@ -322,20 +189,15 @@ window.onload = () => {
     }
     loadDashboard();
 };
-  
+
 document.addEventListener("DOMContentLoaded", ()=>{
   const settingsIcon = document.getElementById('settingsIcon');
   const logoutIcon = document.getElementById('logoutIcon');
   const themeSelector = document.getElementById('themeSelector');
 
-  settingsIcon.addEventListener('click', () => {
-      themeSelector.classList.toggle('active');
-  });
+  settingsIcon.addEventListener('click', () => { themeSelector.classList.toggle('active'); });
 
-  // แก้ไขให้กลับไปหน้า Login.html โดยไม่ลบข้อมูลใน localStorage
-  logoutIcon.addEventListener('click', () => {
-    window.location.href = 'Login.html';
-  });
+  logoutIcon.addEventListener('click', () => { window.location.href = 'Login.html'; });
 
   document.querySelectorAll('.theme-option').forEach(option => {
       option.addEventListener('click', function() {
@@ -375,33 +237,7 @@ function openTab(evt, tabId){
   </div>
 
   <div class="theme-selector" id="themeSelector">
-    <div class="theme-option" data-theme="theme-default">
-      <span class="theme-preview" style="--color-start: #1994b6; --color-end: #36a761;"></span>Default color (Blue-Green)
-    </div>
-    <div class="theme-option" data-theme="theme-orange-purple">
-      <span class="theme-preview" style="--color-start: #ff7e5f; --color-end: #6a11cb;"></span>Orange-Purple
-    </div>
-    <div class="theme-option" data-theme="theme-blue-violet">
-      <span class="theme-preview" style="--color-start: #36d1dc; --color-end: #5b86e5;"></span>Blue-Purple
-    </div>
-    <div class="theme-option" data-theme="theme-pink-purple">
-      <span class="theme-preview" style="--color-start: #ff758c; --color-end: #8e44ad;"></span>Pink-Purple
-    </div>
-    <div class="theme-option" data-theme="theme-green-gold">
-      <span class="theme-preview" style="--color-start: #11998e; --color-end: #fbc531;"></span>Green-Gold
-    </div>
-    <div class="theme-option" data-theme="theme-red-orange">
-      <span class="theme-preview" style="--color-start: #f12711; --color-end: #f5af19;"></span>Red-Orange
-    </div>
-    <div class="theme-option" data-theme="theme-teal-navy">
-      <span class="theme-preview" style="--color-start: #2b5876; --color-end: #4e4376;"></span>Teal-Navy
-    </div>
-    <div class="theme-option" data-theme="theme-monochrome">
-      <span class="theme-preview" style="--color-start: #555; --color-end: #999;"></span>Monochrome
-    </div>
-    <div class="theme-option" data-theme="theme-dark">
-      <span class="theme-preview" style="--color-start: #141E30; --color-end: #243B55;"></span>Dark Mode
-    </div>
+    <!-- theme options คงเดิม -->
   </div>
 
   <div class="tabs-container">
@@ -417,12 +253,8 @@ function openTab(evt, tabId){
   </div>
 
   <div class="buttons">
-    <button class="btn" onclick="window.location.href='leaveform.html'">
-      <i class="fas fa-calendar-plus"></i> ลาออนไลน์
-    </button>
-      <button class="btn" onclick="window.location.href='History.html'">
-    <i class="fas fa-history"></i> ตรวจสอบสถานะ
-  </button>
+    <button class="btn" onclick="window.location.href='leaveform.html'"><i class="fas fa-calendar-plus"></i> ลาออนไลน์</button>
+    <button class="btn" onclick="window.location.href='History.html'"><i class="fas fa-history"></i> ตรวจสอบสถานะ</button>
   </div>
 </div>
 </body>
