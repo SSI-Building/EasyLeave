@@ -1,374 +1,362 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ฟอร์มลาออนไลน์</title>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* Light Theme Default */
-        :root {
-            --primary-color-start: #1994b6;
-            --primary-color-end: #36a761;
-            --text-color-dark: #333;
-            --text-color-light: #666;
-            --background-color: #f0f2f5;
-            --card-background: #ffffff;
-            --shadow-light: 0 4px 15px rgba(0,0,0,0.08);
-            --border-color: #e0e0e0;
-            --focus-ring-color: rgba(74, 144, 226, 0.2);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ฟอร์มลาออนไลน์</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+    /* Light Theme Default */
+    :root {
+        --primary-color-start: #1994b6;
+        --primary-color-end: #36a761;
+        --text-color-dark: #333;
+        --text-color-light: #666;
+        --background-color: #f0f2f5;
+        --card-background: #ffffff;
+        --shadow-light: 0 4px 15px rgba(0,0,0,0.08);
+        --border-color: #e0e0e0;
+        --focus-ring-color: rgba(74, 144, 226, 0.2);
+    }
 
-        body.theme-dark {
-            --primary-color-start: #141E30;
-            --primary-color-end: #243B55;
-            --text-color-dark: #fff;
-            --text-color-light: #bbb;
-            --background-color: #181818;
-            --card-background: #242424;
-            --border-color: #444;
-            --shadow-light: 0 4px 15px rgba(255,255,255,0.08);
-            --focus-ring-color: rgba(36, 59, 85, 0.2);
-        }
+    /* Dark Theme */
+    body.theme-dark {
+        --primary-color-start: #141E30;
+        --primary-color-end: #243B55;
+        --text-color-dark: #fff;
+        --text-color-light: #bbb;
+        --background-color: #181818;
+        --card-background: #242424;
+        --border-color: #444;
+        --shadow-light: 0 4px 15px rgba(255,255,255,0.08);
+        --focus-ring-color: rgba(36, 59, 85, 0.2);
+    }
+    
+    /* General Theme Variants */
+    body.theme-orange-purple { --primary-color-start: #ff7e5f; --primary-color-end: #6a11cb; }
+    body.theme-blue-violet { --primary-color-start: #36d1dc; --primary-color-end: #5b86e5; }
+    body.theme-pink-purple { --primary-color-start: #ff758c; --primary-color-end: #8e44ad; }
+    body.theme-green-gold { --primary-color-start: #11998e; --primary-color-end: #fbc531; }
+    body.theme-red-orange { --primary-color-start: #f12711; --primary-color-end: #f5af19; }
+    body.theme-teal-navy { --primary-color-start: #2b5876; --primary-color-end: #4e4376; }
+    body.theme-monochrome { --primary-color-start: #555; --primary-color-end: #999; }
 
-        body.theme-orange-purple { --primary-color-start: #ff7e5f; --primary-color-end: #6a11cb; }
-        body.theme-blue-violet { --primary-color-start: #36d1dc; --primary-color-end: #5b86e5; }
-        body.theme-pink-purple { --primary-color-start: #ff758c; --primary-color-end: #8e44ad; }
-        body.theme-green-gold { --primary-color-start: #11998e; --primary-color-end: #fbc531; }
-        body.theme-red-orange { --primary-color-start: #f12711; --primary-color-end: #f5af19; }
-        body.theme-teal-navy { --primary-color-start: #2b5876; --primary-color-end: #4e4376; }
-        body.theme-monochrome { --primary-color-start: #555; --primary-color-end: #999; }
+    body {
+        font-family: 'Prompt', sans-serif;
+        background: var(--background-color);
+        margin: 0;
+        padding: 15px;
+        color: var(--text-color-dark);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        box-sizing: border-box;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
 
-        body {
-            font-family: 'Prompt', sans-serif;
-            background: var(--background-color);
-            margin: 0;
-            padding: 15px;
-            color: var(--text-color-dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+    .container {
+        max-width: 650px;
+        width: 100%;
+        background: var(--card-background);
+        padding: 25px;
+        border-radius: 20px;
+        box-shadow: var(--shadow-light);
+        box-sizing: border-box;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .container.loaded {
+        opacity: 1;
+        transform: translateY(0);
+    }
 
-        .container {
-            max-width: 650px;
-            width: 100%;
-            background: var(--card-background);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: var(--shadow-light);
-            box-sizing: border-box;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-        .container.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    h2 {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 30px;
+        font-size: 1.8em;
+        position: relative;
+        background: linear-gradient(90deg, var(--primary-color-start), var(--primary-color-end));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    h2 i { -webkit-text-fill-color: var(--primary-color-end); }
+    body.theme-dark h2 { -webkit-text-fill-color: var(--text-color-dark); background: none; }
+    body.theme-dark h2 i { color: var(--primary-color-end); }
 
-        h2 {
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 30px;
-            font-size: 1.8em;
-            position: relative;
-            background: linear-gradient(90deg, var(--primary-color-start), var(--primary-color-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    .form-section {
+        background: var(--background-color);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
 
-        body.theme-dark h2 {
-            -webkit-text-fill-color: var(--text-color-dark);
-            background: none;
-        }
+    .form-section-title {
+        font-size: 1.1em;
+        font-weight: 600;
+        color: var(--text-color-dark);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .form-section-title i { color: var(--primary-color-end); }
 
-        .form-section {
-            background: var(--background-color);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; }
+    .form-group { display: flex; flex-direction: column; }
+    
+    .date-time-group { display: flex; gap: 10px; align-items: flex-end; }
+    .date-time-group .form-group { flex: 1; }
 
-        .form-section-title {
-            font-size: 1.1em;
-            font-weight: 600;
-            color: var(--text-color-dark);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .form-section-title i { color: var(--primary-color-end); }
+    label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-color-light); font-size: 13px; }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-        }
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 14px;
+        box-sizing: border-box;
+        background: var(--card-background);
+        color: var(--text-color-dark);
+        transition: all 0.3s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--primary-color-end);
+        box-shadow: 0 0 0 3px var(--focus-ring-color);
+        outline: none;
+    }
+    textarea { min-height: 100px; resize: vertical; }
 
-        .form-group { display: flex; flex-direction: column; }
+    .date-group { position: relative; padding-bottom: 25px; }
+    #leaveDaysDisplay { position: absolute; bottom: 0; left: 0; font-weight: 500; font-size: 12px; color: var(--text-color-light); }
 
-        .date-time-group {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
+    .signature-pad-container { position: relative; }
+    .signature-pad { border: 2px dashed var(--border-color); border-radius: 10px; height: 150px; touch-action: none; background: var(--background-color); transition: background-color 0.3s ease, border-color 0.3s ease; }
+    .btn-clear { position: absolute; top: 10px; right: 10px; z-index: 10; padding: 6px 10px; font-size: 11px; background: var(--card-background); color: var(--text-color-light); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+    .btn-clear:hover { background: var(--background-color); }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: var(--text-color-light);
-            font-size: 13px;
-        }
+    .buttons { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+    .btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #fff;
+        background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+    .btn-secondary { background: #B0B9C2; box-shadow: none; }
 
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-            background: var(--card-background);
-            color: var(--text-color-dark);
-            transition: all 0.3s ease;
-        }
+    .radio-group { display: flex; gap: 15px; align-items: center; margin-top: 5px; }
+    .radio-group label { margin-bottom: 0; font-weight: 400; font-size: 13px; color: var(--text-color-dark); cursor: pointer; }
+    .radio-group input[type="radio"] { margin-right: 3px; width: auto; }
 
-        input:focus, select:focus, textarea:focus {
-            border-color: var(--primary-color-end);
-            box-shadow: 0 0 0 3px var(--focus-ring-color);
-            outline: none;
-        }
+    @media(min-width: 480px) { .buttons { flex-direction: row; } }
 
-        textarea { min-height: 100px; resize: vertical; }
-
-        .date-group { position: relative; padding-bottom: 25px; }
-
-        #leaveDaysDisplay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            font-weight: 500;
-            font-size: 12px;
-            color: var(--text-color-light);
-        }
-
-        .signature-pad-container { position: relative; }
-        .signature-pad {
-            border: 2px dashed var(--border-color);
-            border-radius: 10px;
-            height: 150px;
-            touch-action: none;
-            background: var(--background-color);
-        }
-        .btn-clear {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 10;
-            padding: 6px 10px;
-            font-size: 11px;
-            background: var(--card-background);
-            color: var(--text-color-light);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .buttons { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            color: #fff;
-            background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
-        }
-        .btn-secondary { background: #B0B9C2; }
-
-        .radio-group { display: flex; gap: 15px; align-items: center; margin-top: 5px; }
-        .radio-group label { margin-bottom: 0; font-weight: 400; font-size: 13px; color: var(--text-color-dark); cursor: pointer; }
-        .radio-group input[type="radio"] { margin-right: 3px; }
-
-        @media(min-width: 480px) { .buttons { flex-direction: row; } }
-
-        .loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--background-color);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 9999; transition: opacity 0.5s ease; flex-direction: column; gap: 20px;
-        }
-        .loading-screen.hidden { opacity: 0; pointer-events: none; }
-        .spinner {
-            border: 5px solid var(--border-color);
-            border-top: 5px solid var(--primary-color-end);
-            border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;
-        }
-        .loading-text { color: var(--text-color-light); font-size: 1.2em; font-weight: 500; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
+    /* Loading Screen */
+    .loading-screen { position: fixed; top:0; left:0; width:100%; height:100%; background-color: var(--background-color); display:flex; justify-content:center; align-items:center; z-index:9999; transition: opacity 0.5s ease; flex-direction: column; gap:20px; }
+    .loading-screen.hidden { opacity:0; pointer-events:none; }
+    .spinner { border:5px solid var(--border-color); border-top:5px solid var(--primary-color-end); border-radius:50%; width:50px; height:50px; animation: spin 1s linear infinite; }
+    .loading-text { color: var(--text-color-light); font-size:1.2em; font-weight:500; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
 </head>
 <body>
-    <div class="loading-screen" id="loadingScreen">
-        <div class="spinner"></div>
-        <div class="loading-text">กำลังโหลดข้อมูล...</div>
-    </div>
+<div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <div class="loading-text">กำลังโหลดข้อมูล...</div>
+</div>
 
-    <div class="container" id="mainContainer">
-        <h2>ฟอร์มลาออนไลน์ <i class="fas fa-file-contract"></i></h2>
+<div class="container" id="mainContainer">
+    <h2>ฟอร์มลาออนไลน์ <i class="fas fa-file-contract"></i></h2>
 
-        <section class="form-section">
-            <h3 class="form-section-title"><i class="fas fa-user-circle"></i> ข้อมูลพนักงาน</h3>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="empName">ชื่อ-สกุล</label>
-                    <input type="text" id="empName" readonly value="ชื่อจริง นามสกุล">
-                </div>
-                <div class="form-group">
-                    <label for="empId">รหัสพนักงาน</label>
-                    <input type="text" id="empId" readonly value="EMP001">
-                </div>
-                <div class="form-group">
-                    <label for="position">ตำแหน่ง</label>
-                    <input type="text" id="position" readonly value="พนักงานทั่วไป">
-                </div>
-                <div class="form-group">
-                    <label for="department">ฝ่าย</label>
-                    <input type="text" id="department" readonly value="BUS">
-                </div>
-            </div>
-        </section>
-
-        <section class="form-section">
-            <h3 class="form-section-title"><i class="fas fa-file-alt"></i> รายละเอียดการลา</h3>
+    <section class="form-section">
+        <h3 class="form-section-title"><i class="fas fa-user-circle"></i> ข้อมูลพนักงาน</h3>
+        <div class="form-grid">
             <div class="form-group">
-                <label for="leaveType">ประเภทการลา</label>
-                <select id="leaveType">
-                    <option value="AL">ลาพักร้อน</option>
-                    <option value="SL">ลาป่วย</option>
-                    <option value="BL">ลากิจ</option>
-                </select>
+                <label for="empName">ชื่อ-สกุล</label>
+                <input type="text" id="empName" readonly value="ชื่อจริง นามสกุล">
             </div>
             <div class="form-group">
-                <label for="reason">เหตุผลการลา</label>
-                <textarea id="reason" placeholder="กรุณากรอกเหตุผล"></textarea>
+                <label for="empId">รหัสพนักงาน</label>
+                <input type="text" id="empId" readonly value="EMP001">
             </div>
             <div class="form-group">
-                <label>เอกสารประกอบ</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="hasDocument" value="มี"> มี</label>
-                    <label><input type="radio" name="hasDocument" value="ไม่มี"> ไม่มี</label>
-                </div>
+                <label for="position">ตำแหน่ง</label>
+                <input type="text" id="position" readonly value="พนักงานทั่วไป">
             </div>
-        </section>
-
-        <section class="form-section">
-            <h3 class="form-section-title"><i class="fas fa-clock"></i> ระยะเวลาการลา</h3>
-            <div class="date-group">
-                <div class="form-group">
-                    <label for="startDate">ตั้งแต่วันที่</label>
-                    <div class="date-time-group">
-                        <div class="form-group"><input type="date" id="startDate"></div>
-                        <div class="form-group"><input type="time" id="startTime"></div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="endDate">ถึงวันที่</label>
-                    <div class="date-time-group">
-                        <div class="form-group"><input type="date" id="endDate"></div>
-                        <div class="form-group"><input type="time" id="endTime"></div>
-                    </div>
-                </div>
-                <div id="leaveDaysDisplay"></div>
+            <div class="form-group">
+                <label for="department">ฝ่าย</label>
+                <input type="text" id="department" readonly value="BUS">
             </div>
-        </section>
-
-        <section class="form-section">
-            <h3 class="form-section-title"><i class="fas fa-signature"></i> ลายเซ็นอิเล็กทรอนิกส์</h3>
-            <div class="form-group signature-pad-container">
-                <canvas id="signaturePad" class="signature-pad"></canvas>
-                <button type="button" onclick="clearSignature()" class="btn-clear"><i class="fas fa-eraser"></i> ล้าง</button>
-            </div>
-        </section>
-
-        <div class="buttons">
-            <button class="btn" id="submitBtn"><i class="fas fa-paper-plane"></i> ส่งคำขอ</button>
-            <button class="btn btn-secondary" onclick="window.location.href='Dashboard.html'"><i class="fas fa-arrow-left"></i> ย้อนกลับ</button>
         </div>
+    </section>
+
+    <section class="form-section">
+        <h3 class="form-section-title"><i class="fas fa-file-alt"></i> รายละเอียดการลา</h3>
+        <div class="form-group">
+            <label for="leaveType">ประเภทการลา</label>
+            <select id="leaveType">
+                <option value="AL">ลาพักร้อน</option>
+                <option value="SL">ลาป่วย</option>
+                <option value="BL">ลากิจ</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="reason">เหตุผลการลา</label>
+            <textarea id="reason" placeholder="กรุณากรอกเหตุผล"></textarea>
+        </div>
+        <div class="form-group">
+            <label>เอกสารประกอบ</label>
+            <div class="radio-group">
+                <label><input type="radio" name="hasDocument" value="มี"> มี</label>
+                <label><input type="radio" name="hasDocument" value="ไม่มี"> ไม่มี</label>
+            </div>
+        </div>
+    </section>
+
+    <section class="form-section">
+        <h3 class="form-section-title"><i class="fas fa-clock"></i> ระยะเวลาการลา</h3>
+        <div class="date-group">
+            <div class="form-group">
+                <label for="startDate">ตั้งแต่วันที่</label>
+                <div class="date-time-group">
+                    <div class="form-group">
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <input type="time" id="startTime">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="endDate">ถึงวันที่</label>
+                <div class="date-time-group">
+                    <div class="form-group">
+                        <input type="date" id="endDate">
+                    </div>
+                    <div class="form-group">
+                        <input type="time" id="endTime">
+                    </div>
+                </div>
+            </div>
+            <div id="leaveDaysDisplay"></div>
+        </div>
+    </section>
+
+    <section class="form-section">
+        <h3 class="form-section-title"><i class="fas fa-signature"></i> ลายเซ็นอิเล็กทรอนิกส์</h3>
+        <div class="form-group signature-pad-container">
+            <canvas id="signaturePad" class="signature-pad"></canvas>
+            <button type="button" onclick="clearSignature()" class="btn-clear"><i class="fas fa-eraser"></i> ล้าง</button>
+        </div>
+    </section>
+
+    <div class="buttons">
+        <button class="btn" id="submitBtn"><i class="fas fa-paper-plane"></i> ส่งคำขอ</button>
+        <button class="btn btn-secondary" onclick="window.location.href='Dashboard.html'"><i class="fas fa-arrow-left"></i> ย้อนกลับ</button>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-    <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const loadingScreen = document.getElementById("loadingScreen");
-        const mainContainer = document.getElementById("mainContainer");
-        const startDate = document.getElementById("startDate");
-        const startTime = document.getElementById("startTime");
-        const endDate = document.getElementById("endDate");
-        const endTime = document.getElementById("endTime");
-        const leaveDisplay = document.getElementById("leaveDaysDisplay");
-        const leaveTypeSelect = document.getElementById("leaveType");
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const loadingScreen = document.getElementById("loadingScreen");
+    const mainContainer = document.getElementById("mainContainer");
 
-        // โหลดธีมจาก localStorage
-        const savedTheme = localStorage.getItem('selectedTheme');
-        if (savedTheme) {
-            document.body.className = savedTheme;
-            if (savedTheme === 'theme-custom') {
-                const savedColorStart = localStorage.getItem('customColorStart');
-                const savedColorEnd = localStorage.getItem('customColorEnd');
-                if (savedColorStart && savedColorEnd) {
-                    document.body.style.setProperty('--primary-color-start', savedColorStart);
-                    document.body.style.setProperty('--primary-color-end', savedColorEnd);
-                }
-            }
+    // โหลดธีมจาก localStorage
+    const savedTheme = localStorage.getItem('selectedTheme');
+    if(savedTheme) document.body.className = savedTheme;
+
+    setTimeout(() => {
+        loadingScreen.classList.add('hidden');
+        mainContainer.classList.add('loaded');
+    }, 1000);
+
+    // โหลดข้อมูลพนักงาน
+    const set1 = JSON.parse(localStorage.getItem("leaveSet1"));
+    if(!set1){ alert("ไม่พบข้อมูลพนักงาน กรุณากลับไปหน้า Dashboard"); return; }
+    document.getElementById("empId").value = set1[0];
+    document.getElementById("empName").value = set1[1];
+    document.getElementById("position").value = set1[2];
+    document.getElementById("department").value = "BUS";
+
+    // แสดงวันลาคงเหลือ
+    const leaveTypeEl = document.getElementById("leaveType");
+    const leaveBalanceInfo = document.createElement("div");
+    leaveBalanceInfo.style.fontSize="13px";
+    leaveBalanceInfo.style.marginTop="5px";
+    leaveBalanceInfo.style.color="var(--text-color-light)";
+    leaveTypeEl.insertAdjacentElement("afterend", leaveBalanceInfo);
+    function updateLeaveBalance(){
+        let msg="";
+        switch(leaveTypeEl.value){
+            case "AL": msg=`วันลาพักร้อนคงเหลือ: ${set1[3]} วัน`; break;
+            case "SL": msg=`วันลาป่วยคงเหลือ: ${set1[4]} วัน`; break;
+            case "BL": msg=`วันลากิจคงเหลือ: ${set1[5]} วัน`; break;
         }
+        leaveBalanceInfo.textContent = msg;
+    }
+    leaveTypeEl.addEventListener("change", updateLeaveBalance);
+    updateLeaveBalance();
 
-        setTimeout(() => {
-            loadingScreen.classList.add('hidden');
-            mainContainer.classList.add('loaded');
-        }, 1000);
+    // --- Date & Time ---
+    const startDate = document.getElementById("startDate");
+    const startTime = document.getElementById("startTime");
+    const endDate = document.getElementById("endDate");
+    const endTime = document.getElementById("endTime");
+    const leaveDisplay = document.getElementById("leaveDaysDisplay");
 
-        const set1 = JSON.parse(localStorage.getItem("leaveSet1"));
-        if (!set1) {
-            alert("ไม่พบข้อมูลพนักงาน กรุณากลับไปหน้า Dashboard");
-            return;
-        }
+    function calculateLeaveMinutes(startD, startT, endD, endT){
+        if(!startD || !startT || !endD || !endT) return 0;
+        const start = new Date(`${startD}T${startT}`);
+        const end = new Date(`${endD}T${endT}`);
+        if(end < start) return 0;
+        const diffMinutes = (end - start)/60000; // ms -> นาที
+        return diffMinutes;
+    }
 
-        document.getElementById("empId").value = set1[0];
-        document.getElementById("empName").value = set1[1];
-        document.getElementById("position").value = set1[2];
-        document.getElementById("department").value = "BUS";
+    function updateLeaveDays(){
+        const minutes = calculateLeaveMinutes(startDate.value, startTime.value, endDate.value, endTime.value);
+        const dayLength = 480; // 8 ชั่วโมง = 480 นาที
+        let days = (minutes / dayLength).toFixed(2);
+        leaveDisplay.innerText = `รวมวันลา: ${days} วัน`;
+    }
 
-        const leaveBalanceInfo = document.createElement("div");
-        leaveBalanceInfo.style.fontSize = "13px";
-        leaveBalanceInfo.style.marginTop = "5px";
-        leaveBalanceInfo.style.color = "var(--text-color-light)";
-        leaveTypeSelect.insertAdjacentElement("afterend", leaveBalanceInfo);
+    [startDate,startTime,endDate,endTime].forEach(el => el.addEventListener("input", updateLeaveDays));
+    updateLeaveDays();
 
-        function updateLeaveBalance() {
-            let msg = "";
-            switch (leaveTypeSelect.value) {
-                case "AL": msg = `วันลาพักร้อนคงเหลือ: ${set1[3]} วัน`; break;
-                case "SL": msg = `วันลาป่วยคงเหลือ: ${set1[4]} วัน`; break;
-                case "BL": msg = `วันลากิจคงเหลือ: ${set1[5]} วัน`; break;
-            }
-            leaveBalanceInfo.textContent = msg;
-        }
-        leaveTypeSelect.addEventListener("change", updateLeaveBalance);
-        updateLeaveBalance();
+    // --- Signature Pad ---
+    const canvas = document.getElementById("signaturePad");
+    const signaturePad = new SignaturePad(canvas);
+    function clearSignature(){ signaturePad.clear(); }
+    window.clearSignature = clearSignature;
 
-        // --- Signature Pad ---
-        const canvas = document.getElementById('signaturePad
+    // --- Submit ---
+    const submitBtn = document.getElementById("submitBtn");
+    submitBtn.addEventListener("click", () => {
+        if(!signaturePad.isEmpty()){
+            alert("ส่งคำขอเรียบร้อยแล้ว!");
+            // คุณสามารถเพิ่มโค้ดส่งข้อมูลไป server หรือ Google Sheet
+        } else alert("กรุณาเซ็นชื่อก่อนส่งคำขอ");
+    });
+
+});
+</script>
+</body>
+</html>
