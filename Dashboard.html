@@ -17,18 +17,9 @@
   --shadow-light: 0 4px 15px rgba(0,0,0,0.08);
   --border-color: #e0e0e0;
 }
-body.theme-custom { --primary-color-start: var(--custom-primary-start); --primary-color-end: var(--custom-primary-end); }
-body.theme-orange-purple { --primary-color-start: #ff7e5f; --primary-color-end: #6a11cb; }
-body.theme-blue-violet { --primary-color-start: #36d1dc; --primary-color-end: #5b86e5; }
-body.theme-pink-purple { --primary-color-start: #ff758c; --primary-color-end: #8e44ad; }
-body.theme-green-gold { --primary-color-start: #11998e; --primary-color-end: #fbc531; }
-body.theme-red-orange { --primary-color-start: #f12711; --primary-color-end: #f5af19; }
-body.theme-teal-navy { --primary-color-start: #2b5876; --primary-color-end: #4e4376; }
-body.theme-monochrome { --primary-color-start: #555; --primary-color-end: #999; }
-body.theme-dark { --primary-color-start: #141E30; --primary-color-end: #243B55; --text-color: #fff; --light-text-color: #bbb; --background-color: #181818; --card-background: #242424; --border-color: #444; }
 body { font-family: 'Prompt', sans-serif; background: var(--background-color); margin:0; padding:20px; color:var(--text-color); transition: all 0.3s ease; min-height: 100vh; box-sizing: border-box; }
-.container { max-width: 600px; margin:auto; position:relative; opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
-.container.loaded { opacity: 1; transform: translateY(0); }
+.container { max-width: 600px; margin:auto; position:relative; opacity:0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.container.loaded { opacity:1; transform: translateY(0); }
 .header { display:flex; align-items:center; gap:15px; margin-bottom:30px; background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end)); padding:25px; border-radius:15px; color:#fff; box-shadow:var(--shadow-light); position:relative; }
 .profile-pic { width:60px; height:60px; border-radius:50%; background:rgba(255,255,255,0.2); object-fit:cover; border:3px solid rgba(255,255,255,0.5); }
 .greeting { font-size:20px; font-weight:600; }
@@ -47,6 +38,7 @@ body { font-family: 'Prompt', sans-serif; background: var(--background-color); m
 .tab.active { background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end)); color:#fff; font-weight:600; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.1); }
 .tab-content { display:none; padding-top:20px; }
 .tab-content.active { display:block; }
+.table-container { background: var(--card-background); border-radius:12px; overflow:hidden; box-shadow: var(--shadow-light); margin-bottom:20px; }
 table { width:100%; border-collapse:collapse; }
 th, td { padding:12px; text-align:center; font-size:15px; border-bottom:1px solid var(--border-color); }
 th { background: var(--background-color); font-weight:600; color: var(--text-color); }
@@ -60,104 +52,123 @@ tr:last-child td { border-bottom:none; }
 .loading-text { color: var(--text-color); font-size: 1.2em; font-weight: 500; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
+
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
 const liffId = "2007956727-rbZz9a0z";
 const GAS_URL = "https://script.google.com/macros/s/AKfycbypMCM0IUoQuBiKy_W28zuwufN0s1XR6tIczx8A23srghg_w-wKuhbbiSeXGyFlL4JHNA/exec";
-const messages = ["ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!", "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!", "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!", "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ", "ขอบคุณที่ตั้งใจทำงานเสมอ!", "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"];
+let selectedTheme = null;
 
-function formatMinutes(minutes){
-  if(isNaN(minutes)||minutes===null) return "-";
-  const days = Math.floor(minutes/480);
-  const hours = Math.floor((minutes%480)/60);
-  const mins = minutes%60;
-  let result = "";
-  if(days>0) result+=days+" วัน ";
-  if(hours>0) result+=hours+" ชั่วโมง ";
-  if(mins>0) result+=mins+" นาที";
-  return result.trim()||"0 นาที";
+const messages = [
+  "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
+  "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!",
+  "มาสำรวจสิทธิ์ลาของคุณกัน!", "วันนี้ก็ทำได้ดีแน่นอนครับ!", "เริ่มต้นวันใหม่ด้วยพลังบวกกันเถอะ!",
+  "ไม่ว่าอะไรเกิดขึ้น คุณก็เอาอยู่!", "ยินดีที่ได้เจอกันอีกครั้งนะครับ!", "ขอบคุณที่ตั้งใจทำงานเสมอ!",
+  "มาลุยงานกันอย่างเต็มที่เลยครับ!", "พักบ้างก็ได้นะ แต่ห้ามยอมแพ้!", "เชื่อมั่นในตัวเอง แล้วก้าวต่อไปครับ!",
+  "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
+];
+
+// ฟังก์ชันแปลงนาทีเป็น วัน ชั่วโมง นาที
+function formatMinutes(minutes) {
+  if (isNaN(minutes) || minutes === null) return "-";
+  const days = Math.floor(minutes / 480);
+  const hours = Math.floor((minutes % 480) / 60);
+  const mins = minutes % 60;
+  return `${days} วัน ${hours} ชั่วโมง ${mins} นาที`.replace(/ 0 วัน/g,"").replace(/ 0 ชั่วโมง/g,"").replace(/ 0 นาที/g,"").trim() || "0 นาที";
 }
 
-function getDayHourMinute(minutes){
-  if(isNaN(minutes)||minutes===null) return {day:0,hour:0,min:0};
-  const day = Math.floor(minutes/480);
-  const hour = Math.floor((minutes%480)/60);
-  const min = minutes%60;
-  return {day,hour,min};
+async function loadDashboard() {
+  await liff.init({ liffId });
+  if(!liff.isLoggedIn()){ liff.login(); return; }
+
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
+  document.getElementById("profilePic").src = profile.pictureUrl;
+
+  const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+  document.getElementById("motivation").textContent = randomMessage;
+
+  fetch(`${GAS_URL}?action=getBalance&userId=${userId}`)
+    .then(res => res.json())
+    .then(data => {
+      if(data.error){ alert(data.error); return; }
+
+      localStorage.setItem("leaveSet1", JSON.stringify(data.set1));
+      localStorage.setItem("leaveSet2", JSON.stringify(data.set2));
+
+      document.getElementById("empName").textContent = data.set1[1];
+
+      // แก้ไขตารางให้มี 4 คอลัมน์
+      const tableHeader = `<tr>
+        <th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th>
+      </tr>`;
+
+      function rowFromMinutes(type, min) {
+        const days = Math.floor(min / 480);
+        const hours = Math.floor((min % 480) / 60);
+        const minutes = min % 60;
+        return `<tr>
+          <td>${type}</td>
+          <td>${days}</td>
+          <td>${hours}</td>
+          <td>${minutes}</td>
+        </tr>`;
+      }
+
+      document.getElementById("remainTable").innerHTML = tableHeader +
+        rowFromMinutes("ลาพักร้อน", data.set1[3]) +
+        rowFromMinutes("ลาป่วย", data.set1[4]) +
+        rowFromMinutes("ลากิจ", data.set1[5]);
+
+      document.getElementById("usedTable").innerHTML = tableHeader +
+        rowFromMinutes("ลาพักร้อน", data.set2[3]) +
+        rowFromMinutes("ลาป่วย", data.set2[4]) +
+        rowFromMinutes("ลากิจ", data.set2[5]) +
+        rowFromMinutes("ขาดงานสะสม", data.set2[6]);
+
+    })
+    .catch(err => { console.error(err); alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message); })
+    .finally(() => {
+      document.getElementById("loadingScreen").classList.add('hidden');
+      document.getElementById("mainContainer").classList.add('loaded');
+    });
 }
 
-async function loadDashboard(){
-  await liff.init({liffId});
-  if(!liff.isLoggedIn()){liff.login();return;}
-  const profile=await liff.getProfile();
-  document.getElementById("profilePic").src=profile.pictureUrl;
-  const randomMessage = messages[Math.floor(Math.random()*messages.length)];
-  document.getElementById("motivation").textContent=randomMessage;
-
-  fetch(`${GAS_URL}?action=getBalance&userId=${profile.userId}`)
-  .then(res=>res.json())
-  .then(data=>{
-    if(data.error){alert(data.error);return;}
-    localStorage.setItem("leaveSet1",JSON.stringify(data.set1));
-    localStorage.setItem("leaveSet2",JSON.stringify(data.set2));
-    document.getElementById("empName").textContent=data.set1[1];
-
-    // แสดงตารางลาคงเหลือ
-    document.getElementById("remainTable").innerHTML=`
-      <tr><th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th></tr>
-      ${['ลาพักร้อน','ลาป่วย','ลากิจ'].map((type,i)=>{
-        const t=getDayHourMinute(data.set1[3+i]);
-        return `<tr><td>${type}</td><td>${t.day}</td><td>${t.hour}</td><td>${t.min}</td></tr>`;
-      }).join('')}
-    `;
-
-    // แสดงตารางสิทธิ์ที่ใช้
-    document.getElementById("usedTable").innerHTML=`
-      <tr><th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th></tr>
-      ${['ลาพักร้อน','ลาป่วย','ลากิจ','ขาดงานสะสม'].map((type,i)=>{
-        const t=getDayHourMinute(data.set2[3+i]);
-        return `<tr><td>${type}</td><td>${t.day}</td><td>${t.hour}</td><td>${t.min}</td></tr>`;
-      }).join('')}
-
-  }).catch(err=>{console.error(err);alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: "+err.message);})
-  .finally(()=>{
-    document.getElementById("loadingScreen").classList.add('hidden');
-    document.getElementById("mainContainer").classList.add('loaded');
-  });
-}
-
-window.onload=()=>{
-  const savedTheme=localStorage.getItem('selectedTheme');
-  if(savedTheme){
-    document.body.className=savedTheme;
-    if(savedTheme==='theme-custom'){
-      const sColor=localStorage.getItem('customColorStart');
-      const eColor=localStorage.getItem('customColorEnd');
-      if(sColor&&eColor){document.body.style.setProperty('--custom-primary-start',sColor);document.body.style.setProperty('--custom-primary-end',eColor);}
+window.onload = () => {
+    const savedTheme = localStorage.getItem('selectedTheme');
+    if (savedTheme) {
+        document.body.className = savedTheme;
+        if (savedTheme === 'theme-custom') {
+            const savedColorStart = localStorage.getItem('customColorStart');
+            const savedColorEnd = localStorage.getItem('customColorEnd');
+            if (savedColorStart && savedColorEnd) {
+                document.body.style.setProperty('--custom-primary-start', savedColorStart);
+                document.body.style.setProperty('--custom-primary-end', savedColorEnd);
+            }
+        }
     }
-  }
-  loadDashboard();
+    loadDashboard();
 };
 
-document.addEventListener("DOMContentLoaded",()=>{
-  const settingsIcon=document.getElementById('settingsIcon');
-  const logoutIcon=document.getElementById('logoutIcon');
-  const themeSelector=document.getElementById('themeSelector');
+document.addEventListener("DOMContentLoaded", ()=>{
+  const settingsIcon = document.getElementById('settingsIcon');
+  const logoutIcon = document.getElementById('logoutIcon');
+  const themeSelector = document.getElementById('themeSelector');
 
-  settingsIcon.addEventListener('click',()=>{themeSelector.classList.toggle('active');});
-  logoutIcon.addEventListener('click',()=>{window.location.href='Login.html';});
+  settingsIcon.addEventListener('click', () => themeSelector.classList.toggle('active'));
+  logoutIcon.addEventListener('click', () => window.location.href = 'Login.html');
 
-  document.querySelectorAll('.theme-option').forEach(option=>{
-    option.addEventListener('click',function(){
-      const theme=this.getAttribute('data-theme');
-      document.body.className=theme;
-      localStorage.setItem('selectedTheme',theme);
-      themeSelector.classList.remove('active');
-    });
+  document.querySelectorAll('.theme-option').forEach(option => {
+      option.addEventListener('click', function() {
+          const theme = this.getAttribute('data-theme');
+          document.body.className = theme;
+          localStorage.setItem('selectedTheme', theme);
+          themeSelector.classList.remove('active');
+      });
   });
 });
 
-function openTab(evt,tabId){
+function openTab(evt, tabId){
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
   document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
   evt.currentTarget.classList.add("active");
@@ -167,9 +178,10 @@ function openTab(evt,tabId){
 </head>
 <body>
 <div class="loading-screen" id="loadingScreen">
-  <div class="spinner"></div>
-  <div class="loading-text">กำลังโหลดข้อมูล...</div>
+    <div class="spinner"></div>
+    <div class="loading-text">กำลังโหลดข้อมูล...</div>
 </div>
+
 <div class="container" id="mainContainer">
   <div class="header">
     <img id="profilePic" class="profile-pic" src="" alt="Profile">
@@ -178,26 +190,60 @@ function openTab(evt,tabId){
       <div class="motivation" id="motivation"></div>
     </div>
     <div class="header-icons">
-      <i class="fas fa-cog settings-icon" id="settingsIcon"></i>
-      <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon"></i>
+        <i class="fas fa-cog settings-icon" id="settingsIcon"></i>
+        <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon"></i>
     </div>
   </div>
+
   <div class="theme-selector" id="themeSelector">
-    <!-- options as before -->
+    <div class="theme-option" data-theme="theme-default">
+      <span class="theme-preview" style="--color-start: #1994b6; --color-end: #36a761;"></span>Default color
+    </div>
+    <div class="theme-option" data-theme="theme-orange-purple">
+      <span class="theme-preview" style="--color-start: #ff7e5f; --color-end: #6a11cb;"></span>Orange-Purple
+    </div>
+    <div class="theme-option" data-theme="theme-blue-violet">
+      <span class="theme-preview" style="--color-start: #36d1dc; --color-end: #5b86e5;"></span>Blue-Purple
+    </div>
+    <div class="theme-option" data-theme="theme-pink-purple">
+      <span class="theme-preview" style="--color-start: #ff758c; --color-end: #8e44ad;"></span>Pink-Purple
+    </div>
+    <div class="theme-option" data-theme="theme-green-gold">
+      <span class="theme-preview" style="--color-start: #11998e; --color-end: #fbc531;"></span>Green-Gold
+    </div>
+    <div class="theme-option" data-theme="theme-red-orange">
+      <span class="theme-preview" style="--color-start: #f12711; --color-end: #f5af19;"></span>Red-Orange
+    </div>
+    <div class="theme-option" data-theme="theme-teal-navy">
+      <span class="theme-preview" style="--color-start: #2b5876; --color-end: #4e4376;"></span>Teal-Navy
+    </div>
+    <div class="theme-option" data-theme="theme-monochrome">
+      <span class="theme-preview" style="--color-start: #555; --color-end: #999;"></span>Monochrome
+    </div>
+    <div class="theme-option" data-theme="theme-dark">
+      <span class="theme-preview" style="--color-start: #141E30; --color-end: #243B55;"></span>Dark Mode
+    </div>
   </div>
+
   <div class="tabs-container">
     <div class="tabs">
       <div class="tab active" onclick="openTab(event,'remain')">สิทธิลาคงเหลือ</div>
       <div class="tab" onclick="openTab(event,'used')">สิทธิลาที่ใช้</div>
     </div>
   </div>
+
   <div class="table-container">
     <div id="remain" class="tab-content active"><table id="remainTable"></table></div>
     <div id="used" class="tab-content"><table id="usedTable"></table></div>
   </div>
+
   <div class="buttons">
-    <button class="btn" onclick="window.location.href='leaveform.html'"><i class="fas fa-calendar-plus"></i> ลาออนไลน์</button>
-    <button class="btn" onclick="window.location.href='History.html'"><i class="fas fa-history"></i> ตรวจสอบสถานะ</button>
+    <button class="btn" onclick="window.location.href='leaveform.html'">
+      <i class="fas fa-calendar-plus"></i> ลาออนไลน์
+    </button>
+    <button class="btn" onclick="window.location.href='History.html'">
+      <i class="fas fa-history"></i> ตรวจสอบสถานะ
+    </button>
   </div>
 </div>
 </body>
