@@ -246,19 +246,14 @@ const messages = [
 ];
 
 
-  function formatMinutes(minutes) {
-  if (isNaN(minutes) || minutes === null) return "-";
+ unction formatMinutesObject(minutes) {
+  if (isNaN(minutes) || minutes === null) return { days: 0, hours: 0, mins: 0 };
 
   const days = Math.floor(minutes / 480);
   const hours = Math.floor((minutes % 480) / 60);
   const mins = minutes % 60;
 
-  let result = "";
-  if (days > 0) result += days + " วัน ";
-  if (hours > 0) result += hours + " ชั่วโมง ";
-  if (mins > 0) result += mins + " นาที";
-
-  return result.trim() || "0 นาที";
+  return { days, hours, mins };
 }
 
 async function loadDashboard() {
@@ -280,20 +275,46 @@ async function loadDashboard() {
       localStorage.setItem("leaveSet1", JSON.stringify(data.set1));
       localStorage.setItem("leaveSet2", JSON.stringify(data.set2));
 
-      
-    document.getElementById("empName").textContent = data.set1[1];
-    document.getElementById("remainTable").innerHTML = `
-      <tr><th>ประเภทการลา</th><th>จำนวนวัน</th></tr>
-      <tr><td>ลาพักร้อน</td><td>${formatMinutes(data.set1[3])}</td></tr>
-      <tr><td>ลาป่วย</td><td>${formatMinutes(data.set1[4])}</td></tr>
-      <tr><td>ลากิจ</td><td>${formatMinutes(data.set1[5])}</td></tr>`;
-    
-    document.getElementById("usedTable").innerHTML = `
-      <tr><th>ประเภทการลา</th><th>จำนวนวัน</th></tr>
-      <tr><td>ลาพักร้อน</td><td>${formatMinutes(data.set2[3])}</td></tr>
-      <tr><td>ลาป่วย</td><td>${formatMinutes(data.set2[4])}</td></tr>
-      <tr><td>ลากิจ</td><td>${formatMinutes(data.set2[5])}</td></tr>
-      <tr><td>ขาดงานสะสม</td><td>${formatMinutes(data.set2[6])}</td></tr>`;
+      document.getElementById("empName").textContent = data.set1[1];
+
+      // Tab สิทธิลาคงเหลือ
+      const remainRows = [
+        { type: 'ลาพักร้อน', min: data.set1[3] },
+        { type: 'ลาป่วย', min: data.set1[4] },
+        { type: 'ลากิจ', min: data.set1[5] }
+      ];
+      document.getElementById("remainTable").innerHTML = `
+        <tr><th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th></tr>
+        ${remainRows.map(r => {
+            const t = formatMinutesObject(r.min);
+            return `<tr>
+              <td>${r.type}</td>
+              <td>${t.days}</td>
+              <td>${t.hours}</td>
+              <td>${t.mins}</td>
+            </tr>`;
+        }).join('')}
+      `;
+
+      // Tab สิทธิลาที่ใช้
+      const usedRows = [
+        { type: 'ลาพักร้อน', min: data.set2[3] },
+        { type: 'ลาป่วย', min: data.set2[4] },
+        { type: 'ลากิจ', min: data.set2[5] },
+        { type: 'ขาดงานสะสม', min: data.set2[6] }
+      ];
+      document.getElementById("usedTable").innerHTML = `
+        <tr><th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th></tr>
+        ${usedRows.map(r => {
+            const t = formatMinutesObject(r.min);
+            return `<tr>
+              <td>${r.type}</td>
+              <td>${t.days}</td>
+              <td>${t.hours}</td>
+              <td>${t.mins}</td>
+            </tr>`;
+        }).join('')}
+      `;
     })
     .catch(err => {
       console.error(err);
@@ -304,7 +325,6 @@ async function loadDashboard() {
       document.getElementById("mainContainer").classList.add('loaded');
     });
 }
-
 window.onload = () => {
     const savedTheme = localStorage.getItem('selectedTheme');
     if (savedTheme) {
