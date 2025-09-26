@@ -23,34 +23,13 @@ body.theme-custom {
   --primary-color-end: var(--custom-primary-end);
 }
 /* ===== Theme Variants ===== */
-body.theme-orange-purple {
-  --primary-color-start: #ff7e5f;
-  --primary-color-end: #6a11cb;
-}
-body.theme-blue-violet {
-  --primary-color-start: #36d1dc;
-  --primary-color-end: #5b86e5;
-}
-body.theme-pink-purple {
-  --primary-color-start: #ff758c;
-  --primary-color-end: #8e44ad;
-}
-body.theme-green-gold {
-  --primary-color-start: #11998e;
-  --primary-color-end: #fbc531;
-}
-body.theme-red-orange {
-  --primary-color-start: #f12711;
-  --primary-color-end: #f5af19;
-}
-body.theme-teal-navy {
-  --primary-color-start: #2b5876;
-  --primary-color-end: #4e4376;
-}
-body.theme-monochrome {
-  --primary-color-start: #555;
-  --primary-color-end: #999;
-}
+body.theme-orange-purple { --primary-color-start: #ff7e5f; --primary-color-end: #6a11cb; }
+body.theme-blue-violet { --primary-color-start: #36d1dc; --primary-color-end: #5b86e5; }
+body.theme-pink-purple { --primary-color-start: #ff758c; --primary-color-end: #8e44ad; }
+body.theme-green-gold { --primary-color-start: #11998e; --primary-color-end: #fbc531; }
+body.theme-red-orange { --primary-color-start: #f12711; --primary-color-end: #f5af19; }
+body.theme-teal-navy { --primary-color-start: #2b5876; --primary-color-end: #4e4376; }
+body.theme-monochrome { --primary-color-start: #555; --primary-color-end: #999; }
 body.theme-dark {
   --primary-color-start: #141E30;
   --primary-color-end: #243B55;
@@ -60,12 +39,6 @@ body.theme-dark {
   --card-background: #242424;
   --border-color: #444;
 }
-/* ===== Custom Theme Colors Override ===== */
-body.theme-custom {
-  --primary-color-start: var(--custom-primary-start);
-  --primary-color-end: var(--custom-primary-end);
-}
-
 /* ===== Base Styles ===== */
 body {
   font-family: 'Prompt', sans-serif;
@@ -89,7 +62,6 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
-
 .header {
   display:flex; align-items:center; gap:15px; margin-bottom:30px;
   background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
@@ -103,8 +75,6 @@ body {
 }
 .greeting { font-size:20px; font-weight:600; }
 .motivation { font-size:14px; color:rgba(255,255,255,0.8); margin-top:5px; }
-
-/* Settings and Logout Icons */
 .header-icons {
     position:absolute;
     top:25px;
@@ -119,11 +89,7 @@ body {
     cursor:pointer;
     transition: transform 0.2s ease;
 }
-.settings-icon:hover, .logout-icon:hover {
-    transform: scale(1.1);
-}
-
-
+.settings-icon:hover, .logout-icon:hover { transform: scale(1.1); }
 /* Theme Selector */
 .theme-selector {
   position:absolute; top:60px; right:25px;
@@ -141,23 +107,17 @@ body {
 }
 .theme-option:hover { background: var(--background-color); }
 .theme-preview {
-    width: 20px;
-    height: 20px;
+    width: 20px; height: 20px;
     border-radius: 50%;
     display: inline-block;
     vertical-align: middle;
     margin-right: 10px;
     background: linear-gradient(45deg, var(--color-start), var(--color-end));
 }
-
-
 /* Tabs */
 .tabs-container { background: var(--card-background); padding:10px; border-radius:12px; box-shadow: var(--shadow-light); margin-bottom:20px; }
 .tabs { display:flex; border-radius:8px; }
-.tab {
-  flex:1; text-align:center; padding:12px 0; cursor:pointer;
-  font-weight:500; color: var(--light-text-color); transition: all 0.3s ease;
-}
+.tab { flex:1; text-align:center; padding:12px 0; cursor:pointer; font-weight:500; color: var(--light-text-color); transition: all 0.3s ease; }
 .tab.active {
   background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
   color:#fff; font-weight:600; border-radius:8px;
@@ -165,16 +125,12 @@ body {
 }
 .tab-content { display:none; padding-top:20px; }
 .tab-content.active { display:block; }
-
 /* Tables */
 .table-container { background: var(--card-background); border-radius:12px; overflow:hidden; box-shadow: var(--shadow-light); margin-bottom:20px; }
 table { width:100%; border-collapse:collapse; }
-th, td {
-  padding:15px; text-align:center; font-size:15px; border-bottom:1px solid var(--border-color);
-}
+th, td { padding:15px; text-align:center; font-size:15px; border-bottom:1px solid var(--border-color); }
 th { background: var(--background-color); font-weight:600; color: var(--text-color); }
 tr:last-child td { border-bottom:none; }
-
 /* Buttons */
 .buttons { display:flex; gap:15px; margin-top:20px; }
 .btn {
@@ -186,48 +142,24 @@ tr:last-child td { border-bottom:none; }
   transition: all 0.3s ease;
 }
 .btn:hover { box-shadow:0 6px 12px rgba(0,0,0,0.15); transform:translateY(-2px); }
-
 /* Loading Screen Styles */
 .loading-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background-color: var(--background-color);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  transition: opacity 0.5s ease;
-  flex-direction: column;
-  gap: 20px;
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999; transition: opacity 0.5s ease;
+  flex-direction: column; gap: 20px;
 }
-
-.loading-screen.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
+.loading-screen.hidden { opacity: 0; pointer-events: none; }
 .spinner {
   border: 5px solid var(--border-color);
   border-top: 5px solid var(--primary-color-end);
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 50px; height: 50px;
   animation: spin 1s linear infinite;
 }
-
-.loading-text {
-  color: var(--text-color);
-  font-size: 1.2em;
-  font-weight: 500;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+.loading-text { color: var(--text-color); font-size: 1.2em; font-weight: 500; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -245,14 +177,11 @@ const messages = [
   "วันนี้อาจเจอความท้าทาย แต่คุณเก่งพอ!", "ขอให้วันนี้มีรอยยิ้มเยอะ ๆ นะครับ!"
 ];
 
-
- unction formatMinutesObject(minutes) {
+function formatMinutesObject(minutes) {
   if (isNaN(minutes) || minutes === null) return { days: 0, hours: 0, mins: 0 };
-
   const days = Math.floor(minutes / 480);
   const hours = Math.floor((minutes % 480) / 60);
   const mins = minutes % 60;
-
   return { days, hours, mins };
 }
 
@@ -271,13 +200,12 @@ async function loadDashboard() {
     .then(res => res.json())
     .then(data => {
       if(data.error){ alert(data.error); return; }
-      
+
       localStorage.setItem("leaveSet1", JSON.stringify(data.set1));
       localStorage.setItem("leaveSet2", JSON.stringify(data.set2));
 
       document.getElementById("empName").textContent = data.set1[1];
 
-      // Tab สิทธิลาคงเหลือ
       const remainRows = [
         { type: 'ลาพักร้อน', min: data.set1[3] },
         { type: 'ลาป่วย', min: data.set1[4] },
@@ -287,16 +215,10 @@ async function loadDashboard() {
         <tr><th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th></tr>
         ${remainRows.map(r => {
             const t = formatMinutesObject(r.min);
-            return `<tr>
-              <td>${r.type}</td>
-              <td>${t.days}</td>
-              <td>${t.hours}</td>
-              <td>${t.mins}</td>
-            </tr>`;
+            return `<tr><td>${r.type}</td><td>${t.days}</td><td>${t.hours}</td><td>${t.mins}</td></tr>`;
         }).join('')}
       `;
 
-      // Tab สิทธิลาที่ใช้
       const usedRows = [
         { type: 'ลาพักร้อน', min: data.set2[3] },
         { type: 'ลาป่วย', min: data.set2[4] },
@@ -307,34 +229,25 @@ async function loadDashboard() {
         <tr><th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th></tr>
         ${usedRows.map(r => {
             const t = formatMinutesObject(r.min);
-            return `<tr>
-              <td>${r.type}</td>
-              <td>${t.days}</td>
-              <td>${t.hours}</td>
-              <td>${t.mins}</td>
-            </tr>`;
+            return `<tr><td>${r.type}</td><td>${t.days}</td><td>${t.hours}</td><td>${t.mins}</td></tr>`;
         }).join('')}
       `;
     })
-    .catch(err => {
-      console.error(err);
-      alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message);
-    })
+    .catch(err => { console.error(err); alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message); })
     .finally(() => {
       document.getElementById("loadingScreen").classList.add('hidden');
       document.getElementById("mainContainer").classList.add('loaded');
     });
 }
+
 window.onload = () => {
     const savedTheme = localStorage.getItem('selectedTheme');
     if (savedTheme) {
         document.body.className = savedTheme;
-        // ตรวจสอบว่าธีมที่บันทึกไว้คือ custom theme หรือไม่
         if (savedTheme === 'theme-custom') {
             const savedColorStart = localStorage.getItem('customColorStart');
             const savedColorEnd = localStorage.getItem('customColorEnd');
             if (savedColorStart && savedColorEnd) {
-                // ถ้าเป็น custom theme ให้กำหนดค่าสีที่บันทึกไว้ใน localStorage
                 document.body.style.setProperty('--custom-primary-start', savedColorStart);
                 document.body.style.setProperty('--custom-primary-end', savedColorEnd);
             }
@@ -352,7 +265,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
       themeSelector.classList.toggle('active');
   });
 
-  // แก้ไขให้กลับไปหน้า Login.html โดยไม่ลบข้อมูลใน localStorage
   logoutIcon.addEventListener('click', () => {
     window.location.href = 'Login.html';
   });
@@ -437,12 +349,8 @@ function openTab(evt, tabId){
   </div>
 
   <div class="buttons">
-    <button class="btn" onclick="window.location.href='leaveform.html'">
-      <i class="fas fa-calendar-plus"></i> ลาออนไลน์
-    </button>
-      <button class="btn" onclick="window.location.href='History.html'">
-    <i class="fas fa-history"></i> ตรวจสอบสถานะ
-  </button>
+    <button class="btn" onclick="window.location.href='LeaveOnline.html'"><i class="fas fa-plane-departure"></i>ลาออนไลน์</button>
+    <button class="btn" onclick="window.history.back()"><i class="fas fa-arrow-left"></i>Back</button>
   </div>
 </div>
 </body>
