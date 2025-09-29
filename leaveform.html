@@ -662,11 +662,22 @@
                 return;
             }
         
-            // ==============================
-            // ✅ ตรวจสอบว่านาทีที่ขอ <= นาทีคงเหลือ
-            // ==============================
-
-
+            // --- ตรวจสอบจำนวนวันลาไม่เกินสิทธิ ---
+            const leaveDisplay = document.getElementById("leaveDaysDisplay").innerText;
+            const leaveDaysMatch = leaveDisplay.match(/รวมวันลา: (\d+(\.\d+)?) วัน/);
+            const leaveDays = leaveDaysMatch ? parseFloat(leaveDaysMatch[1]) : 0;
+            const leaveSet1 = JSON.parse(localStorage.getItem("leaveSet1"));
+            const leaveType = document.getElementById("leaveType").value;
+            let maxDays = 0;
+            switch (leaveType) {
+                case "AL": maxDays = leaveSet1[3]; break;
+                case "SL": maxDays = leaveSet1[4]; break;
+                case "BL": maxDays = leaveSet1[5]; break;
+            }
+            if (leaveDays > maxDays) {
+                alert(`จำนวนวันลาที่ขอ (${leaveDays}) เกินวันลาคงเหลือ (${maxDays})`);
+                return;
+            }
 
 
             
