@@ -656,22 +656,24 @@
             const leaveMinutesMatch = leaveDisplayText.match(/รวมเวลา: (\d+) นาที/);
             const leaveMinutes = leaveMinutesMatch ? parseInt(leaveMinutesMatch[1]) : 0;
             
-            // แปลงนาทีเป็นวัน (วันทำงาน 8 ชั่วโมง = 480 นาที)
-            const leaveDays = leaveMinutes ;
+            // ใช้นาทีตรง ๆ ไม่ต้องแปลง
+            const leaveUsed = leaveMinutes;
             
             const leaveSet1 = JSON.parse(localStorage.getItem("leaveSet1"));
             const leaveTypeValue = document.getElementById("leaveType").value;
-            let maxDays = 0;
+            
+            let maxMinutes = 0;
             switch (leaveTypeValue) {
-                case "AL": maxDays = leaveSet1[3]; break;
-                case "SL": maxDays = leaveSet1[4]; break;
-                case "BL": maxDays = leaveSet1[5]; break;
+                case "AL": maxMinutes = leaveSet1[3]; break;
+                case "SL": maxMinutes = leaveSet1[4]; break;
+                case "BL": maxMinutes = leaveSet1[5]; break;
             }
             
-            if (leaveDays > maxDays) {
-                alert(`จำนวนวันลาที่ขอ (${leaveDays.toFixed(2)}) เกินวันลาคงเหลือ (${maxDays})`);
+            if (leaveUsed > maxMinutes) {
+                alert(`จำนวนเวลาที่ขอ (${leaveUsed} นาที) เกินสิทธิ์คงเหลือ (${maxMinutes} นาที)`);
                 return;
             }
+
 
 
             // --- เก็บข้อมูลลง localStorage ---
