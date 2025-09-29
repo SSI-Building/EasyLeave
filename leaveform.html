@@ -461,12 +461,27 @@
             leaveBalanceInfo.style.marginTop = "5px";
             leaveBalanceInfo.style.color = "var(--text-color-light)"; // ใช้ตัวแปรสี
             leaveType.insertAdjacentElement("afterend", leaveBalanceInfo);
+
+           function formatMinutes(totalMinutes) {
+            const workDayMinutes = 8 * 60; // 1 วันทำงาน = 8 ชั่วโมง = 480 นาที
+            const days = Math.floor(totalMinutes / workDayMinutes);
+            const remainingMinutes = totalMinutes % workDayMinutes;
+            const hours = Math.floor(remainingMinutes / 60);
+            const minutes = remainingMinutes % 60;
+        
+            let result = "";
+            if (days > 0) result += `${days} วัน `;
+            if (hours > 0) result += `${hours} ชั่วโมง `;
+            if (minutes > 0) result += `${minutes} นาที`;
+            return result.trim();
+            }
+           
             function updateLeaveBalance() {
                 let msg = "";
                 switch (leaveType.value) {
-                    case "AL": msg = `วันลาพักร้อนคงเหลือ: ${set1[3]} วัน`; break;
-                    case "SL": msg = `วันลาป่วยคงเหลือ: ${set1[4]} วัน`; break;
-                    case "BL": msg = `วันลากิจคงเหลือ: ${set1[5]} วัน`; break;
+                case "AL": msg = `วันลาพักร้อนคงเหลือ: ${formatMinutes(set1[3])}`; break;
+                case "SL": msg = `วันลาป่วยคงเหลือ: ${formatMinutes(set1[4])}`; break;
+                case "BL": msg = `วันลากิจคงเหลือ: ${formatMinutes(set1[5])}`; break;
                 }
                 leaveBalanceInfo.textContent = msg;
             }
