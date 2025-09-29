@@ -420,15 +420,16 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-    <script>
-        
-        // --- การจัดการ Loading Screen และ Theme ---
-       document.addEventListener("DOMContentLoaded", () => {
+   <script>
+       
+document.addEventListener("DOMContentLoaded", () => {
+    const loadingScreen = document.getElementById('loadingScreen');
+    const mainContainer = document.getElementById('mainContainer');
+
     // โหลดธีมจาก localStorage
     const savedTheme = localStorage.getItem('selectedTheme');
     if (savedTheme) {
         document.body.className = savedTheme;
-        // เพิ่มส่วนนี้: สำหรับธีมที่กำหนดเอง
         if (savedTheme === 'theme-custom') {
             const savedColorStart = localStorage.getItem('customColorStart');
             const savedColorEnd = localStorage.getItem('customColorEnd');
@@ -439,278 +440,197 @@
         }
     }
 
-            // หน่วงเวลา 1 วินาทีแล้วแสดงหน้าหลัก
-            setTimeout(() => {
-                loadingScreen.classList.add('hidden');
-                mainContainer.classList.add('loaded');
-            }, 1000); // 1 วินาที
+    // แสดงหน้าหลักหลังโหลด
+    setTimeout(() => {
+        loadingScreen.classList.add('hidden');
+        mainContainer.classList.add('loaded');
+    }, 1000);
 
-            // --- ส่วน JavaScript ไม่มีการเปลี่ยนแปลงจากโค้ดเดิม ---
-            const set1 = JSON.parse(localStorage.getItem("leaveSet1"));
-            if (!set1) {
-                alert("ไม่พบข้อมูลพนักงาน กรุณากลับไปหน้า Dashboard");
-                return;
-            }
-            document.getElementById("empId").value = set1[0];
-            document.getElementById("empName").value = set1[1];
-            document.getElementById("position").value = set1[2];
-            document.getElementById("department").value = "BUS";
-            const leaveType = document.getElementById("leaveType");
-            const leaveBalanceInfo = document.createElement("div");
-            leaveBalanceInfo.style.fontSize = "13px";
-            leaveBalanceInfo.style.marginTop = "5px";
-            leaveBalanceInfo.style.color = "var(--text-color-light)"; // ใช้ตัวแปรสี
-            leaveType.insertAdjacentElement("afterend", leaveBalanceInfo);
+    // โหลดข้อมูลพนักงาน
+    const set1 = JSON.parse(localStorage.getItem("leaveSet1"));
+    if (!set1) {
+        alert("ไม่พบข้อมูลพนักงาน กรุณากลับไปหน้า Dashboard");
+        return;
+    }
+    document.getElementById("empId").value = set1[0];
+    document.getElementById("empName").value = set1[1];
+    document.getElementById("position").value = set1[2];
+    document.getElementById("department").value = "BUS";
 
-           function formatMinutes(totalMinutes) {
-            const workDayMinutes = 8 * 60; // 1 วันทำงาน = 8 ชั่วโมง = 480 นาที
-            const days = Math.floor(totalMinutes / workDayMinutes);
-            const remainingMinutes = totalMinutes % workDayMinutes;
-            const hours = Math.floor(remainingMinutes / 60);
-            const minutes = remainingMinutes % 60;
-        
-            let result = "";
-            if (days > 0) result += `${days} วัน `;
-            if (hours > 0) result += `${hours} ชั่วโมง `;
-            if (minutes > 0) result += `${minutes} นาที`;
-            return result.trim();
-            }
-           
-            function updateLeaveBalance() {
-                let msg = "";
-                switch (leaveType.value) {
-                case "AL": msg = `วันลาพักร้อนคงเหลือ: ${formatMinutes(set1[3])}`; break;
-                case "SL": msg = `วันลาป่วยคงเหลือ: ${formatMinutes(set1[4])}`; break;
-                case "BL": msg = `วันลากิจคงเหลือ: ${formatMinutes(set1[5])}`; break;
-                }
-                leaveBalanceInfo.textContent = msg;
-            }
-            leaveType.addEventListener("change", updateLeaveBalance);
-            updateLeaveBalance();
-        });
+    // แสดงวันลาคงเหลือ
+    const leaveTypeEl = document.getElementById("leaveType");
+    const leaveBalanceInfo = document.createElement("div");
+    leaveBalanceInfo.style.fontSize = "13px";
+    leaveBalanceInfo.style.marginTop = "5px";
+    leaveBalanceInfo.style.color = "var(--text-color-light)";
+    leaveTypeEl.insertAdjacentElement("afterend", leaveBalanceInfo);
 
+    function formatMinutes(totalMinutes) {
+        const workDayMinutes = 8 * 60;
+        const days = Math.floor(totalMinutes / workDayMinutes);
+        const remainingMinutes = totalMinutes % workDayMinutes;
+        const hours = Math.floor(remainingMinutes / 60);
+        const minutes = remainingMinutes % 60;
 
-        // ฟังก์ชันคำนวณระยะเวลาการลาเป็นนาที
-        function calculateLeaveMinutes(sDate, sTime, eDate, eTime) {
-            if (!sDate || !sTime || !eDate || !eTime) return 0;
-        
-            const start = new Date(`${sDate}T${sTime}`);
-            const end = new Date(`${eDate}T${eTime}`);
-            if (end <= start) return 0;
-        
-            let totalMinutes = 0;
-            let current = new Date(start);
-            current.setHours(0, 0, 0, 0);
-        
-            while (current <= end) {
-                const dayOfWeek = current.getDay(); // 0=อาทิตย์, 6=เสาร์
-        
-                if (dayOfWeek === 6) {
-                    // -------- วันเสาร์ -------- (เช้า 08:00–12:00, บ่าย 13:00–16:00) 
-                    const morningStart = new Date(current); morningStart.setHours(8, 0, 0, 0);
-                    const morningEnd = new Date(current);   morningEnd.setHours(12, 0, 0, 0);
-                    const afternoonStart = new Date(current); afternoonStart.setHours(13, 0, 0, 0);
-                    const afternoonEnd = new Date(current);   afternoonEnd.setHours(16, 0, 0, 0);
-        
-                    let overlapMorning = Math.max(0, Math.min(end, morningEnd) - Math.max(start, morningStart)) / 1000 / 60;
-                    let overlapAfternoon = Math.max(0, Math.min(end, afternoonEnd) - Math.max(start, afternoonStart)) / 1000 / 60;
-        
-                    let minutes = overlapMorning + overlapAfternoon;
-        
-                    // ✅ ถ้าครบวันเสาร์ ให้ปรับให้นับรวม 480 นาที (8 ชั่วโมง)
-                    if (minutes >= 420) {
-                        minutes = 480;
-                    }
-        
-                    totalMinutes += minutes;
-        
-                } else if (dayOfWeek !== 0) { 
-                    // -------- จันทร์–ศุกร์ -------- (เช้า 08:00–12:00, บ่าย 13:00–17:00)
-                    const morningStart = new Date(current); morningStart.setHours(8, 0, 0, 0);
-                    const morningEnd = new Date(current);   morningEnd.setHours(12, 0, 0, 0);
-                    const afternoonStart = new Date(current); afternoonStart.setHours(13, 0, 0, 0);
-                    const afternoonEnd = new Date(current);   afternoonEnd.setHours(17, 0, 0, 0);
-        
-                    let overlapMorning = Math.max(0, Math.min(end, morningEnd) - Math.max(start, morningStart)) / 1000 / 60;
-                    let overlapAfternoon = Math.max(0, Math.min(end, afternoonEnd) - Math.max(start, afternoonStart)) / 1000 / 60;
-        
-                    totalMinutes += overlapMorning + overlapAfternoon;
-                }
-        
-                current.setDate(current.getDate() + 1);
-                current.setHours(0, 0, 0, 0);
+        let result = "";
+        if (days > 0) result += `${days} วัน `;
+        if (hours > 0) result += `${hours} ชั่วโมง `;
+        if (minutes > 0) result += `${minutes} นาที`;
+        return result.trim();
+    }
+
+    function updateLeaveBalance() {
+        let msg = "";
+        switch (leaveTypeEl.value) {
+            case "AL": msg = `วันลาพักร้อนคงเหลือ: ${formatMinutes(set1[3])}`; break;
+            case "SL": msg = `วันลาป่วยคงเหลือ: ${formatMinutes(set1[4])}`; break;
+            case "BL": msg = `วันลากิจคงเหลือ: ${formatMinutes(set1[5])}`; break;
+        }
+        leaveBalanceInfo.textContent = msg;
+    }
+    leaveTypeEl.addEventListener("change", updateLeaveBalance);
+    updateLeaveBalance();
+
+    // ตัวแปร input ระยะเวลาลา
+    const startDate = document.getElementById("startDate");
+    const startTime = document.getElementById("startTime");
+    const endDate = document.getElementById("endDate");
+    const endTime = document.getElementById("endTime");
+    const leaveDisplay = document.getElementById("leaveDaysDisplay");
+
+    function calculateLeaveMinutes(sDate, sTime, eDate, eTime) {
+        if (!sDate || !sTime || !eDate || !eTime) return 0;
+        const start = new Date(`${sDate}T${sTime}`);
+        const end = new Date(`${eDate}T${eTime}`);
+        if (end <= start) return 0;
+
+        let totalMinutes = 0;
+        let current = new Date(start);
+        current.setHours(0, 0, 0, 0);
+
+        while (current <= end) {
+            const dayOfWeek = current.getDay();
+
+            if (dayOfWeek === 6) {
+                // วันเสาร์
+                const morningStart = new Date(current); morningStart.setHours(8,0,0,0);
+                const morningEnd = new Date(current); morningEnd.setHours(12,0,0,0);
+                const afternoonStart = new Date(current); afternoonStart.setHours(13,0,0,0);
+                const afternoonEnd = new Date(current); afternoonEnd.setHours(16,0,0,0);
+
+                let overlapMorning = Math.max(0, Math.min(end, morningEnd) - Math.max(start, morningStart))/60000;
+                let overlapAfternoon = Math.max(0, Math.min(end, afternoonEnd) - Math.max(start, afternoonStart))/60000;
+                let minutes = overlapMorning + overlapAfternoon;
+                if (minutes >= 420) minutes = 480;
+                totalMinutes += minutes;
+
+            } else if (dayOfWeek !== 0) {
+                // จันทร์–ศุกร์
+                const morningStart = new Date(current); morningStart.setHours(8,0,0,0);
+                const morningEnd = new Date(current); morningEnd.setHours(12,0,0,0);
+                const afternoonStart = new Date(current); afternoonStart.setHours(13,0,0,0);
+                const afternoonEnd = new Date(current); afternoonEnd.setHours(17,0,0,0);
+
+                let overlapMorning = Math.max(0, Math.min(end, morningEnd) - Math.max(start, morningStart))/60000;
+                let overlapAfternoon = Math.max(0, Math.min(end, afternoonEnd) - Math.max(start, afternoonStart))/60000;
+                totalMinutes += overlapMorning + overlapAfternoon;
             }
-        
-            return Math.round(totalMinutes); // คืนค่าเป็นนาที
+
+            current.setDate(current.getDate() + 1);
+            current.setHours(0,0,0,0);
         }
 
+        return Math.round(totalMinutes);
+    }
 
-        // --- ตรวจสอบจำนวนวันลาไม่เกินสิทธิ (คำนวณจากเวลาจริง) ---
-        const startDate = document.getElementById("startDate").value;
-        const startTime = document.getElementById("startTime").value;
-        const endDate = document.getElementById("endDate").value;
-        const endTime = document.getElementById("endTime").value;
-        
-        // คำนวณเวลาลาเป็นนาที
-        const leaveMinutes = calculateLeaveMinutes(startDate, startTime, endDate, endTime);
-        
-        // โหลดสิทธิ์จาก localStorage
-        const leaveSet1 = JSON.parse(localStorage.getItem("leaveSet1"));
-        const leaveType = document.getElementById("leaveType").value;
-        
+    function updateLeaveDisplay() {
+        const leaveMinutes = calculateLeaveMinutes(startDate.value, startTime.value, endDate.value, endTime.value);
+        leaveDisplay.innerText = `รวมเวลา: ${formatMinutes(leaveMinutes)}`;
+    }
+
+    startDate.addEventListener("change", updateLeaveDisplay);
+    startTime.addEventListener("change", updateLeaveDisplay);
+    endDate.addEventListener("change", updateLeaveDisplay);
+    endTime.addEventListener("change", updateLeaveDisplay);
+    updateLeaveDisplay();
+
+    // Signature
+    const canvas = document.getElementById('signaturePad');
+    const signaturePad = new SignaturePad(canvas, {
+        backgroundColor: 'rgba(0,0,0,0)',
+        penColor: 'black',
+        minWidth: 0.5,
+        maxWidth: 2.5,
+        velocityFilterWeight: 0.7
+    });
+
+    function clearSignature() { signaturePad.clear(); }
+    function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio||1,1);
+        canvas.width = canvas.offsetWidth*ratio;
+        canvas.height = canvas.offsetHeight*ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        signaturePad.clear();
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    // Submit
+    document.getElementById("submitBtn").addEventListener("click", () => {
+        const fields = [
+            document.getElementById("empName"),
+            document.getElementById("empId"),
+            document.getElementById("position"),
+            document.getElementById("department"),
+            document.getElementById("leaveType"),
+            document.getElementById("reason"),
+            document.getElementById("startDate"),
+            document.getElementById("startTime"),
+            document.getElementById("endDate"),
+            document.getElementById("endTime")
+        ];
+        let hasEmpty = false;
+        fields.forEach(f => f.style.borderColor = 'var(--border-color)');
+        fields.forEach(f => { if(!f.value.trim()){ f.style.borderColor='red'; hasEmpty=true; }});
+
+        const docRadios = document.getElementsByName("hasDocument");
+        if(!Array.from(docRadios).some(r=>r.checked)){ alert("กรุณาเลือกว่ามีเอกสารประกอบหรือไม่"); return; }
+        if(hasEmpty){ alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (กรอบสีแดงคือช่องที่ว่าง)"); return; }
+        if(signaturePad.isEmpty()){ alert("กรุณาเซ็นชื่อก่อนส่ง"); return; }
+
+        // ตรวจสอบสิทธิ์นาที
+        const leaveMinutes = calculateLeaveMinutes(startDate.value, startTime.value, endDate.value, endTime.value);
+        const leaveType = leaveTypeEl.value;
         let maxMinutes = 0;
-        switch (leaveType) {
-            case "AL": maxMinutes = leaveSet1[3] ; break; 
-            case "SL": maxMinutes = leaveSet1[4] ; break;
-            case "BL": maxMinutes = leaveSet1[5] ; break;
+        switch(leaveType){
+            case "AL": maxMinutes=set1[3]; break;
+            case "SL": maxMinutes=set1[4]; break;
+            case "BL": maxMinutes=set1[5]; break;
         }
-        
-        // ถ้าเกินสิทธิ์
-        if (leaveMinutes > maxMinutes) {
-            alert("กรุณาตรวจสอบวันลาคงเหลือ");
+        if(leaveMinutes>maxMinutes){
+            alert(`จำนวนเวลาที่ขอ (${leaveMinutes} นาที) เกินสิทธิ์คงเหลือ (${maxMinutes} นาที)`);
             return;
         }
 
-        
-        // --- เพิ่มการจับเหตุการณ์เมื่อมีการเปลี่ยนแปลง Date และ Time ---
-        document.addEventListener("DOMContentLoaded", () => {
-            const startDate = document.getElementById("startDate");
-            const startTime = document.getElementById("startTime");
-            const endDate = document.getElementById("endDate");
-            const endTime = document.getElementById("endTime");
-            const leaveDisplay = document.getElementById("leaveDaysDisplay");
-        
-            function updateLeaveDays() {
-                const leaveMinutes = calculateLeaveMinutes(
-                    startDate.value,
-                    startTime.value,
-                    endDate.value,
-                    endTime.value
-                );
-        
-                // แสดงผลแบบ วัน ชั่วโมง นาที
-                leaveDisplay.innerText = `รวมเวลา: ${formatMinutes(leaveMinutes)}`;
-            }
-        
-            // จับเหตุการณ์ change สำหรับ input ทั้ง 4 ตัว
-            startDate.addEventListener("change", updateLeaveDays);
-            startTime.addEventListener("change", updateLeaveDays);
-            endDate.addEventListener("change", updateLeaveDays);
-            endTime.addEventListener("change", updateLeaveDays);
-        
-            // เรียกครั้งแรกตอนโหลดหน้า
-            updateLeaveDays();
-        });
-
-
-        const canvas = document.getElementById('signaturePad');
-        const signaturePad = new SignaturePad(canvas, {
-            backgroundColor: 'rgba(0,0,0,0)',
-            penColor: 'black',
-            minWidth: 0.5,
-            maxWidth: 2.5,
-            velocityFilterWeight: 0.7
-        });
-
-        function clearSignature() {
-            signaturePad.clear();
-        }
-        function resizeCanvas() {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
-            signaturePad.clear();
-        }
-        window.addEventListener("resize", resizeCanvas);
-        resizeCanvas();
-
-        document.getElementById("submitBtn").addEventListener("click", () => {
-            const fields = [
-                document.getElementById("empName"),
-                document.getElementById("empId"),
-                document.getElementById("position"),
-                document.getElementById("department"),
-                document.getElementById("leaveType"),
-                document.getElementById("reason"),
-                document.getElementById("startDate"),
-                document.getElementById("startTime"),
-                document.getElementById("endDate"),
-                document.getElementById("endTime")
-            ];
-        
-            let hasEmpty = false;
-            fields.forEach(f => f.style.borderColor = 'var(--border-color)');
-            fields.forEach(f => {
-                if (!f.value.trim()) {
-                    f.style.borderColor = 'red';
-                    hasEmpty = true;
-                }
-            });
-        
-            const docRadios = document.getElementsByName("hasDocument");
-            if (!Array.from(docRadios).some(r => r.checked)) {
-                alert("กรุณาเลือกว่ามีเอกสารประกอบหรือไม่");
-                return;
-            }
-            if (hasEmpty) {
-                alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (กรอบสีแดงคือช่องที่ว่าง)");
-                return;
-            }
-            if (signaturePad.isEmpty()) {
-                alert("กรุณาเซ็นชื่อก่อนส่ง");
-                return;
-            }
-        
-            // --- ตรวจสอบจำนวนวันลาไม่เกินสิทธิ ---
-            const startDate = document.getElementById("startDate").value;
-            const startTime = document.getElementById("startTime").value;
-            const endDate = document.getElementById("endDate").value;
-            const endTime = document.getElementById("endTime").value;
-            
-            // 1️⃣ คำนวณเวลาลาเป็นนาที
-            const leaveMinutes = calculateLeaveMinutes(startDate, startTime, endDate, endTime);
-            
-            const leaveSet1 = JSON.parse(localStorage.getItem("leaveSet1"));
-            const leaveType = document.getElementById("leaveType").value;
-            let maxMinutes = 0;
-            
-            switch (leaveType) {
-                case "AL": maxMinutes = leaveSet1[3]; break;
-                case "SL": maxMinutes = leaveSet1[4]; break;
-                case "BL": maxMinutes = leaveSet1[5]; break;
-            }
-            
-            // 2️⃣ ตรวจสอบสิทธิ์
-            if (leaveMinutes > maxMinutes) {
-                alert(`จำนวนเวลาที่ขอ (${leaveMinutes} นาที) เกินสิทธิ์คงเหลือ (${maxMinutes} นาที)`);
-                return;
-            }
-
-
-            
-            // --- เก็บข้อมูลลง localStorage ---
-            const leaveData = {
-                empId: document.getElementById("empId").value,
-                empName: document.getElementById("empName").value,
-                position: document.getElementById("position").value,
-                department: document.getElementById("department").value,
-                leaveType: leaveType,
-                reason: document.getElementById("reason").value,
-                hasDocument: Array.from(docRadios).find(r => r.checked).value,
-                startDate: document.getElementById("startDate").value, // เปลี่ยนการเก็บข้อมูล
-                startTime: document.getElementById("startTime").value, // เพิ่มการเก็บข้อมูล
-                endDate: document.getElementById("endDate").value, // เปลี่ยนการเก็บข้อมูล
-                endTime: document.getElementById("endTime").value, // เพิ่มการเก็บข้อมูล
-                leaveDays: leaveDays,
-                signatureData: signaturePad.toDataURL()
-            };
-
-            localStorage.setItem("leavePreviewData", JSON.stringify(leaveData));
-
-            // --- ไปหน้า Preview ---
-            window.location.href = "preview.html";
-        });
-    </script>
+        const leaveData = {
+            empId: document.getElementById("empId").value,
+            empName: document.getElementById("empName").value,
+            position: document.getElementById("position").value,
+            department: document.getElementById("department").value,
+            leaveType: leaveType,
+            reason: document.getElementById("reason").value,
+            hasDocument: Array.from(docRadios).find(r=>r.checked).value,
+            startDate: startDate.value,
+            startTime: startTime.value,
+            endDate: endDate.value,
+            endTime: endTime.value,
+            leaveMinutes: leaveMinutes,
+            signatureData: signaturePad.toDataURL()
+        };
+        localStorage.setItem("leavePreviewData", JSON.stringify(leaveData));
+        window.location.href = "preview.html";
+    });
+});
+</script>
 </body>
 </html>
