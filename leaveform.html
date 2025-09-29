@@ -409,7 +409,7 @@
             <h3 class="form-section-title"><i class="fas fa-signature"></i> ลายเซ็นอิเล็กทรอนิกส์</h3>
             <div class="form-group signature-pad-container">
                 <canvas id="signaturePad" class="signature-pad"></canvas>
-                <button type="button" onclick="clearSignature()" class="btn-clear"><i class="fas fa-eraser"></i> ล้าง</button>
+               <button type="button" id="clearBtn" class="btn-clear"><i class="fas fa-eraser"></i> ล้าง</button>
             </div>
         </section>
 
@@ -564,9 +564,9 @@ document.addEventListener("DOMContentLoaded", () => {
             velocityFilterWeight: 0.7
         });
 
-        function clearSignature() {
+        document.getElementById("clearBtn").addEventListener("click", () => {
             signaturePad.clear();
-        }
+        });
         function resizeCanvas() {
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
             canvas.width = canvas.offsetWidth * ratio;
