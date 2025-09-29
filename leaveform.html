@@ -626,7 +626,7 @@
                 document.getElementById("endDate"),
                 document.getElementById("endTime")
             ];
-
+        
             let hasEmpty = false;
             fields.forEach(f => f.style.borderColor = 'var(--border-color)');
             fields.forEach(f => {
@@ -635,7 +635,7 @@
                     hasEmpty = true;
                 }
             });
-
+        
             const docRadios = document.getElementsByName("hasDocument");
             if (!Array.from(docRadios).some(r => r.checked)) {
                 alert("กรุณาเลือกว่ามีเอกสารประกอบหรือไม่");
@@ -649,32 +649,32 @@
                 alert("กรุณาเซ็นชื่อก่อนส่ง");
                 return;
             }
-
-
-            // --- ตรวจสอบจำนวนวันลาไม่เกินสิทธิ (รองรับนาที) ---
-            const leaveDisplayText = document.getElementById("leaveDaysDisplay").innerText;
-            const leaveMinutesMatch = leaveDisplayText.match(/รวมเวลา: (\d+) นาที/);
-            const leaveMinutes = leaveMinutesMatch ? parseInt(leaveMinutesMatch[1]) : 0;
-            
-            // ใช้นาทีตรง ๆ ไม่ต้องแปลง
-            const leaveUsed = leaveMinutes;
-            
-            const leaveSet1 = JSON.parse(localStorage.getItem("leaveSet1"));
-            const leaveTypeValue = document.getElementById("leaveType").value;
-            
-            let maxMinutes = 0;
-            switch (leaveTypeValue) {
-                case "AL": maxMinutes = leaveSet1[3]; break;
-                case "SL": maxMinutes = leaveSet1[4]; break;
-                case "BL": maxMinutes = leaveSet1[5]; break;
+        
+            // ==============================
+            // ✅ ตรวจสอบว่านาทีที่ขอ <= นาทีคงเหลือ
+            // ==============================
+            const leaveMinutes = calculateLeaveMinutes(
+                document.getElementById("startDate").value,
+                document.getElementById("startTime").value,
+                document.getElementById("endDate").value,
+                document.getElementById("endTime").value
+            );
+        
+            let balanceMinutes = 0;
+            const leaveType = document.getElementById("leaveType").value;
+            switch (leaveType) {
+                case "AL": balanceMinutes = set1[3]; break; // ลาพักร้อน
+                case "SL": balanceMinutes = set1[4]; break; // ลาป่วย
+                case "BL": balanceMinutes = set1[5]; break; // ลากิจ
             }
-            
-            if (leaveUsed > maxMinutes) {
-                alert(`จำนวนเวลาที่ขอ (${leaveUsed} นาที) เกินสิทธิ์คงเหลือ (${maxMinutes} นาที)`);
+        
+            if (leaveMinutes > balanceMinutes) {
+                alert(
+                    `❌ เวลาที่คุณขอลา (${formatMinutes(leaveMinutes)}) ` +
+                    `เกินสิทธิที่เหลือ (${formatMinutes(balanceMinutes)})`
+                );
                 return;
             }
-
-
 
             // --- เก็บข้อมูลลง localStorage ---
             const leaveData = {
