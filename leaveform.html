@@ -668,9 +668,8 @@
                 case "BL": maxDays = leaveSet1[5]; break;
             }
             
-            // ตรวจสอบว่าเกินสิทธิหรือไม่
-            if (leaveMinutes > maxMinutes) {
-                alert(`ตรวจสอบวันลาคงเหลือ: ${formatMinutes(maxMinutes)}`);
+            if (leaveDays > maxDays) {
+                alert(`จำนวนวันลาที่ขอ (${leaveDays.toFixed(2)}) เกินวันลาคงเหลือ (${maxDays})`);
                 return;
             }
 
