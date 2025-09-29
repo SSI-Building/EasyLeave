@@ -422,13 +422,6 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
    <script>
 
-    let signaturePad;
-        function clearSignature() {
-        if (signaturePad) {
-            signaturePad.clear();
-        }
-    }
-       
 document.addEventListener("DOMContentLoaded", () => {
     const loadingScreen = document.getElementById('loadingScreen');
     const mainContainer = document.getElementById('mainContainer');
@@ -570,6 +563,10 @@ document.addEventListener("DOMContentLoaded", () => {
             maxWidth: 2.5,
             velocityFilterWeight: 0.7
         });
+
+        function clearSignature() {
+            signaturePad.clear();
+        }
         function resizeCanvas() {
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
             canvas.width = canvas.offsetWidth * ratio;
