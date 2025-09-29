@@ -663,19 +663,27 @@
             }
         
             // --- ตรวจสอบจำนวนวันลาไม่เกินสิทธิ ---
-            const leaveDisplay = document.getElementById("leaveDaysDisplay").innerText;
-            const leaveDaysMatch = leaveDisplay.match(/รวมวันลา: (\d+(\.\d+)?) วัน/);
-            const leaveDays = leaveDaysMatch ? parseFloat(leaveDaysMatch[1]) : 0;
+            const startDate = document.getElementById("startDate").value;
+            const startTime = document.getElementById("startTime").value;
+            const endDate = document.getElementById("endDate").value;
+            const endTime = document.getElementById("endTime").value;
+            
+            // 1️⃣ คำนวณเวลาลาเป็นนาที
+            const leaveMinutes = calculateLeaveMinutes(startDate, startTime, endDate, endTime);
+            
             const leaveSet1 = JSON.parse(localStorage.getItem("leaveSet1"));
             const leaveType = document.getElementById("leaveType").value;
-            let maxDays = 0;
+            let maxMinutes = 0;
+            
             switch (leaveType) {
-                case "AL": maxDays = leaveSet1[3]; break;
-                case "SL": maxDays = leaveSet1[4]; break;
-                case "BL": maxDays = leaveSet1[5]; break;
+                case "AL": maxMinutes = leaveSet1[3]; break;
+                case "SL": maxMinutes = leaveSet1[4]; break;
+                case "BL": maxMinutes = leaveSet1[5]; break;
             }
-            if (leaveDays > maxDays) {
-                alert(`จำนวนวันลาที่ขอ (${leaveDays}) เกินวันลาคงเหลือ (${maxDays})`);
+            
+            // 2️⃣ ตรวจสอบสิทธิ์
+            if (leaveMinutes > maxMinutes) {
+                alert(`จำนวนเวลาที่ขอ (${leaveMinutes} นาที) เกินสิทธิ์คงเหลือ (${maxMinutes} นาที)`);
                 return;
             }
 
