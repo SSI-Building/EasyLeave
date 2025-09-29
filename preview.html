@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("leaveTypeDisplay").textContent = leaveTypeMap[leaveData.leaveType] || leaveData.leaveType;
     document.getElementById("reasonDisplay").textContent = leaveData.reason || "";
     document.getElementById("hasDocumentDisplay").textContent = leaveData.hasDocument || "";
-    document.getElementById("leaveDaysDisplay").textContent = `${leaveData.leaveDays || 0} วัน`;
+    document.getElementById("leaveDaysDisplay").textContent = `${leaveData.leaveMinutes || 0} วัน`;
 
     const startDateTime = new Date(`${leaveData.startDate}T${leaveData.startTime}`);
     const endDateTime = new Date(`${leaveData.endDate}T${leaveData.endTime}`);
