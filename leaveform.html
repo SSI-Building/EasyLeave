@@ -653,12 +653,6 @@
             // ==============================
             // ✅ ตรวจสอบว่านาทีที่ขอ <= นาทีคงเหลือ
             // ==============================
-            const leaveMinutes = calculateLeaveMinutes(
-                document.getElementById("startDate").value,
-                document.getElementById("startTime").value,
-                document.getElementById("endDate").value,
-                document.getElementById("endTime").value
-            );
         
             let balanceMinutes = 0;
             const leaveType = document.getElementById("leaveType").value;
@@ -669,10 +663,7 @@
             }
         
             if (leaveMinutes > balanceMinutes) {
-                alert(
-                    `❌ เวลาที่คุณขอลา (${formatMinutes(leaveMinutes)}) ` +
-                    `เกินสิทธิที่เหลือ (${formatMinutes(balanceMinutes)})`
-                );
+                alert("กรุณาตรวจสอบสิทธิคงเหลือ");
                 return;
             }
 
