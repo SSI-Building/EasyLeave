@@ -422,6 +422,17 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
    <script>
        
+   // 1. ประกาศตัวแปร signaturePad ใน Global Scope
+    let signaturePad;
+
+    // 2. ย้ายฟังก์ชัน clearSignature() ออกมา Global Scope
+    function clearSignature() {
+        if (signaturePad) {
+            signaturePad.clear();
+        }
+    }
+
+       
 document.addEventListener("DOMContentLoaded", () => {
     const loadingScreen = document.getElementById('loadingScreen');
     const mainContainer = document.getElementById('mainContainer');
@@ -554,38 +565,31 @@ document.addEventListener("DOMContentLoaded", () => {
     endTime.addEventListener("change", updateLeaveDisplay);
     updateLeaveDisplay();
 
-    // Signature
-        const canvas = document.getElementById('signaturePad');
-        
-        function resizeCanvas() {
-            const ratio = Math.max(window.devicePixelRatio||1,1);
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
-        }
-        
-        // รีไซส์ก่อนสร้าง SignaturePad
-        resizeCanvas();
-        
-        const signaturePad = new SignaturePad(canvas, {
-            backgroundColor: 'rgba(0,0,0,0)',
-            penColor: 'black',
-            minWidth: 0.5,
-            maxWidth: 2.5,
-            velocityFilterWeight: 0.7
-        });
-        
-        // รีไซส์เวลาเปลี่ยนขนาดหน้าจอ พร้อมคืนค่า signature
-        window.addEventListener("resize", () => {
-            const data = signaturePad.toData();
+            // Signature
+            const canvas = document.getElementById('signaturePad');
+                
+            function resizeCanvas() {
+                // ... โค้ดเดิม ...
+            }
+                
+            // รีไซส์ก่อนสร้าง SignaturePad
             resizeCanvas();
-            signaturePad.fromData(data);
-        });
-        
-        function clearSignature() {
-            signaturePad.clear();
-        }
-
+                
+            // *** แก้ไขตรงนี้: ลบ 'const' ออก ***
+            signaturePad = new SignaturePad(canvas, { 
+                backgroundColor: 'rgba(0,0,0,0)',
+                penColor: 'black',
+                minWidth: 0.5,
+                maxWidth: 2.5,
+                velocityFilterWeight: 0.7
+            });
+                
+            // รีไซส์เวลาเปลี่ยนขนาดหน้าจอ พร้อมคืนค่า signature
+            window.addEventListener("resize", () => {
+                const data = signaturePad.toData();
+                resizeCanvas();
+                signaturePad.fromData(data);
+            });
 
     // Submit
     document.getElementById("submitBtn").addEventListener("click", () => {
