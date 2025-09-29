@@ -657,7 +657,7 @@
             const leaveMinutes = leaveMinutesMatch ? parseInt(leaveMinutesMatch[1]) : 0;
             
             // แปลงนาทีเป็นวัน (วันทำงาน 8 ชั่วโมง = 480 นาที)
-            const leaveDays = leaveMinutes / 480;
+            const leaveDays = leaveMinutes ;
             
             const leaveSet1 = JSON.parse(localStorage.getItem("leaveSet1"));
             const leaveTypeValue = document.getElementById("leaveType").value;
