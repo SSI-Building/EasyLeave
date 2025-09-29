@@ -505,31 +505,36 @@
             while (current <= end) {
                 const dayOfWeek = current.getDay(); // 0=อาทิตย์, 6=เสาร์
         
-                if (dayOfWeek !== 0) { // ไม่คิดวันอาทิตย์
-                    if (dayOfWeek === 6) {
-                        // -------- วันเสาร์ -------- (เช้า 08:00–12:00, บ่าย 13:00–17:00)
-                        const morningStart = new Date(current); morningStart.setHours(8, 0, 0, 0);
-                        const morningEnd = new Date(current);   morningEnd.setHours(12, 0, 0, 0);
-                        const afternoonStart = new Date(current); afternoonStart.setHours(13, 0, 0, 0);
-                        const afternoonEnd = new Date(current);   afternoonEnd.setHours(17, 0, 0, 0); // แก้จาก 16:00 → 17:00
+                if (dayOfWeek === 6) {
+                    // -------- วันเสาร์ -------- (เช้า 08:00–12:00, บ่าย 13:00–16:00) 
+                    const morningStart = new Date(current); morningStart.setHours(8, 0, 0, 0);
+                    const morningEnd = new Date(current);   morningEnd.setHours(12, 0, 0, 0);
+                    const afternoonStart = new Date(current); afternoonStart.setHours(13, 0, 0, 0);
+                    const afternoonEnd = new Date(current);   afternoonEnd.setHours(16, 0, 0, 0);
         
-                        let overlapMorning = Math.max(0, Math.min(end, morningEnd) - Math.max(start, morningStart)) / 1000 / 60;
-                        let overlapAfternoon = Math.max(0, Math.min(end, afternoonEnd) - Math.max(start, afternoonStart)) / 1000 / 60;
+                    let overlapMorning = Math.max(0, Math.min(end, morningEnd) - Math.max(start, morningStart)) / 1000 / 60;
+                    let overlapAfternoon = Math.max(0, Math.min(end, afternoonEnd) - Math.max(start, afternoonStart)) / 1000 / 60;
         
-                        totalMinutes += overlapMorning + overlapAfternoon;
+                    let minutes = overlapMorning + overlapAfternoon;
         
-                    } else {
-                        // -------- จันทร์–ศุกร์ -------- (เช้า 08:00–12:00, บ่าย 13:00–17:00)
-                        const morningStart = new Date(current); morningStart.setHours(8, 0, 0, 0);
-                        const morningEnd = new Date(current);   morningEnd.setHours(12, 0, 0, 0);
-                        const afternoonStart = new Date(current); afternoonStart.setHours(13, 0, 0, 0);
-                        const afternoonEnd = new Date(current);   afternoonEnd.setHours(17, 0, 0, 0);
-        
-                        let overlapMorning = Math.max(0, Math.min(end, morningEnd) - Math.max(start, morningStart)) / 1000 / 60;
-                        let overlapAfternoon = Math.max(0, Math.min(end, afternoonEnd) - Math.max(start, afternoonStart)) / 1000 / 60;
-        
-                        totalMinutes += overlapMorning + overlapAfternoon;
+                    // ✅ ถ้าครบวันเสาร์ ให้ปรับให้นับรวม 480 นาที (8 ชั่วโมง)
+                    if (minutes >= 420) {
+                        minutes = 480;
                     }
+        
+                    totalMinutes += minutes;
+        
+                } else if (dayOfWeek !== 0) { 
+                    // -------- จันทร์–ศุกร์ -------- (เช้า 08:00–12:00, บ่าย 13:00–17:00)
+                    const morningStart = new Date(current); morningStart.setHours(8, 0, 0, 0);
+                    const morningEnd = new Date(current);   morningEnd.setHours(12, 0, 0, 0);
+                    const afternoonStart = new Date(current); afternoonStart.setHours(13, 0, 0, 0);
+                    const afternoonEnd = new Date(current);   afternoonEnd.setHours(17, 0, 0, 0);
+        
+                    let overlapMorning = Math.max(0, Math.min(end, morningEnd) - Math.max(start, morningStart)) / 1000 / 60;
+                    let overlapAfternoon = Math.max(0, Math.min(end, afternoonEnd) - Math.max(start, afternoonStart)) / 1000 / 60;
+        
+                    totalMinutes += overlapMorning + overlapAfternoon;
                 }
         
                 current.setDate(current.getDate() + 1);
