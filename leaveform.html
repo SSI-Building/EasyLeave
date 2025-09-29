@@ -665,35 +665,11 @@
             // ==============================
             // ✅ ตรวจสอบว่านาทีที่ขอ <= นาทีคงเหลือ
             // ==============================
-        
-            function updateLeave() {
-                const startDate = document.getElementById("startDate").value;
-                const startTime = document.getElementById("startTime").value;
-                const endDate = document.getElementById("endDate").value;
-                const endTime = document.getElementById("endTime").value;
-                const leaveDisplay = document.getElementById("leaveDaysDisplay");
-            
-                // 1️⃣ คำนวณเวลาลาเป็นนาที
-                const leaveMinutes = calculateLeaveMinutes(startDate, startTime, endDate, endTime);
-            
-                // 2️⃣ แสดงผลแบบ วัน ชั่วโมง นาที
-                leaveDisplay.innerText = `รวมเวลา: ${formatMinutes(leaveMinutes)}`;
-            
-                // 3️⃣ ตรวจสอบสิทธิ์
-                let balanceMinutes = 0;
-                const leaveType = document.getElementById("leaveType").value;
-                switch (leaveType) {
-                    case "AL": balanceMinutes = set1[3]; break; // ลาพักร้อน
-                    case "SL": balanceMinutes = set1[4]; break; // ลาป่วย
-                    case "BL": balanceMinutes = set1[5]; break; // ลากิจ
-                }
-            
-                if (leaveMinutes > balanceMinutes) {
-                    alert("กรุณาตรวจสอบสิทธิคงเหลือ");
-                    return;
-                }
-            }
 
+
+
+
+            
             // --- เก็บข้อมูลลง localStorage ---
             const leaveData = {
                 empId: document.getElementById("empId").value,
