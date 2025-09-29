@@ -607,8 +607,8 @@ document.addEventListener("DOMContentLoaded", () => {
             case "SL": maxMinutes=set1[4]; break;
             case "BL": maxMinutes=set1[5]; break;
         }
-        if(leaveMinutes>maxMinutes){
-            alert(`จำนวนเวลาที่ขอ (${leaveMinutes} นาที) เกินสิทธิ์คงเหลือ (${maxMinutes} นาที)`);
+        if(leaveMinutes > maxMinutes){
+            alert(`จำนวนเวลาที่ขอ (${formatMinutes(leaveMinutes)}) เกินสิทธิ์คงเหลือ (${formatMinutes(maxMinutes)})`);
             return;
         }
 
