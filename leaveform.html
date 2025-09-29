@@ -564,13 +564,16 @@ document.addEventListener("DOMContentLoaded", () => {
         velocityFilterWeight: 0.7
     });
 
-    function clearSignature() { signaturePad.clear(); }
+    function clearSignature() {
+    signaturePad.clear();
+    }
+    
     function resizeCanvas() {
         const ratio = Math.max(window.devicePixelRatio||1,1);
-        canvas.width = canvas.offsetWidth*ratio;
-        canvas.height = canvas.offsetHeight*ratio;
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
         canvas.getContext("2d").scale(ratio, ratio);
-        
+        // ลบ signaturePad.clear(); ออก
     }
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
