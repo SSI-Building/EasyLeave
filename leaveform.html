@@ -555,28 +555,37 @@ document.addEventListener("DOMContentLoaded", () => {
     updateLeaveDisplay();
 
     // Signature
-    const canvas = document.getElementById('signaturePad');
-    const signaturePad = new SignaturePad(canvas, {
-        backgroundColor: 'rgba(0,0,0,0)',
-        penColor: 'black',
-        minWidth: 0.5,
-        maxWidth: 2.5,
-        velocityFilterWeight: 0.7
-    });
+        const canvas = document.getElementById('signaturePad');
+        
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio||1,1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+        }
+        
+        // รีไซส์ก่อนสร้าง SignaturePad
+        resizeCanvas();
+        
+        const signaturePad = new SignaturePad(canvas, {
+            backgroundColor: 'rgba(0,0,0,0)',
+            penColor: 'black',
+            minWidth: 0.5,
+            maxWidth: 2.5,
+            velocityFilterWeight: 0.7
+        });
+        
+        // รีไซส์เวลาเปลี่ยนขนาดหน้าจอ พร้อมคืนค่า signature
+        window.addEventListener("resize", () => {
+            const data = signaturePad.toData();
+            resizeCanvas();
+            signaturePad.fromData(data);
+        });
+        
+        function clearSignature() {
+            signaturePad.clear();
+        }
 
-    function clearSignature() {
-    signaturePad.clear();
-    }
-    
-    function resizeCanvas() {
-        const ratio = Math.max(window.devicePixelRatio||1,1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
-        // ลบ signaturePad.clear(); ออก
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
 
     // Submit
     document.getElementById("submitBtn").addEventListener("click", () => {
