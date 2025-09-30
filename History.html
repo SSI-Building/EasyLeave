@@ -292,6 +292,21 @@
         function formatTime(timeStr) {
             return timeStr || '-';
         }
+        
+        // ฟังก์ชันแปลงนาทีเป็น วัน,ชั่วโมง,นาที
+        function formatMinutes(totalMinutes) {
+        const workDayMinutes = 8 * 60;
+        const days = Math.floor(totalMinutes / workDayMinutes);
+        const remainingMinutes = totalMinutes % workDayMinutes;
+        const hours = Math.floor(remainingMinutes / 60);
+        const minutes = remainingMinutes % 60;
+
+        let result = "";
+        if (days > 0) result += `${days} วัน `;
+        if (hours > 0) result += `${hours} ชั่วโมง `;
+        if (minutes > 0) result += `${minutes} นาที`;
+        return result.trim();
+        }
 
         async function fetchHistory() {
             const loadingScreen = document.getElementById('loading-screen');
@@ -352,7 +367,7 @@
                         dateInfo.innerHTML = `
                             <p><strong>ตั้งแต่วันที่:</strong> ${formatDate(row[5])}, <strong>เวลา:</strong> ${formatTime(row[6])}</p>
                             <p><strong>ถึงวันที่:</strong> ${formatDate(row[7])}, <strong>เวลา:</strong> ${formatTime(row[8])}</p>
-                            <p><strong>รวม:</strong> ${row[9] || '-'} วัน</p>
+                            <p><strong>รวม:</strong> ${formatMinutes(row[9])}</p>
                             <p><strong>ยื่นวันที่:</strong> ${formatDate(row[11])}</p>
                         `;
                         card.appendChild(dateInfo);
