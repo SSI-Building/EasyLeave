@@ -604,19 +604,21 @@
                 let x, y, size = 5;
 
           
-          // Checkbox 1: ลาป่วย
-          x = 50; y = 85;
-          doc.rect(x, y, size, size, 'S'); // วาดกรอบ
-
-          if (leaveType === "SL") {
-              doc.setFont("ZapfDingbats"); 
-              doc.setFontSize(size + 10); // ขนาดใหญ่ขึ้น
-              // เลื่อนตำแหน่งให้อยู่กลางกล่อง
-              const offsetX = x + size / 2 - 1.5;
-              const offsetY = y + size - 0.5;
-              doc.text("3", offsetX, offsetY);
-              doc.setFont("Sarabun"); // กลับไปฟอนต์ปกติ
-          }
+            // Checkbox 1: ลาป่วย
+            x = 50; y = 85;
+            doc.rect(x, y, size, size, 'S'); // วาดกรอบ
+            
+            if (leaveType === "SL") {
+                doc.setFont("ZapfDingbats"); 
+                doc.setFontSize(size + 10); // ขนาดใหญ่ขึ้น
+                // เลื่อนตำแหน่งให้อยู่กลางกล่อง
+                const offsetX = x + size / 2 - 1.5;
+                const offsetY = y + size - 0.5;
+                doc.text("3", offsetX, offsetY);
+                doc.setFont("Sarabun"); // กลับไปฟอนต์ปกติ
+            }
+            doc.setFontSize(12);
+            doc.text("ลาป่วย(SL)", x + size + 2, 88.5);
 
             // Checkbox 2: ลาป่วยอุบัติเหตุ
             y = 97;
@@ -625,7 +627,14 @@
 
             // Checkbox 3: ลากิจ
             y = 109;
-            doc.rect(x, y, size, size, leaveType === "BL" ? 'F' : 'S');
+            doc.rect(x, y, size, size, 'S'); // วาดกรอบ
+            if (leaveType === "BL") {
+                doc.setFont("ZapfDingbats"); 
+                doc.setFontSize(size + 10); // ปรับขนาดเครื่องหมาย ✓
+                doc.text("3", x + 0.7, y + size - 0.3); // ตำแหน่งเครื่องหมาย ✓
+                doc.setFont("Sarabun"); // กลับไปฟอนต์ปกติ
+            }
+            doc.setFontSize(12);
             doc.text("ลากิจ Business Leave(BL)", x + size + 2, 112.5);
 
             // Checkbox 4: ลาคลอด
@@ -635,7 +644,14 @@
 
             // Checkbox 5: ลาพักร้อน
             x = 125; y = 85;
-            doc.rect(x, y, size, size, leaveType === "AL" ? 'F' : 'S');
+            doc.rect(x, y, size, size, 'S'); // วาดกรอบ
+            if (leaveType === "AL") {
+                doc.setFont("ZapfDingbats"); 
+                doc.setFontSize(size + 10); // ปรับขนาดเครื่องหมาย ✓
+                doc.text("3", x + 0.7, y + size - 0.3); 
+                doc.setFont("Sarabun"); 
+            }
+            doc.setFontSize(12);
             doc.text("ลาพักร้อนประจำปี (AL)", x + size + 2, 88.5);
 
             // Checkbox 6: ลาอุปสมบท
@@ -680,14 +696,28 @@
             doc.text(sumDateStr, centerX_sumDate, 159);
             doc.text(`วัน`, 77, 159, { align: "right" });
 
-                //เอกสารประกอบ
-            const xdocuments=137;
-            const ydocuments=159;
+            // เอกสารประกอบ
+            const xdocuments = 137;
+            const ydocuments = 159;
             doc.text(`เอกสารประกอบ`, xdocuments, ydocuments, { align: "right" });
-            doc.rect(xdocuments+10, ydocuments-3.5, size, size, Parper === "มี" ? 'F' : 'S');
-            doc.text(`มี`, xdocuments+20, ydocuments, { align: "right" });
-            doc.rect(xdocuments+30, ydocuments-3.5, size, size, Parper === "ไม่มี" ? 'F' : 'S');
-            doc.text(`ไม่มี`, xdocuments+43, ydocuments, { align: "right" });
+            
+            doc.rect(xdocuments + 10, ydocuments - 3.5, size, size, 'S'); // วาดกรอบ
+            if (Parper === "มี") {
+                doc.setFont("ZapfDingbats"); 
+                doc.setFontSize(size + 10); 
+                doc.text("3", xdocuments + 10 + 0.7, ydocuments - 3.5 + size - 0.3); 
+                doc.setFont("Sarabun");
+            }
+            doc.text(`มี`, xdocuments + 20, ydocuments, { align: "right" });
+            
+            doc.rect(xdocuments + 30, ydocuments - 3.5, size, size, 'S'); 
+            if (Parper === "ไม่มี") {
+                doc.setFont("ZapfDingbats"); 
+                doc.setFontSize(size + 10); 
+                doc.text("3", xdocuments + 30 + 0.7, ydocuments - 3.5 + size - 0.3); 
+                doc.setFont("Sarabun");
+            }
+            doc.text(`ไม่มี`, xdocuments + 43, ydocuments, { align: "right" });
 
           
               // ---- กำหนดขนาดตาราง ----
