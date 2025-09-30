@@ -283,8 +283,8 @@ document.addEventListener("DOMContentLoaded", () => {
             set2[4] = set2[4] || 0;
             set2[5] = set2[5] || 0;
             
-            // จำนวนวันที่ลาครั้งนี้
-            let leaveDays = parseFloat(leaveData.leaveDays);
+            // จำนวนการลาครั้งนี้ (นาที)
+            let leaveMinutes = parseFloat(leaveData.leaveMinutes) || 0;
             const leaveType = leaveData.leaveType;
             
             // อัปเดท set2 (สิทธิที่ใช้ไป) และ set1 (สิทธิคงเหลือ)
@@ -300,6 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 set2[5] += leaveMinutes;
                 set1[5] -= leaveMinutes;
             }
+
             
             // คำนวณรวม
             const usedTotal = set2[3] + set2[4] + set2[5];
