@@ -147,8 +147,23 @@
         }
         .action-button:hover { transform: translateY(-2px); }
         
-        .save-button { background-color: var(--approved-color); }
-        .save-button:hover { background-color: #229954; }
+        .save-button {
+        background-color: #28a745; /* เขียว */
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        cursor: pointer;
+        border-radius: 5px;
+        }
+
+        .save-button:hover {
+        background-color: #218838; /* เขียวเข้ม */
+        }
+
+        .save-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        }
         
         .print-button { background-color: #555555; }
         .print-button:hover { background-color: #333333; }
@@ -275,6 +290,40 @@
                 color: var(--primary-color);
             }
         }
+           /* === ปรับปุ่มและแถบสถานะให้ขนาดใกล้เคียงกัน === */
+        .action-button,
+        .save-button,
+        .print-button,
+        .status-approved,
+        .status-rejected,
+        .status-pending {
+            min-width: 100px;       /* ความกว้างขั้นต่ำ */
+            padding: 8px 16px;      /* ความสูงและขอบใน */
+            font-size: 14px;        /* ขนาดตัวอักษรเท่ากัน */
+            border-radius: 20px;    /* มนเท่ากัน */
+            text-align: center;     /* จัดกลางข้อความ */
+            display: inline-flex;   /* จัดไอคอน+ข้อความกลาง */
+            justify-content: center;
+            align-items: center;
+            gap: 6px;               /* ระยะห่างระหว่าง icon + text */
+            box-sizing: border-box;
+        }
+        .controls .action-button {
+        padding: 12px 24px;      /* ขนาดเท่ากับปุ่มโหลดข้อมูล/ตั้งค่าเริ่มต้น */
+        font-size: 16px;
+        font-weight: 500;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;   /* สำหรับ <a> */
+        display: inline-flex;    /* กึ่งกลางแนวนอน-แนวตั้ง */
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        }
+        .controls .action-button:hover {
+            transform: translateY(-3px);
+        }
     </style>
 </head>
 <body>
@@ -293,9 +342,7 @@
             <input type="date" id="endDate">
             <button id="loadDataButton"><i class="fas fa-sync-alt"></i> โหลดข้อมูล</button>
             <button id="resetButton"><i class="fas fa-undo"></i> ตั้งค่าเริ่มต้น</button>
-            <a href="SummaryTable.html" class="action-button" id="summaryTableButton" style="background-color: #3498db; color: white;">
-            <i class="fas fa-table"></i> ดูตารางสรุป
-        </a>
+            <a href="SummaryTable.html" class="action-button" id="summaryTableButton" style="background-color: #3498db;"><i class="fas fa-table"></i> ดูตารางสรุป</a>
         </div>
         
         <div class="filter-controls">
@@ -315,7 +362,7 @@
                 <option value="">ทั้งหมด</option>
                 <option value="Approved">อนุมัติแล้ว</option>
                 <option value="Rejected">ไม่อนุมัติ</option>
-                <option value="Pending">รออนุมัติ</option>
+                <option value="pending">รออนุมัติ</option>
             </select>
             
             <button id="sortButton"><i class="fas fa-sort-amount-down"></i> เรียงล่าสุด → เก่าสุด</button>
@@ -938,7 +985,7 @@
             function getStatusDisplay(status) {
                 if (status === 'Approved') return 'อนุมัติแล้ว';
                 if (status === 'Rejected') return 'ไม่อนุมัติ';
-                if (status === 'Pending') return 'รออนุมัติ';
+                if (status === 'pending') return 'รออนุมัติ';
                 return status;
             }
 
@@ -1060,7 +1107,7 @@
                                 statusSpan.classList.add('status-approved');
                             } else if (status === 'Rejected') {
                                 statusSpan.classList.add('status-rejected');
-                            } else if (status === 'Pending') {
+                            } else if (status === 'pending') {
                                 statusSpan.classList.add('status-pending');
                             }
                             statusContent.appendChild(statusSpan);
@@ -1091,12 +1138,28 @@
                         
                         const saveButton = document.createElement('button');
                         saveButton.innerHTML = `<i class="fas fa-save"></i> บันทึก`;
-                        saveButton.classList.add('action-button', 'save-button');
-                        saveButton.addEventListener('click', () => {
+                        saveButton.classList.add('action-button', 'save-button'); // สีเขียวเดิม
+
+                        saveButton.addEventListener('click', async () => {
                             const newStatus = statusSelect.value;
-                            const uuid = rowData[19]; 
-                            updateStatus(uuid, newStatus);
+                            const uuid = rowData[19];
+
+                            // ป้องกันกดซ้ำ
+                            saveButton.disabled = true;
+
+                            try {
+                                await updateStatus(uuid, newStatus);
+                            } catch (error) {
+                                console.error('Error updating status:', error);
+                                alert('เกิดข้อผิดพลาดในการบันทึกสถานะ');
+                            } finally {
+                                // ดีเลย์เปิดปุ่มกลับเหมือน Print
+                                setTimeout(() => {
+                                    saveButton.disabled = false;
+                                }, 1000); // 1 วินาที
+                            }
                         });
+
                         actionContent.appendChild(saveButton);
                         
                       // ✅ เพิ่มปุ่ม Print สำหรับ pending
