@@ -657,7 +657,7 @@
             
             if (leaveType === "SL") {
                 doc.setFont("ZapfDingbats"); 
-                doc.setFontSize(size + 10); // ขนาดใหญ่ขึ้น
+                doc.setFontSize(size + 12); // ขนาดใหญ่ขึ้น
                 // เลื่อนตำแหน่งให้อยู่กลางกล่อง
                 const offsetX = x + size / 2 - 1.5;
                 const offsetY = y + size - 0.5;
@@ -677,7 +677,7 @@
             doc.rect(x, y, size, size, 'S'); // วาดกรอบ
             if (leaveType === "BL") {
                 doc.setFont("ZapfDingbats"); 
-                doc.setFontSize(size + 10); // ปรับขนาดเครื่องหมาย ✓
+                doc.setFontSize(size + 12); // ปรับขนาดเครื่องหมาย ✓
                 doc.text("3", x + 0.7, y + size - 0.3); // ตำแหน่งเครื่องหมาย ✓
                 doc.setFont("Sarabun"); // กลับไปฟอนต์ปกติ
             }
@@ -694,7 +694,7 @@
             doc.rect(x, y, size, size, 'S'); // วาดกรอบ
             if (leaveType === "AL") {
                 doc.setFont("ZapfDingbats"); 
-                doc.setFontSize(size + 10); // ปรับขนาดเครื่องหมาย ✓
+                doc.setFontSize(size + 12); // ปรับขนาดเครื่องหมาย ✓
                 doc.text("3", x + 0.7, y + size - 0.3); 
                 doc.setFont("Sarabun"); 
             }
@@ -751,7 +751,7 @@
             doc.rect(xdocuments + 10, ydocuments - 3.5, size, size, 'S'); // วาดกรอบ
             if (Parper === "มี") {
                 doc.setFont("ZapfDingbats"); 
-                doc.setFontSize(size + 10); 
+                doc.setFontSize(size + 12); 
                 doc.text("3", xdocuments + 10 + 0.7, ydocuments - 3.5 + size - 0.3); 
                 doc.setFont("Sarabun");
             }
