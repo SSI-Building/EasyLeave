@@ -289,16 +289,16 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // อัปเดท set2 (สิทธิที่ใช้ไป) และ set1 (สิทธิคงเหลือ)
             if (leaveType === "AL") {
-                set2[3] += leaveDays;
-                set1[3] -= leaveDays;
+                set2[3] += leaveMinutes;
+                set1[3] -= leaveMinutes;
             }
             else if (leaveType === "SL") {
-                set2[4] += leaveDays;
-                set1[4] -= leaveDays;
+                set2[4] += leaveMinutes;
+                set1[4] -= leaveMinutes;
             }
             else if (leaveType === "BL") {
-                set2[5] += leaveDays;
-                set1[5] -= leaveDays;
+                set2[5] += leaveMinutes;
+                set1[5] -= leaveMinutes;
             }
             
             // คำนวณรวม
