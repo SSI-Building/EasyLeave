@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการลา</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ===== Theme Variables ===== */
+        :root {
+            --primary-color-start: #1994b6;
+            --primary-color-end: #36a761;
+            --text-color-dark: #333;
+            --text-color-light: #666;
+            --background-color: #f0f2f5;
+            --card-background: #ffffff;
+            --shadow-light: 0 4px 15px rgba(0,0,0,0.08);
+            --border-color: #e0e0e0;
+        }
+
+        body.theme-dark {
+            --primary-color-start: #141E30;
+            --primary-color-end: #243B55;
+            --text-color-dark: #fff;
+            --text-color-light: #bbb;
+            --background-color: #181818;
+            --card-background: #242424;
+            --border-color: #444;
+            --shadow-light: 0 4px 15px rgba(255,255,255,0.08);
+        }
+
+        /* General Theme Variants */
+        body.theme-orange-purple { --primary-color-start: #ff7e5f; --primary-color-end: #6a11cb; }
+        body.theme-blue-violet { --primary-color-start: #36d1dc; --primary-color-end: #5b86e5; }
+        body.theme-pink-purple { --primary-color-start: #ff758c; --primary-color-end: #8e44ad; }
+        body.theme-green-gold { --primary-color-start: #11998e; --primary-color-end: #fbc531; }
+        body.theme-red-orange { --primary-color-start: #f12711; --primary-color-end: #f5af19; }
+        body.theme-teal-navy { --primary-color-start: #2b5876; --primary-color-end: #4e4376; }
+        body.theme-monochrome { --primary-color-start: #555; --primary-color-end: #999; }
+
+
+        /* ===== Custom Theme Colors Override ===== */
+        body.theme-custom {
+            --primary-color-start: var(--custom-primary-start);
+            --primary-color-end: var(--custom-primary-end);
+        }
+        
+        /* ===== Base Styles ===== */
+        body {
+            font-family: 'Prompt', sans-serif;
+            background: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--card-background);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-light);
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        h2 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            background: linear-gradient(90deg, var(--primary-color-start), var(--primary-color-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        h2 i {
+            -webkit-text-fill-color: var(--primary-color-end);
+        }
+        body.theme-dark h2 {
+            -webkit-text-fill-color: var(--text-color-dark);
+            background: none;
+        }
+        body.theme-dark h2 i {
+            color: var(--primary-color-end);
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .history-card {
+            background: var(--background-color);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+        .history-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--text-color-dark);
+            flex-grow: 1;
+        }
+
+        .card-status {
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.8em;
+            color: #fff;
+        }
+        .status-pending { background-color: #ffc107; }
+        .status-approved { background-color: #4caf50; }
+        .status-rejected { background-color: #f44336; }
+
+        .card-info {
+            font-size: 0.9em;
+            color: var(--text-color-light);
+            line-height: 1.6;
+        }
+        .card-info strong {
+            color: var(--text-color-dark);
+        }
+
+        /* ===== Buttons Styles ===== */
+        .buttons-container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #fff;
+            background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end));
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        
+        .btn-secondary {
+            background: var(--border-color);
+            color: var(--text-color-light);
+            box-shadow: none;
+        }
+        body.theme-dark .btn-secondary {
+            background: var(--border-color);
+            color: var(--text-color-dark);
+        }
+        .btn-secondary:hover {
+            background: #d5d5d5;
+            color: #333;
+        }
+        body.theme-dark .btn-secondary:hover {
+            background: #555;
+            color: #fff;
+        }
+
+        /* ===== Loading Screen Styles ===== */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--background-color);
+            z-index: 1000;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            border: 6px solid var(--border-color);
+            border-top: 6px solid var(--primary-color-end);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 15px;
+            font-size: 1.2em;
+            font-weight: 500;
+            color: var(--text-color-light);
+        }
+        
+        /* ===== Status Message Styles ===== */
+        .status-message {
+            text-align: center;
+            padding: 24px;
+            font-size: 1.1rem;
+            color: var(--text-color-light);
+            background-color: var(--card-background);
+            border-radius: 12px;
+            margin-top: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .status-message.error {
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen" class="hidden">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">กำลังโหลดข้อมูล...</div>
+    </div>
+    
+    <div class="buttons-container">
+        <button class="btn btn-secondary" onclick="window.location.href='Dashboard.html'"><i class="fas fa-arrow-left"></i> ย้อนกลับ</button>
+    </div>
+
+    <div class="container">
+        <h2><i class="fas fa-history"></i> ประวัติการลา</h2>
+        <div class="history-list" id="dataContainer">
+        </div>
+    </div>
+    
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+        // --- ส่วน JavaScript ที่แก้ไขแล้ว ---
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const dateObj = new Date(dateStr);
+            // ตรวจสอบว่าวันที่ถูกต้องหรือไม่
+            if (isNaN(dateObj.getTime())) return dateStr;
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const year = dateObj.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        
+        // ฟังก์ชันใหม่ที่ง่ายขึ้น เพราะข้อมูลมาเป็นข้อความอยู่แล้ว
+        function formatTime(timeStr) {
+            return timeStr || '-';
+        }
+
+        async function fetchHistory() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const dataContainer = document.getElementById('dataContainer');
+            
+            loadingScreen.classList.remove('hidden');
+            
+            setTimeout(async () => {
+                try {
+                    await liff.init({ liffId: "2007956727-6V7DrnMD" });
+                    if (!liff.isLoggedIn()) { 
+                        liff.login(); 
+                        return; 
+                    }
+
+                    const profile = await liff.getProfile();
+                    const lineUserId = profile.userId;
+
+                    const webAppUrl = "https://script.google.com/macros/s/AKfycbyMSCCq9FvSx-ovt3dUVkJ525R9YX5wJnZQoBYOsWNbrxpklT0njy5UzmljCrbfTVww/exec?lineUserId=" + lineUserId;
+                    const resp = await fetch(webAppUrl);
+                    const data = await resp.json();
+
+                    dataContainer.innerHTML = "";
+
+                    if (!data || data.length === 0) {
+                        dataContainer.innerHTML = `<div class="status-message">❌ ไม่พบข้อมูล</div>`;
+                        return;
+                    }
+                    
+                    data.sort((a, b) => {
+                        const dateA = new Date(a[11]);
+                        const dateB = new Date(b[11]);
+                        return dateB - dateA;
+                    });
+
+                    data.forEach(row => {
+                        const card = document.createElement("div");
+                        card.className = "history-card";
+                        
+                        let leaveType = row[4]; // คอลัมน์ E (index 4)
+                        if (leaveType === 'AL') leaveType = 'ลาพักร้อน';
+                        else if (leaveType === 'SL') leaveType = 'ลาป่วย';
+                        else if (leaveType === 'BL') leaveType = 'ลากิจ';
+                        
+                        let statusText = row[10]; // คอลัมน์ K (index 10)
+                        let statusClass = 'pending';
+                        if (statusText === 'pending') { statusText = 'รออนุมัติ'; statusClass = 'status-pending'; }
+                        else if (statusText === 'Approved') { statusText = 'อนุมัติแล้ว'; statusClass = 'status-approved'; }
+                        else if (statusText === 'Reject') { statusText = 'ไม่อนุมัติ'; statusClass = 'status-rejected'; }
+                        
+                        const header = document.createElement('div');
+                        header.className = 'card-header';
+                        header.innerHTML = `<span class="card-title">${leaveType}</span><span class="card-status ${statusClass}">${statusText}</span>`;
+                        card.appendChild(header);
+
+                        const dateInfo = document.createElement('div');
+                        dateInfo.className = 'card-info';
+                        dateInfo.innerHTML = `
+                            <p><strong>ตั้งแต่วันที่:</strong> ${formatDate(row[5])}, <strong>เวลา:</strong> ${formatTime(row[6])}</p>
+                            <p><strong>ถึงวันที่:</strong> ${formatDate(row[7])}, <strong>เวลา:</strong> ${formatTime(row[8])}</p>
+                            <p><strong>รวม:</strong> ${row[9] || '-'} วัน</p>
+                            <p><strong>ยื่นวันที่:</strong> ${formatDate(row[11])}</p>
+                        `;
+                        card.appendChild(dateInfo);
+                        
+                        // ลบส่วน card-actions ออก
+                        // const cardFooter = document.createElement('div');
+                        // cardFooter.className = 'card-actions';
+                        // cardFooter.innerHTML = `<a href="PDF-form.html?row=${encodeURIComponent(JSON.stringify(row))}" class="detail-link" target="_blank">ดูรายละเอียดเพิ่มเติม <i class="fas fa-chevron-right"></i></a>`;
+                        // card.appendChild(cardFooter);
+
+                        dataContainer.appendChild(card);
+                    });
+
+                } catch (err) {
+                    console.error(err);
+                    dataContainer.innerHTML = `<div class="status-message error">❌ เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
+                } finally {
+                    loadingScreen.classList.add('hidden');
+                }
+            }, 500);
+            
+            const savedTheme = localStorage.getItem('selectedTheme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
+                // ตรวจสอบว่าธีมที่บันทึกไว้คือ custom theme หรือไม่
+                if (savedTheme === 'theme-custom') {
+                    const savedColorStart = localStorage.getItem('customColorStart');
+                    const savedColorEnd = localStorage.getItem('customColorEnd');
+                    if (savedColorStart && savedColorEnd) {
+                        document.body.style.setProperty('--primary-color-start', savedColorStart);
+                        document.body.style.setProperty('--primary-color-end', savedColorEnd);
+                    }
+                }
+            }
+        }
+
+        fetchHistory();
+    </script>
+</body>
+</html>
