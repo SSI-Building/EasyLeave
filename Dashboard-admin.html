@@ -603,10 +603,20 @@
 
                 let x, y, size = 5;
 
-            // Checkbox 1: ลาป่วย
-            x = 50; y = 85;
-            doc.rect(x, y, size, size, leaveType === "SL" ? 'F' : 'S');
-            doc.text("ลาป่วย(SL)", x + size + 2, 88.5);
+          
+          // Checkbox 1: ลาป่วย
+          x = 50; y = 85;
+          doc.rect(x, y, size, size, 'S'); // วาดกรอบ
+
+          if (leaveType === "SL") {
+              doc.setFont("ZapfDingbats"); 
+              doc.setFontSize(size + 10); // ขนาดใหญ่ขึ้น
+              // เลื่อนตำแหน่งให้อยู่กลางกล่อง
+              const offsetX = x + size / 2 - 1.5;
+              const offsetY = y + size - 0.5;
+              doc.text("3", offsetX, offsetY);
+              doc.setFont("Sarabun"); // กลับไปฟอนต์ปกติ
+          }
 
             // Checkbox 2: ลาป่วยอุบัติเหตุ
             y = 97;
