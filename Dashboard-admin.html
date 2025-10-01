@@ -605,15 +605,29 @@
             const dotsWidthEndTime = doc.getTextWidth(lineText_02);
             const endTimeWidth = doc.getTextWidth(endTime);
             const centerX_endTime = 162 + (dotsWidthEndTime / 2) - (endTimeWidth / 2);
+            
+            
+            function formatMinutes(totalMinutes) {
+            const workDayMinutes = 8 * 60;
+            const days = Math.floor(totalMinutes / workDayMinutes);
+            const remainingMinutes = totalMinutes % workDayMinutes;
+            const hours = Math.floor(remainingMinutes / 60);
+            const minutes = remainingMinutes % 60;
 
+            let result = "";
+            if (days > 0) result += `${days} วัน `;
+            if (hours > 0) result += `${hours} ชั่วโมง `;
+            if (minutes > 0) result += `${minutes} นาที`;
+            return result.trim();
+            }
+            
             //จำนวนวันลา(จัดกึ่งกลาง)
-            const sumDateStr = String(sumDate);
+            const sumDateStr = formatMinutes(sumDate);
             const dotsWidthSumDate = doc.getTextWidth(lineText_04);
             const sumDateWidth = doc.getTextWidth(sumDateStr);
             const centerX_sumDate = 42 + (dotsWidthSumDate / 2) - (sumDateWidth / 2);
 
             
-
 
             doc.setFontSize(20);
             doc.text(company1, pageWidth / 2, 15, { align: 'center' });
@@ -717,6 +731,7 @@
             doc.text("ลาอื่นๆ Other", x + size + 2, 124.5);
 
                 //เหตุผลประกอบการลา
+            doc.setFontSize(14);
             doc.text(`เหตุผลที่ขอลา`, 40, 135, { align: "right" });
             doc.text(`${reason}`, 43, 135);
             doc.text(lineText_03, 41, 137);
@@ -737,11 +752,12 @@
             doc.text(`เวลา`, 160, 147, { align: "right" });
             doc.text(lineText_02, 162, 149);
             doc.text(endTime, centerX_endTime, 147);
+            
 
             doc.text(`จำนวนวันลา`, 40, 159, { align: "right" });
             doc.text(lineText_04, 42, 161);
             doc.text(sumDateStr, centerX_sumDate, 159);
-            doc.text(`วัน`, 77, 159, { align: "right" });
+            
 
             // เอกสารประกอบ
             const xdocuments = 137;
@@ -768,37 +784,54 @@
             doc.setFontSize(12);
             doc.text(`ไม่มี`, xdocuments + 43, ydocuments, { align: "right" });
 
+  
           
-              // ---- กำหนดขนาดตาราง ----
-              
+            // ---- กำหนดขนาดตาราง ----
             const tby1 = 170;
-            const rowHeight = 7;
-            const tby2 = tby1 + rowHeight * 4; // ยืดลงมา 4 แถว
+            const rowHeight = 6;
+            const tby2 = tby1 + rowHeight * 8; // ยืดลงมา 8 แถว
             const tbx1 = 15;
             const tbx2 = 103;
-        
-            
+
             const colXs = [40, 47, 54, 61, 68, 75, 82, 89, 96];
-        
+
+            // ---- หาจุดกึ่งกลาง Column 1 ----
+            const col1Mid = (tbx1 + colXs[0]) / 2;
+
             // ---- วาดเส้นแนวนอน ----
             for (let i = 0; i <= (tby2 - tby1) / rowHeight; i++) {
                 let y = tby1 + i * rowHeight;
-                doc.line(tbx1, y, tbx2, y);
+
+                // แถวที่ 3 = i=2, แถวที่ 4 = i=3
+                // แถวที่ 6 = i=5, แถวที่ 7 = i=6
+                if (i === 3 || i === 4 || i === 6 || i === 7) {
+                    // ✅ เริ่มจาก col1Mid
+                    doc.line(col1Mid, y, tbx2, y);
+                } else {
+                    // ✅ เส้นปกติเริ่มจาก tbx1
+                    doc.line(tbx1, y, tbx2, y);
+                }
             }
+
             // ---- วาดเส้นแนวตั้ง ----
             doc.line(tbx1, tby1, tbx1, tby2);
             colXs.forEach(x => doc.line(x, tby1 + rowHeight, x, tby2));
             doc.line(tbx2, tby1, tbx2, tby2);
+
+            // ---- เพิ่มเส้นกึ่งกลาง Column 1 เริ่มจาก Row3 ----
+            doc.line(col1Mid, tby1 + rowHeight * 2, col1Mid, tby2);
+
         
             // ---- ข้อความหัวตาราง ----
             const centerX_table = (tbx1 + tbx2) / 2;
-            doc.setFontSize(12);
-            doc.text("สิทธิลาที่ใช้/สิทธิลาคงเหลือ", centerX_table, tby1 + rowHeight - 2.5, { align: "center" });
-            doc.setFontSize(12);
+            doc.setFontSize(11);
+            doc.text("สิทธิลาที่ใช้/สิทธิลาคงเหลือ", centerX_table, tby1 + rowHeight - 2, { align: "center" });
+            doc.setFontSize(11);
             const colCenter1 = (15 + 40) / 2;
-            doc.text("ประเภทการลา", colCenter1, tby1 + rowHeight + rowHeight - 2, { align: "center" });
+            doc.text("รายการ", colCenter1, tby1 + rowHeight + rowHeight - 2, { align: "center" });
         
             //Rows2
+            
             doc.setFontSize(11);
             const colCenter2 = (40 + 47) / 2;
             doc.text("SL", colCenter2, tby1 + rowHeight + rowHeight - 2, { align: "center" });
@@ -818,105 +851,295 @@
             doc.text("OTH", colCenter9, tby1 + rowHeight + rowHeight - 2, { align: "center" });
             const colCenter10 = (96 + 103) / 2;
             doc.text("Total", colCenter10, tby1 + rowHeight + rowHeight - 2, { align: "center" });
-        
-             // Row3
-            doc.setFontSize(12);
-            const colCenter11 = (15+40) / 2;
-            doc.text("สิทธิลาที่ใช้", colCenter11, tby1 + rowHeight*3 - 2, { align: "center" });
-        
+            
+            // ✅ Column 1 รวม Row 3-4 และ 6-7
+            doc.text("ลาสะสม", tbx1 + 2, tby1 + rowHeight * 3.5); // กลางระหว่าง Row3-4
+            doc.text("คงเหลือ", tbx1 + 2, tby1 + rowHeight * 6.5); // กลางระหว่าง Row6-7
+
+              // ตำแหน่งกึ่งกลางของคอลัมน์ที่แบ่งครึ่ง (ขวาของ col1Mid แต่ซ้ายของ colXs[0])
+            const halfColCenterX = (col1Mid + colXs[0]) / 2;
+
+            // ปรับขนาดฟอนต์ถ้าต้องการ
+            doc.setFontSize(11);
+
+            // Rows 2,3,4 -> วัน, ชั่วโมง, นาที (แกน Y เหมือนตัวอย่าง)
+            doc.text("วัน",     halfColCenterX, tby1 + rowHeight*3 - 2, { align: "center" });
+            doc.text("ชั่วโมง", halfColCenterX, tby1 + rowHeight*4 - 2, { align: "center" });
+            doc.text("นาที",    halfColCenterX, tby1 + rowHeight*5- 2, { align: "center" });
+
+            // Rows 5,6,7 -> วัน, ชั่วโมง, นาที (แกน Y เหมือนตัวอย่าง)
+            doc.text("วัน",     halfColCenterX, tby1 + rowHeight*6 - 2, { align: "center" });
+            doc.text("ชั่วโมง", halfColCenterX, tby1 + rowHeight*7 - 2, { align: "center" });
+            doc.text("นาที",    halfColCenterX, tby1 + rowHeight*8 - 2, { align: "center" });
+            
+            
+                // ฟังก์ชัน 1: วันเต็ม (คุณมีแล้ว)
+                function getFullDays(totalMinutes) {
+                    const days = Math.floor((totalMinutes / 60) / 8);
+                    return days > 0 ? days : "";
+                }
+
+                // ฟังก์ชัน 2: ชั่วโมงที่เหลือหลังจากวันเต็ม
+                function getRemainingHours(totalMinutes) {
+                    const totalHours = totalMinutes / 60;
+                    const days = Math.floor(totalHours / 8);
+                    const leftoverHours = totalHours - days * 8;
+                    const hours = Math.floor(leftoverHours);
+                    return hours > 0 ? hours : "";
+                }
+
+                // ฟังก์ชัน 3: นาทีที่เหลือหลังจากวันและชั่วโมงเต็ม
+                function getRemainingMinutes(totalMinutes) {
+                    const totalHours = totalMinutes / 60;
+                    const days = Math.floor(totalHours / 8);
+                    const leftoverHours = totalHours - days * 8;
+                    const hours = Math.floor(leftoverHours);
+                    const leftoverMinutes = (leftoverHours - hours) * 60;
+                    const minutes = Math.round(leftoverMinutes);
+                    return minutes > 0 ? minutes : "";
+                }
+                
+                const sumSLdaysUsed = getFullDays(sumSL);
+                const sumSLhoursUsed = getRemainingHours(sumSL);
+                const sumSLminsUsed = getRemainingMinutes(sumSL);
+
+                const sumALdaysUsed = getFullDays(sumAL);
+                const sumALhoursUsed = getRemainingHours(sumAL);
+                const sumALminsUsed = getRemainingMinutes(sumAL);
+
+                const sumBLdaysUsed = getFullDays(sumBL);
+                const sumBLhoursUsed = getRemainingHours(sumBL);
+                const sumBLminsUsed = getRemainingMinutes(sumBL);
+
+                const totalLeavedaysUsed = getFullDays(totalLeave);
+                const totalLeavehoursUsed = getRemainingHours(totalLeave);
+                const totalLeaveminsUsed = getRemainingMinutes(totalLeave);
+                
+                const balSLdays = getFullDays(balSL);
+                const balSLhours = getRemainingHours(balSL);
+                const balSLmins = getRemainingMinutes(balSL);
+                
+                const balALdays = getFullDays(balAL);
+                const balALhours = getRemainingHours(balAL);
+                const balALmins = getRemainingMinutes(balAL);
+                
+                const balBLdays = getFullDays(balBL);
+                const balBLhours = getRemainingHours(balBL);
+                const balBLmins = getRemainingMinutes(balBL);
+                
+                const balanceTotaldays = getFullDays(balanceTotal);
+                const balanceTotalhours = getRemainingHours(balanceTotal);
+                const balanceTotalmins = getRemainingMinutes(balanceTotal);
+            
+            
+            //Row วัน ที่ใช้
             doc.setFontSize(11);
             const colCenter12 = (40 + 47) / 2;
-            doc.text(`${sumSL}`, colCenter12, tby1 + rowHeight*3 - 2, { align: "center" });
+            doc.text(`${sumSLdaysUsed}`, colCenter12, tby1 + rowHeight*3 - 2, { align: "center" });
         
             const colCenter13 = (47 + 54) / 2;
-            doc.text(`${sumAL}`, colCenter13, tby1 + rowHeight*3 - 2, { align: "center" });
+            doc.text(`${sumALdaysUsed}`, colCenter13, tby1 + rowHeight*3 - 2, { align: "center" });
         
             const colCenter14 = (54 + 61) / 2;
-            doc.text("-", colCenter14, tby1 + rowHeight*3 - 2, { align: "center" });
+            doc.text("", colCenter14, tby1 + rowHeight*3 - 2, { align: "center" });
         
             const colCenter15 = (61 + 68) / 2;
-            doc.text("-", colCenter15, tby1 + rowHeight*3 - 2, { align: "center" });
+            doc.text("", colCenter15, tby1 + rowHeight*3 - 2, { align: "center" });
         
             const colCenter16 = (68 + 75) / 2;
-            doc.text(`${sumBL}`, colCenter16, tby1 + rowHeight*3 - 2, { align: "center" });
+            doc.text(`${sumBLdaysUsed}`, colCenter16, tby1 + rowHeight*3 - 2, { align: "center" });
         
             const colCenter17 = (75 + 82) / 2;
-            doc.text("-", colCenter17, tby1 + rowHeight*3 - 2, { align: "center" });
+            doc.text("", colCenter17, tby1 + rowHeight*3 - 2, { align: "center" });
         
             const colCenter18 = (82 + 89) / 2;
-            doc.text("-", colCenter18, tby1 + rowHeight*3 - 2, { align: "center" });
+            doc.text("", colCenter18, tby1 + rowHeight*3 - 2, { align: "center" });
         
             const colCenter19 = (89 + 96) / 2;
-            doc.text("-", colCenter19, tby1 + rowHeight*3 - 2, { align: "center" });
+            doc.text("", colCenter19, tby1 + rowHeight*3 - 2, { align: "center" });
         
             const colCenter20 = (96 + 103) / 2;
-            doc.text(`${totalLeave}`, colCenter20, tby1 + rowHeight*3 - 2, { align: "center" });
+            doc.text(`${totalLeavedaysUsed}`, colCenter20, tby1 + rowHeight*3 - 2, { align: "center" });
             
-                // ---- Row4 (สิทธิลาที่ใช้) ----
-            doc.setFontSize(12);
-            const colCenter21 = (15 + 40) / 2;
-            doc.text("สิทธิลาคงเหลือ", colCenter21, tby1 + rowHeight*4 - 2, { align: "center" });
-        
+             //Row ชั่วโมง ที่ใช้
             doc.setFontSize(11);
-            const colCenter22 = (40 + 47) / 2;
-            doc.text(`${balSL}`, colCenter22, tby1 + rowHeight*4 - 2, { align: "center" });
+            const colCenter21 = (40 + 47) / 2;
+            doc.text(`${sumSLhoursUsed}`, colCenter21, tby1 + rowHeight*4 - 2, { align: "center" });
         
-            const colCenter23 = (47 + 54) / 2;
-            doc.text(`${balAL}`, colCenter23, tby1 + rowHeight*4 - 2, { align: "center" });
+            const colCenter22 = (47 + 54) / 2;
+            doc.text(`${sumALhoursUsed}`, colCenter22, tby1 + rowHeight*4 - 2, { align: "center" });
         
-            const colCenter24 = (54 + 61) / 2;
-            doc.text("-", colCenter24, tby1 + rowHeight*4 - 2, { align: "center" });
+            const colCenter23 = (54 + 61) / 2;
+            doc.text("", colCenter23, tby1 + rowHeight*4 - 2, { align: "center" });
         
-            const colCenter25 = (61 + 68) / 2;
-            doc.text("-", colCenter25, tby1 + rowHeight*4 - 2, { align: "center" });
+            const colCenter24 = (61 + 68) / 2;
+            doc.text("", colCenter24, tby1 + rowHeight*4 - 2, { align: "center" });
         
-            const colCenter26 = (68 + 75) / 2;
-            doc.text(`${balBL}`, colCenter26, tby1 + rowHeight*4 - 2, { align: "center" });
+            const colCenter25 = (68 + 75) / 2;
+            doc.text(`${sumBLhoursUsed}`, colCenter25, tby1 + rowHeight*4 - 2, { align: "center" });
         
-            const colCenter27 = (75 + 82) / 2;
-            doc.text("-", colCenter27, tby1 + rowHeight*4 - 2, { align: "center" });
+            const colCenter26 = (75 + 82) / 2;
+            doc.text("", colCenter26, tby1 + rowHeight*4 - 2, { align: "center" });
         
-            const colCenter28 = (82 + 89) / 2;
-            doc.text("-", colCenter28, tby1 + rowHeight*4 - 2, { align: "center" });
+            const colCenter27 = (82 + 89) / 2;
+            doc.text("", colCenter27, tby1 + rowHeight*4 - 2, { align: "center" });
         
-            const colCenter29 = (89 + 96) / 2;
-            doc.text("-", colCenter29, tby1 + rowHeight*4 - 2, { align: "center" });
+            const colCenter28 = (89 + 96) / 2;
+            doc.text("", colCenter28, tby1 + rowHeight*4 - 2, { align: "center" });
         
-            const colCenter30 = (96 + 103) / 2;
-            doc.text(`${balanceTotal}`, colCenter30, tby1 + rowHeight*4 - 2, { align: "center" });
+            const colCenter29 = (96 + 103) / 2;
+            doc.text(`${totalLeavehoursUsed}`, colCenter29, tby1 + rowHeight*4 - 2, { align: "center" });
+            
+             //Row นาที ที่ใช้
+            doc.setFontSize(11);
+            const colCenter30 = (40 + 47) / 2;
+            doc.text(`${sumSLminsUsed}`, colCenter30, tby1 + rowHeight*5 - 2, { align: "center" });
+        
+            const colCenter31 = (47 + 54) / 2;
+            doc.text(`${sumALminsUsed}`, colCenter31, tby1 + rowHeight*5 - 2, { align: "center" });
+        
+            const colCenter32 = (54 + 61) / 2;
+            doc.text("", colCenter32, tby1 + rowHeight*5 - 2, { align: "center" });
+        
+            const colCenter33 = (61 + 68) / 2;
+            doc.text("", colCenter33, tby1 + rowHeight*5 - 2, { align: "center" });
+        
+            const colCenter34 = (68 + 75) / 2;
+            doc.text(`${sumBLminsUsed}`, colCenter34, tby1 + rowHeight*5 - 2, { align: "center" });
+        
+            const colCenter35 = (75 + 82) / 2;
+            doc.text("", colCenter35, tby1 + rowHeight*5 - 2, { align: "center" });
+        
+            const colCenter36 = (82 + 89) / 2;
+            doc.text("", colCenter36, tby1 + rowHeight*5 - 2, { align: "center" });
+        
+            const colCenter37= (89 + 96) / 2;
+            doc.text("", colCenter37, tby1 + rowHeight*5 - 2, { align: "center" });
+        
+            const colCenter38 = (96 + 103) / 2;
+            doc.text(`${totalLeaveminsUsed}`, colCenter38, tby1 + rowHeight*5 - 2, { align: "center" });
+            
+            //Row วัน คงเหลือ
+            doc.setFontSize(11);
+            const colCenter39 = (40 + 47) / 2;
+            doc.text(`${balSLdays}`, colCenter39, tby1 + rowHeight*6 - 2, { align: "center" });
+        
+            const colCenter40 = (47 + 54) / 2;
+            doc.text(`${balALdays}`, colCenter40, tby1 + rowHeight*6 - 2, { align: "center" });
+        
+            const colCenter41 = (54 + 61) / 2;
+            doc.text("", colCenter41, tby1 + rowHeight*6 - 2, { align: "center" });
+        
+            const colCenter42 = (61 + 68) / 2;
+            doc.text("", colCenter42, tby1 + rowHeight*6 - 2, { align: "center" });
+        
+            const colCenter43 = (68 + 75) / 2;
+            doc.text(`${balBLdays}`, colCenter43, tby1 + rowHeight*6 - 2, { align: "center" });
+        
+            const colCenter44 = (75 + 82) / 2;
+            doc.text("", colCenter44, tby1 + rowHeight*6 - 2, { align: "center" });
+        
+            const colCenter45 = (82 + 89) / 2;
+            doc.text("", colCenter45, tby1 + rowHeight*6 - 2, { align: "center" });
+        
+            const colCenter46 = (89 + 96) / 2;
+            doc.text("", colCenter46, tby1 + rowHeight*6 - 2, { align: "center" });
+        
+            const colCenter47 = (96 + 103) / 2;
+            doc.text(`${balanceTotaldays}`, colCenter47, tby1 + rowHeight*6 - 2, { align: "center" });
+            
+            //Row ชั่วโมง คงเหลือ
+            doc.setFontSize(11);
+            const colCenter48 = (40 + 47) / 2;
+            doc.text(`${balSLhours}`, colCenter48, tby1 + rowHeight*7 - 2, { align: "center" });
+        
+            const colCenter49 = (47 + 54) / 2;
+            doc.text(`${balALhours}`, colCenter49, tby1 + rowHeight*7 - 2, { align: "center" });
+        
+            const colCenter50 = (54 + 61) / 2;
+            doc.text("", colCenter50, tby1 + rowHeight*7 - 2, { align: "center" });
+        
+            const colCenter51 = (61 + 68) / 2;
+            doc.text("", colCenter51, tby1 + rowHeight*7 - 2, { align: "center" });
+        
+            const colCenter52 = (68 + 75) / 2;
+            doc.text(`${balBLhours}`, colCenter52, tby1 + rowHeight*7 - 2, { align: "center" });
+        
+            const colCenter53 = (75 + 82) / 2;
+            doc.text("", colCenter53, tby1 + rowHeight*7 - 2, { align: "center" });
+        
+            const colCenter54 = (82 + 89) / 2;
+            doc.text("", colCenter54, tby1 + rowHeight*7 - 2, { align: "center" });
+        
+            const colCenter55 = (89 + 96) / 2;
+            doc.text("", colCenter55, tby1 + rowHeight*7 - 2, { align: "center" });
+        
+            const colCenter56 = (96 + 103) / 2;
+            doc.text(`${balanceTotalhours}`, colCenter56, tby1 + rowHeight*7 - 2, { align: "center" });
+            
+            //Row นาที คงเหลือ
+            doc.setFontSize(11);
+            const colCenter57 = (40 + 47) / 2;
+            doc.text(`${balSLmins}`, colCenter57, tby1 + rowHeight*8 - 2, { align: "center" });
+        
+            const colCenter58 = (47 + 54) / 2;
+            doc.text(`${balALmins}`, colCenter58, tby1 + rowHeight*8 - 2, { align: "center" });
+        
+            const colCenter59 = (54 + 61) / 2;
+            doc.text("", colCenter59, tby1 + rowHeight*8 - 2, { align: "center" });
+        
+            const colCenter60 = (61 + 68) / 2;
+            doc.text("", colCenter60, tby1 + rowHeight*8 - 2, { align: "center" });
+        
+            const colCenter61 = (68 + 75) / 2;
+            doc.text(`${balBLmins}`, colCenter61, tby1 + rowHeight*8 - 2, { align: "center" });
+        
+            const colCenter62 = (75 + 82) / 2;
+            doc.text("", colCenter62, tby1 + rowHeight*8 - 2, { align: "center" });
+        
+            const colCenter63 = (82 + 89) / 2;
+            doc.text("", colCenter63, tby1 + rowHeight*8 - 2, { align: "center" });
+        
+            const colCenter64 = (89 + 96) / 2;
+            doc.text("", colCenter64, tby1 + rowHeight*8 - 2, { align: "center" });
+        
+            const colCenter65 = (96 + 103) / 2;
+            doc.text(`${balanceTotalmins}`, colCenter65, tby1 + rowHeight*8 - 2, { align: "center" });
+            
 
 
             // --- กรอบครอบทั้งหมด ตรงผู้อนุมัติ ---
             // --- ปรับตำแหน่งแกน Y ได้ด้วย offset ---
-            const offsetY = 15; // 🔹 ถ้าอยากเลื่อนลงให้ใส่ค่า + เช่น 10, เลื่อนขึ้นใส่ - เช่น -15
+            const offsetY = 20; // 🔹 ถ้าอยากเลื่อนลงให้ใส่ค่า + เช่น 10, เลื่อนขึ้นใส่ - เช่น -15
 
             doc.setFontSize(14);
 
             const boxX_2 = 15;
             const boxY_2 = 205 + offsetY; // ✅ เพิ่ม offset
             const boxWidth_2 = 180;
-            const boxHeight_2 = 60;
+            const boxHeight_2 = 55;
 
             // กรอบใหญ่
             doc.rect(boxX_2, boxY_2, boxWidth_2, boxHeight_2, 'S');
 
             // เส้นแบ่ง
             doc.line(15, 215 + offsetY, boxWidth_2 + 15, 215 + offsetY);
-            doc.line(105, 205 + offsetY, 105, 265 + offsetY);
+            doc.line(105, 205 + offsetY, 105, 255 + offsetY);
 
             // ข้อความด้านซ้าย
             doc.text("ความเห็นผู้บังคับบัญชา", 45, 211 + offsetY);
             doc.text("ความเห็น .............................................................................", 20, 225 + offsetY);
-            doc.text("ลงชื่อ ............................................................. (รับทราบ)", 25, 235 + offsetY);
-            doc.text("(                                              )", 32, 245 + offsetY);
-            doc.text("วันที่ .............................................................", 26, 255 + offsetY);
+            doc.text("ลงชื่อ ............................................................. (รับทราบ)", 25, 233 + offsetY);
+            doc.text("(                                              )", 32, 241 + offsetY);
+            doc.text("วันที่ .............................................................", 26, 249 + offsetY);
 
             // ข้อความด้านขวา
             doc.text("ความเห็นผู้มีอํานาจอนุมัติระดับส่วน/ฝ่าย", 123, 211 + offsetY);
             doc.text("ความเห็น .............................................................................", 110, 225 + offsetY);
-            doc.text("ลงชื่อ ............................................................. (อนุมัติ)", 115, 235 + offsetY);
-            doc.text("(                                              )", 122, 245 + offsetY);
-            doc.text("วันที่ .............................................................", 116, 255 + offsetY);
+            doc.text("ลงชื่อ ............................................................. (อนุมัติ)", 115, 233 + offsetY);
+            doc.text("(                                              )", 122, 241 + offsetY);
+            doc.text("วันที่ .............................................................", 116, 249 + offsetY);
+
 
 
         //ส่วนลายเซ็น
