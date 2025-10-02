@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-       /* ==================== Theme & Variables ==================== */
+            /* ==================== Theme & Variables ==================== */
     /* เก็บสีหลัก/รอง เฉดสีสถานะ และเงา */
     :root {
         --primary-color: #2c3e50;
@@ -176,29 +176,36 @@
         box-shadow: 0 8px 15px rgba(52, 152, 219, 0.2);
     }
     
-    /* ปุ่มบันทึก */
-    .save-button {
-        background-color: #28a745;
-    }
-    .save-button:hover {
-        background-color: #218838;
-    }
-    .save-button:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-    
-    /* ปุ่มพิมพ์ */
-    .print-button {
-        background-color: #555555;
-    }
-    .print-button:hover {
-        background-color: #333333;
-    }
-    .print-button:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
+/* ==================== ปุ่มบันทึก ==================== */
+.save-button {
+    background-color: #28a745;
+    padding: 5px 12px;   /* ลดความสูง / ขนาดปุ่ม */
+    font-size: 13px;     /* ลดตัวอักษร */
+    border-radius: 6px;  /* ปรับมุมถ้าต้องการ */
+}
+.save-button:hover {
+    background-color: #218838;
+}
+.save-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ==================== ปุ่มพิมพ์ ==================== */
+.print-button {
+    background-color: #555555;
+    padding: 5px 12px;   /* ลดความสูง / ขนาดปุ่ม */
+    font-size: 13px;
+    border-radius: 6px;
+}
+.print-button:hover {
+    background-color: #333333;
+}
+.print-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
     
     /* ปุ่มหน้า Pagination */
     .pagination-button {
@@ -275,16 +282,19 @@
         gap: 5px;
     }
     
-    .status-approved,
-    .status-rejected,
-    .status-pending {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.9em;
-        display: inline-block;
-        text-align: center;
-    }
+  .status-approved,
+  .status-rejected,
+  .status-pending {
+      min-width: 110px;       /* กำหนดตามความกว้างของป้าย "อนุมัติแล้ว" */
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9em;
+      display: inline-flex;   /* ใช้ flex จัดกลางข้อความ */
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+  }
     .status-approved {
         background-color: var(--approved-color);
         color: white;
