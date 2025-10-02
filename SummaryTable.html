@@ -297,12 +297,27 @@
         const loadingOverlay = document.getElementById("loading-overlay");
 
         const API_URL = "https://script.google.com/macros/s/AKfycbxe8-gbiYacq6o3jwkDkp3JfUeGaY7wJeMR_hESazJIMRxtyHiG-MdeN-XltsR988IlKw/exec";
+        
+    function formatNumber(num) {
+        if (num === "" || num === null || num === "-" || isNaN(num)) return num;
+        let value = Number.isInteger(Number(num)) ? num : Number(num).toFixed(1);
+        return value + " วัน";
+    }
 
-        function formatNumber(num) {
-            if (num === "" || num === null || isNaN(num)) return num;
-            return Number.isInteger(Number(num)) ? num : Number(num).toFixed(1);
+        // ฟังก์ชันแปลงนาทีเป็น วัน,ชั่วโมง,นาที
+        function formatMinutes(totalMinutes) {
+        const workDayMinutes = 8 * 60;
+        const days = Math.floor(totalMinutes / workDayMinutes);
+        const remainingMinutes = totalMinutes % workDayMinutes;
+        const hours = Math.floor(remainingMinutes / 60);
+        const minutes = remainingMinutes % 60;
+
+        let result = "";
+        if (days > 0) result += `${days} วัน `;
+        if (hours > 0) result += `${hours} ชั่วโมง `;
+        if (minutes > 0) result += `${minutes} นาที`;
+        return result.trim();
         }
-
         let balanceData = [];
         let recordsData = [];
         let currentPage = 1;
@@ -337,9 +352,9 @@
                 tr += `<td>${row.empId}</td>`;
                 tr += `<td>${row.name}</td>`;
                 tr += `<td>${row.position}</td>`;
-                tr += `<td>${formatNumber(row.al)}</td>`;
-                tr += `<td>${formatNumber(row.sl)}</td>`;
-                tr += `<td>${formatNumber(row.bl)}</td>`;
+                tr += `<td>${formatMinutes(row.al)}</td>`;
+                tr += `<td>${formatMinutes(row.sl)}</td>`;
+                tr += `<td>${formatMinutes(row.bl)}</td>`;
                 if (includeAbsent) tr += `<td>${formatNumber(row.absent)}</td>`;
                 tr += "</tr>";
                 tbody.innerHTML += tr;
