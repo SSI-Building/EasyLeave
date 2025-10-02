@@ -28,7 +28,8 @@
             background-color: #ffffff;
             border-radius: 20px;
             padding: 30px;
-            max-width: 900px;
+            max-width: 100%;   /* ปรับเต็มจอ */
+            width: 100%;
             margin: 40px auto;
             box-shadow: 0 10px 30px rgba(45, 55, 72, 0.1);
         }
@@ -84,6 +85,7 @@
 
         #searchInput {
             width: 100%;
+            max-width: 400px;
             padding: 12px 16px;
             border-radius: 10px;
             border: 1px solid #cbd5e0;
@@ -129,7 +131,7 @@
             display: none;
         }
 
-        /* Styling for the back button */
+        /* Back button */
         .back-button {
             position: absolute;
             top: 20px;
@@ -159,7 +161,7 @@
             line-height: 1;
         }
 
-        /* ==================== Loading Overlay Styles ==================== */
+        /* Loading overlay */
         #loading-overlay {
             position: fixed;
             top: 0;
@@ -171,7 +173,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000; /* Use a higher z-index to ensure it's on top */
+            z-index: 1000;
             transition: opacity 0.3s ease, visibility 0.3s ease;
             opacity: 0;
             visibility: hidden;
@@ -201,6 +203,34 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* Pagination */
+        #pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 8px;
+        }
+
+        .page-btn {
+            padding: 8px 14px;
+            border: 1px solid #ccc;
+            background: #f7fafc;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-color: var(--primary-color);
+        }
+
+        .page-btn:hover:not(.active) {
+            background: #e2e8f0;
         }
     </style>
 </head>
@@ -248,6 +278,9 @@
             </thead>
             <tbody></tbody>
         </table>
+
+        <!-- Pagination -->
+        <div id="pagination"></div>
     </div>
 
     <div id="loading-overlay" class="visible">
@@ -272,6 +305,8 @@
 
         let balanceData = [];
         let recordsData = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
 
         // Show loading overlay before fetching data
         loadingOverlay.classList.add('visible');
@@ -285,14 +320,19 @@
                 renderTable(usedTable, recordsData, true);
             })
             .finally(() => {
-                // Hide loading overlay after data is loaded (whether successful or not)
                 loadingOverlay.classList.remove('visible');
             });
 
-        function renderTable(table, data, includeAbsent = false) {
+        function renderTable(table, data, includeAbsent = false, page = 1) {
             const tbody = table.querySelector("tbody");
             tbody.innerHTML = "";
-            data.forEach(row => {
+
+            // คำนวณช่วงข้อมูล
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedData = data.slice(start, end);
+
+            paginatedData.forEach(row => {
                 let tr = "<tr>";
                 tr += `<td>${row.empId}</td>`;
                 tr += `<td>${row.name}</td>`;
@@ -304,6 +344,34 @@
                 tr += "</tr>";
                 tbody.innerHTML += tr;
             });
+
+            renderPagination(data.length, page, includeAbsent);
+        }
+
+        function renderPagination(totalRows, page, includeAbsent = false) {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
+
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = i;
+                btn.classList.add("page-btn");
+                if (i === page) btn.classList.add("active");
+
+                btn.addEventListener("click", () => {
+                    currentPage = i;
+                    const isRemainTableVisible = !remainTable.classList.contains("hidden");
+                    if (isRemainTableVisible) {
+                        renderTable(remainTable, balanceData, false, currentPage);
+                    } else {
+                        renderTable(usedTable, recordsData, true, currentPage);
+                    }
+                });
+
+                pagination.appendChild(btn);
+            }
         }
 
         btnRemain.addEventListener("click", () => {
@@ -311,6 +379,7 @@
             usedTable.classList.add("hidden");
             btnRemain.classList.add("active");
             btnUsed.classList.remove("active");
+            currentPage = 1;
             filterTable();
         });
 
@@ -319,6 +388,7 @@
             usedTable.classList.remove("hidden");
             btnUsed.classList.add("active");
             btnRemain.classList.remove("active");
+            currentPage = 1;
             filterTable();
         });
 
@@ -330,10 +400,10 @@
 
             if (isRemainTableVisible) {
                 const visibleDataRemain = balanceData.filter(row => row.name.toLowerCase().includes(filter));
-                renderTable(remainTable, visibleDataRemain);
+                renderTable(remainTable, visibleDataRemain, false, currentPage);
             } else {
                 const visibleDataUsed = recordsData.filter(row => row.name.toLowerCase().includes(filter));
-                renderTable(usedTable, visibleDataUsed, true);
+                renderTable(usedTable, visibleDataUsed, true, currentPage);
             }
         }
     </script>
