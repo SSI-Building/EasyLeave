@@ -295,7 +295,7 @@
         const usedTable = document.getElementById("usedTable");
         const searchInput = document.getElementById("searchInput");
         const loadingOverlay = document.getElementById("loading-overlay");
-
+        
         const API_URL = "https://script.google.com/macros/s/AKfycbxe8-gbiYacq6o3jwkDkp3JfUeGaY7wJeMR_hESazJIMRxtyHiG-MdeN-XltsR988IlKw/exec";
         
         function formatNumber(num) {
@@ -303,51 +303,63 @@
             let value = Number.isInteger(Number(num)) ? num : Number(num).toFixed(1);
             return value + " วัน";
         }
-
-
+        
         // ฟังก์ชันแปลงนาทีเป็น วัน,ชั่วโมง,นาที
         function formatMinutes(totalMinutes) {
-        const workDayMinutes = 8 * 60;
-        const days = Math.floor(totalMinutes / workDayMinutes);
-        const remainingMinutes = totalMinutes % workDayMinutes;
-        const hours = Math.floor(remainingMinutes / 60);
-        const minutes = remainingMinutes % 60;
-
-        let result = "";
-        if (days > 0) result += `${days} วัน `;
-        if (hours > 0) result += `${hours} ชั่วโมง `;
-        if (minutes > 0) result += `${minutes} นาที`;
-        return result.trim();
+            const workDayMinutes = 8 * 60;
+            const days = Math.floor(totalMinutes / workDayMinutes);
+            const remainingMinutes = totalMinutes % workDayMinutes;
+            const hours = Math.floor(remainingMinutes / 60);
+            const minutes = remainingMinutes % 60;
+        
+            let result = "";
+            if (days > 0) result += `${days} วัน `;
+            if (hours > 0) result += `${hours} ชั่วโมง `;
+            if (minutes > 0) result += `${minutes} นาที`;
+            return result.trim();
         }
-        let balanceData = [];
-        let recordsData = [];
+        
+        let balanceData = []; // ข้อมูลสิทธิ์คงเหลือทั้งหมด
+        let recordsData = []; // ข้อมูลสิทธิ์ที่ใช้ทั้งหมด
+        
+        // --- เพิ่มตัวแปรสำหรับข้อมูลที่ถูกกรองแล้ว ---
+        let filteredBalanceData = [];
+        let filteredRecordsData = [];
+        // ----------------------------------------
+        
         let currentPage = 1;
         const rowsPerPage = 8;
-
+        let currentMode = 'remain'; // 'remain' หรือ 'used'
+        
         // Show loading overlay before fetching data
         loadingOverlay.classList.add('visible');
-
+        
         fetch(API_URL)
             .then(res => res.json())
             .then(data => {
                 balanceData = data.balance;
                 recordsData = data.records;
-                renderTable(remainTable, balanceData);
-                renderTable(usedTable, recordsData, true);
+                
+                // กำหนดข้อมูลที่กรองเริ่มต้นเป็นข้อมูลทั้งหมด
+                filteredBalanceData = [...balanceData];
+                filteredRecordsData = [...recordsData];
+        
+                // แสดงผลตารางเริ่มต้น (สิทธิคงเหลือ)
+                renderTable(remainTable, filteredBalanceData, false, currentPage);
             })
             .finally(() => {
                 loadingOverlay.classList.remove('visible');
             });
-
+        
         function renderTable(table, data, includeAbsent = false, page = 1) {
             const tbody = table.querySelector("tbody");
             tbody.innerHTML = "";
-
-            // คำนวณช่วงข้อมูล
+        
+            // คำนวณช่วงข้อมูลจากข้อมูลที่ 'data' (ซึ่งถูกกรองแล้ว)
             const start = (page - 1) * rowsPerPage;
             const end = start + rowsPerPage;
             const paginatedData = data.slice(start, end);
-
+        
             paginatedData.forEach(row => {
                 let tr = "<tr>";
                 tr += `<td>${row.empId}</td>`;
@@ -360,66 +372,71 @@
                 tr += "</tr>";
                 tbody.innerHTML += tr;
             });
-
-            renderPagination(data.length, page, includeAbsent);
+        
+            renderPagination(data.length, page); // ใช้ data.length ซึ่งเป็นจำนวนแถวที่กรองแล้ว
         }
-
-        function renderPagination(totalRows, page, includeAbsent = false) {
+        
+        function renderPagination(totalRows, page) {
             const pagination = document.getElementById("pagination");
             pagination.innerHTML = "";
-
+        
             const totalPages = Math.ceil(totalRows / rowsPerPage);
-
+        
             for (let i = 1; i <= totalPages; i++) {
                 const btn = document.createElement("button");
                 btn.textContent = i;
                 btn.classList.add("page-btn");
                 if (i === page) btn.classList.add("active");
-
+        
                 btn.addEventListener("click", () => {
                     currentPage = i;
-                    const isRemainTableVisible = !remainTable.classList.contains("hidden");
-                    if (isRemainTableVisible) {
-                        renderTable(remainTable, balanceData, false, currentPage);
-                    } else {
-                        renderTable(usedTable, recordsData, true, currentPage);
-                    }
+                    const currentFilteredData = currentMode === 'remain' ? filteredBalanceData : filteredRecordsData;
+                    const currentTable = currentMode === 'remain' ? remainTable : usedTable;
+                    const includeAbsent = currentMode === 'used';
+                    
+                    renderTable(currentTable, currentFilteredData, includeAbsent, currentPage);
                 });
-
+        
                 pagination.appendChild(btn);
             }
         }
-
+        
         btnRemain.addEventListener("click", () => {
             remainTable.classList.remove("hidden");
             usedTable.classList.add("hidden");
             btnRemain.classList.add("active");
             btnUsed.classList.remove("active");
-            currentPage = 1;
-            filterTable();
+            currentMode = 'remain';
+            searchInput.value = ''; // ล้างช่องค้นหาเมื่อเปลี่ยนโหมด
+            filterTable(); // เรียกกรองเพื่อรีเซ็ต
         });
-
+        
         btnUsed.addEventListener("click", () => {
             remainTable.classList.add("hidden");
             usedTable.classList.remove("hidden");
             btnUsed.classList.add("active");
             btnRemain.classList.remove("active");
-            currentPage = 1;
-            filterTable();
+            currentMode = 'used';
+            searchInput.value = ''; // ล้างช่องค้นหาเมื่อเปลี่ยนโหมด
+            filterTable(); // เรียกกรองเพื่อรีเซ็ต
         });
-
+        
         searchInput.addEventListener("input", filterTable);
-
+        
         function filterTable() {
             const filter = searchInput.value.toLowerCase();
-            const isRemainTableVisible = !remainTable.classList.contains("hidden");
-
-            if (isRemainTableVisible) {
-                const visibleDataRemain = balanceData.filter(row => row.name.toLowerCase().includes(filter));
-                renderTable(remainTable, visibleDataRemain, false, currentPage);
+            
+            // *** สำคัญ: รีเซ็ต currentPage เป็น 1 เสมอเมื่อมีการกรองใหม่ ***
+            currentPage = 1;
+        
+            if (currentMode === 'remain') {
+                // กรองข้อมูลทั้งหมด (balanceData) และเก็บไว้ใน filteredBalanceData
+                filteredBalanceData = balanceData.filter(row => row.name.toLowerCase().includes(filter) || row.empId.toLowerCase().includes(filter));
+                renderTable(remainTable, filteredBalanceData, false, currentPage);
             } else {
-                const visibleDataUsed = recordsData.filter(row => row.name.toLowerCase().includes(filter));
-                renderTable(usedTable, visibleDataUsed, true, currentPage);
+                // กรองข้อมูลทั้งหมด (recordsData) และเก็บไว้ใน filteredRecordsData
+                filteredRecordsData = recordsData.filter(row => row.name.toLowerCase().includes(filter) || row.empId.toLowerCase().includes(filter));
+                renderTable(usedTable, filteredRecordsData, true, currentPage);
             }
         }
     </script>
