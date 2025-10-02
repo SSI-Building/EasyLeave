@@ -298,11 +298,12 @@
 
         const API_URL = "https://script.google.com/macros/s/AKfycbxe8-gbiYacq6o3jwkDkp3JfUeGaY7wJeMR_hESazJIMRxtyHiG-MdeN-XltsR988IlKw/exec";
         
-    function formatNumber(num) {
-        if (num === "" || num === null || num === "-" || isNaN(num)) return num;
-        let value = Number.isInteger(Number(num)) ? num : Number(num).toFixed(1);
-        return value + " วัน";
-    }
+        function formatNumber(num) {
+            if (num === "" || num === null || num === "-" || isNaN(num) || Number(num) === 0) return "";
+            let value = Number.isInteger(Number(num)) ? num : Number(num).toFixed(1);
+            return value + " วัน";
+        }
+
 
         // ฟังก์ชันแปลงนาทีเป็น วัน,ชั่วโมง,นาที
         function formatMinutes(totalMinutes) {
