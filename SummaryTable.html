@@ -1,420 +1,411 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ตารางสรุป</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #4CAF50;
-      --border-color: #f3f4f6;
-      --text-color: #334e68;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตารางสรุป</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --border-color: #f3f4f6;
+            --text-color: #334e68;
+        }
 
-    body {
-      font-family: 'Prompt', sans-serif;
-      background-color: #f0f4f8;
-      margin: 0;
-      padding: 20px;
-      color: #334e68;
-      line-height: 1.6;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh; /* จัดให้อยู่กลาง */
-    }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #334e68;
+            line-height: 1.6;
+            position: relative;
+        }
 
-    .card {
-      background-color: #ffffff;
-      border-radius: 20px;
-      padding: 30px;
-      width: 100%;
-      max-width: 1200px;
-      max-height: 90vh;   /* ไม่เกินหน้าจอ */
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 10px 30px rgba(45, 55, 72, 0.1);
-    }
+        .card {
+            background-color: #ffffff;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 100%;   /* ปรับเต็มจอ */
+            width: 100%;
+            margin: 40px auto;
+            box-shadow: 0 10px 30px rgba(45, 55, 72, 0.1);
+        }
 
-    h2 {
-      text-align: center;
-      margin: 0 0 20px;
-      font-weight: 600;
-      color: #2d3748;
-      font-size: 24px;
-    }
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 28px;
+        }
 
-    .filter-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 15px;
-    }
+        .filter-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
-    .btn-group {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 10px;
-      background-color: #e5e7eb;
-      border-radius: 12px;
-      padding: 5px;
-      max-width: 350px;
-      width: 100%;
-    }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            background-color: #e5e7eb;
+            border-radius: 12px;
+            padding: 5px;
+            max-width: 350px;
+            width: 100%;
+        }
 
-    .btn-group button {
-      flex: 1;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 10px;
-      background-color: transparent;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+        .btn-group button {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            background-color: transparent;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-    .btn-group button:hover:not(.active) {
-      background-color: #d1d5db;
-    }
+        .btn-group button:hover:not(.active) {
+            background-color: #d1d5db;
+        }
 
-    .btn-group button.active {
-      background-color: #4CAF50;
-      color: white;
-      font-weight: 600;
-      box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
-    }
+        .btn-group button.active {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+        }
 
-    #searchInput {
-      width: 100%;
-      max-width: 400px;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #cbd5e0;
-      font-size: 15px;
-      box-sizing: border-box;
-      transition: border-color 0.3s;
-    }
+        #searchInput {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e0;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
 
-    #searchInput:focus {
-      outline: none;
-      border-color: #4CAF50;
-    }
+        #searchInput:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
 
-    .table-container {
-      flex: 1;
-      overflow-y: auto; /* เลื่อนเฉพาะตาราง */
-    }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 600px;
-    }
+        th, td {
+            padding: 15px 12px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
 
-    thead th {
-      position: sticky;
-      top: 0;
-      background: #f7fafc;
-      z-index: 1;
-      font-weight: 600;
-      color: #4a5568;
-      text-transform: uppercase;
-      font-size: 14px;
-      letter-spacing: 0.5px;
-      border-bottom: 2px solid #e2e8f0;
-      padding: 12px 8px;
-    }
+        th {
+            background-color: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
 
-    td {
-      padding: 10px 8px;
-      border-bottom: 1px solid #e2e8f0;
-      text-align: center;
-    }
+        tr:hover td {
+            background-color: #f7fafc;
+        }
 
-    tr:hover td {
-      background-color: #f7fafc;
-    }
+        .hidden {
+            display: none;
+        }
 
-    .hidden {
-      display: none;
-    }
+        /* Back button */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #ffffff;
+            color: #4a5568;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
 
-    /* Back button */
-    .back-button {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      padding: 10px 20px;
-      background-color: #ffffff;
-      color: #4a5568;
-      border: 1px solid #cbd5e0;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    }
+        .back-button:hover {
+            background-color: #f7fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+        }
 
-    .back-button:hover {
-      background-color: #f7fafc;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
-    }
+        .back-button-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
 
-    /* Loading overlay */
-    #loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(255, 255, 255, 0.9);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-      opacity: 0;
-      visibility: hidden;
-    }
+        /* Loading overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+        }
 
-    #loading-overlay.visible {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    .spinner {
-      border: 4px solid var(--border-color);
-      border-top: 4px solid var(--primary-color);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-    }
+        #loading-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .spinner {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
 
-    .loading-text {
-      margin-top: 15px;
-      font-size: 1.2em;
-      font-weight: 500;
-      color: var(--text-color);
-    }
+        .loading-text {
+            margin-top: 15px;
+            font-size: 1.2em;
+            font-weight: 500;
+            color: var(--text-color);
+        }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
-    /* Pagination */
-    #pagination {
-      display: flex;
-      justify-content: center;
-      margin-top: 10px;
-      gap: 8px;
-    }
+        /* Pagination */
+        #pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 8px;
+        }
 
-    .page-btn {
-      padding: 6px 12px;
-      border: 1px solid #ccc;
-      background: #f7fafc;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+        .page-btn {
+            padding: 8px 14px;
+            border: 1px solid #ccc;
+            background: #f7fafc;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
 
-    .page-btn.active {
-      background: var(--primary-color);
-      color: white;
-      font-weight: bold;
-      border-color: var(--primary-color);
-    }
+        .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-color: var(--primary-color);
+        }
 
-    .page-btn:hover:not(.active) {
-      background: #e2e8f0;
-    }
-  </style>
+        .page-btn:hover:not(.active) {
+            background: #e2e8f0;
+        }
+    </style>
 </head>
 <body>
-  <a href="Dashboard-admin.html" class="back-button">
-    <span>&#8592;</span> ย้อนกลับ
-  </a>
+    <a href="Dashboard-admin.html" class="back-button">
+        <span class="back-button-icon">&#8592;</span> ย้อนกลับ
+    </a>
 
-  <div class="card">
     <h2>ตารางสรุปข้อมูลสิทธิลาคงเหลือ/สิทธิลาที่ใช้</h2>
 
-    <div class="filter-container">
-      <div class="btn-group">
-        <button id="btnRemain" class="active">สิทธิคงเหลือ</button>
-        <button id="btnUsed">สิทธิที่ใช้</button>
-      </div>
-      <input type="text" id="searchInput" placeholder="ค้นหาชื่อพนักงาน...">
+    <div class="card">
+        <div class="filter-container">
+            <div class="btn-group">
+                <button id="btnRemain" class="active">สิทธิคงเหลือ</button>
+                <button id="btnUsed">สิทธิที่ใช้</button>
+            </div>
+            <input type="text" id="searchInput" placeholder="ค้นหาชื่อพนักงาน...">
+        </div>
+
+        <table id="remainTable">
+            <thead>
+                <tr>
+                    <th>รหัสพนักงาน</th>
+                    <th>ชื่อ-สกุล</th>
+                    <th>ตำแหน่ง</th>
+                    <th>พักร้อน (AL)</th>
+                    <th>ป่วย (SL)</th>
+                    <th>กิจ (BL)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <table id="usedTable" class="hidden">
+            <thead>
+                <tr>
+                    <th>รหัสพนักงาน</th>
+                    <th>ชื่อ-สกุล</th>
+                    <th>ตำแหน่ง</th>
+                    <th>พักร้อน (AL)</th>
+                    <th>ป่วย (SL)</th>
+                    <th>กิจ (BL)</th>
+                    <th>ขาดงาน (A)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div id="pagination"></div>
     </div>
 
-    <div class="table-container">
-      <table id="remainTable">
-        <thead>
-          <tr>
-            <th>รหัสพนักงาน</th>
-            <th>ชื่อ-สกุล</th>
-            <th>ตำแหน่ง</th>
-            <th>พักร้อน (AL)</th>
-            <th>ป่วย (SL)</th>
-            <th>กิจ (BL)</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-
-      <table id="usedTable" class="hidden">
-        <thead>
-          <tr>
-            <th>รหัสพนักงาน</th>
-            <th>ชื่อ-สกุล</th>
-            <th>ตำแหน่ง</th>
-            <th>พักร้อน (AL)</th>
-            <th>ป่วย (SL)</th>
-            <th>กิจ (BL)</th>
-            <th>ขาดงาน (A)</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <div id="loading-overlay" class="visible">
+        <div class="spinner"></div>
+        <div class="loading-text">กำลังโหลดข้อมูล...</div>
     </div>
 
-    <!-- Pagination -->
-    <div id="pagination"></div>
-  </div>
+    <script>
+        const btnRemain = document.getElementById("btnRemain");
+        const btnUsed = document.getElementById("btnUsed");
+        const remainTable = document.getElementById("remainTable");
+        const usedTable = document.getElementById("usedTable");
+        const searchInput = document.getElementById("searchInput");
+        const loadingOverlay = document.getElementById("loading-overlay");
 
-  <div id="loading-overlay" class="visible">
-    <div class="spinner"></div>
-    <div class="loading-text">กำลังโหลดข้อมูล...</div>
-  </div>
+        const API_URL = "https://script.google.com/macros/s/AKfycbxe8-gbiYacq6o3jwkDkp3JfUeGaY7wJeMR_hESazJIMRxtyHiG-MdeN-XltsR988IlKw/exec";
 
-  <script>
-    const btnRemain = document.getElementById("btnRemain");
-    const btnUsed = document.getElementById("btnUsed");
-    const remainTable = document.getElementById("remainTable");
-    const usedTable = document.getElementById("usedTable");
-    const searchInput = document.getElementById("searchInput");
-    const loadingOverlay = document.getElementById("loading-overlay");
+        function formatNumber(num) {
+            if (num === "" || num === null || isNaN(num)) return num;
+            return Number.isInteger(Number(num)) ? num : Number(num).toFixed(1);
+        }
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbxe8-gbiYacq6o3jwkDkp3JfUeGaY7wJeMR_hESazJIMRxtyHiG-MdeN-XltsR988IlKw/exec";
+        let balanceData = [];
+        let recordsData = [];
+        let currentPage = 1;
+        const rowsPerPage = 10;
 
-    function formatNumber(num) {
-      if (num === "" || num === null || isNaN(num)) return num;
-      return Number.isInteger(Number(num)) ? num : Number(num).toFixed(1);
-    }
+        // Show loading overlay before fetching data
+        loadingOverlay.classList.add('visible');
 
-    let balanceData = [];
-    let recordsData = [];
-    let currentPage = 1;
-    const rowsPerPage = 10;
+        fetch(API_URL)
+            .then(res => res.json())
+            .then(data => {
+                balanceData = data.balance;
+                recordsData = data.records;
+                renderTable(remainTable, balanceData);
+                renderTable(usedTable, recordsData, true);
+            })
+            .finally(() => {
+                loadingOverlay.classList.remove('visible');
+            });
 
-    // Show loading overlay
-    loadingOverlay.classList.add('visible');
+        function renderTable(table, data, includeAbsent = false, page = 1) {
+            const tbody = table.querySelector("tbody");
+            tbody.innerHTML = "";
 
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => {
-        balanceData = data.balance;
-        recordsData = data.records;
-        renderTable(remainTable, balanceData);
-        renderTable(usedTable, recordsData, true);
-      })
-      .finally(() => {
-        loadingOverlay.classList.remove('visible');
-      });
+            // คำนวณช่วงข้อมูล
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedData = data.slice(start, end);
 
-    function renderTable(table, data, includeAbsent = false, page = 1) {
-      const tbody = table.querySelector("tbody");
-      tbody.innerHTML = "";
+            paginatedData.forEach(row => {
+                let tr = "<tr>";
+                tr += `<td>${row.empId}</td>`;
+                tr += `<td>${row.name}</td>`;
+                tr += `<td>${row.position}</td>`;
+                tr += `<td>${formatNumber(row.al)}</td>`;
+                tr += `<td>${formatNumber(row.sl)}</td>`;
+                tr += `<td>${formatNumber(row.bl)}</td>`;
+                if (includeAbsent) tr += `<td>${formatNumber(row.absent)}</td>`;
+                tr += "</tr>";
+                tbody.innerHTML += tr;
+            });
 
-      const start = (page - 1) * rowsPerPage;
-      const end = start + rowsPerPage;
-      const paginatedData = data.slice(start, end);
+            renderPagination(data.length, page, includeAbsent);
+        }
 
-      paginatedData.forEach(row => {
-        let tr = "<tr>";
-        tr += `<td>${row.empId}</td>`;
-        tr += `<td>${row.name}</td>`;
-        tr += `<td>${row.position}</td>`;
-        tr += `<td>${formatNumber(row.al)}</td>`;
-        tr += `<td>${formatNumber(row.sl)}</td>`;
-        tr += `<td>${formatNumber(row.bl)}</td>`;
-        if (includeAbsent) tr += `<td>${formatNumber(row.absent)}</td>`;
-        tr += "</tr>";
-        tbody.innerHTML += tr;
-      });
+        function renderPagination(totalRows, page, includeAbsent = false) {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
 
-      renderPagination(data.length, page, includeAbsent);
-    }
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
 
-    function renderPagination(totalRows, page, includeAbsent = false) {
-      const pagination = document.getElementById("pagination");
-      pagination.innerHTML = "";
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement("button");
+                btn.textContent = i;
+                btn.classList.add("page-btn");
+                if (i === page) btn.classList.add("active");
 
-      const totalPages = Math.ceil(totalRows / rowsPerPage);
+                btn.addEventListener("click", () => {
+                    currentPage = i;
+                    const isRemainTableVisible = !remainTable.classList.contains("hidden");
+                    if (isRemainTableVisible) {
+                        renderTable(remainTable, balanceData, false, currentPage);
+                    } else {
+                        renderTable(usedTable, recordsData, true, currentPage);
+                    }
+                });
 
-      for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement("button");
-        btn.textContent = i;
-        btn.classList.add("page-btn");
-        if (i === page) btn.classList.add("active");
+                pagination.appendChild(btn);
+            }
+        }
 
-        btn.addEventListener("click", () => {
-          currentPage = i;
-          const isRemainTableVisible = !remainTable.classList.contains("hidden");
-          if (isRemainTableVisible) {
-            renderTable(remainTable, balanceData, false, currentPage);
-          } else {
-            renderTable(usedTable, recordsData, true, currentPage);
-          }
+        btnRemain.addEventListener("click", () => {
+            remainTable.classList.remove("hidden");
+            usedTable.classList.add("hidden");
+            btnRemain.classList.add("active");
+            btnUsed.classList.remove("active");
+            currentPage = 1;
+            filterTable();
         });
 
-        pagination.appendChild(btn);
-      }
-    }
+        btnUsed.addEventListener("click", () => {
+            remainTable.classList.add("hidden");
+            usedTable.classList.remove("hidden");
+            btnUsed.classList.add("active");
+            btnRemain.classList.remove("active");
+            currentPage = 1;
+            filterTable();
+        });
 
-    btnRemain.addEventListener("click", () => {
-      remainTable.classList.remove("hidden");
-      usedTable.classList.add("hidden");
-      btnRemain.classList.add("active");
-      btnUsed.classList.remove("active");
-      currentPage = 1;
-      filterTable();
-    });
+        searchInput.addEventListener("input", filterTable);
 
-    btnUsed.addEventListener("click", () => {
-      remainTable.classList.add("hidden");
-      usedTable.classList.remove("hidden");
-      btnUsed.classList.add("active");
-      btnRemain.classList.remove("active");
-      currentPage = 1;
-      filterTable();
-    });
+        function filterTable() {
+            const filter = searchInput.value.toLowerCase();
+            const isRemainTableVisible = !remainTable.classList.contains("hidden");
 
-    searchInput.addEventListener("input", filterTable);
-
-    function filterTable() {
-      const filter = searchInput.value.toLowerCase();
-      const isRemainTableVisible = !remainTable.classList.contains("hidden");
-
-      if (isRemainTableVisible) {
-        const visibleDataRemain = balanceData.filter(row => row.name.toLowerCase().includes(filter));
-        renderTable(remainTable, visibleDataRemain, false, currentPage);
-      } else {
-        const visibleDataUsed = recordsData.filter(row => row.name.toLowerCase().includes(filter));
-        renderTable(usedTable, visibleDataUsed, true, currentPage);
-      }
-    }
-  </script>
+            if (isRemainTableVisible) {
+                const visibleDataRemain = balanceData.filter(row => row.name.toLowerCase().includes(filter));
+                renderTable(remainTable, visibleDataRemain, false, currentPage);
+            } else {
+                const visibleDataUsed = recordsData.filter(row => row.name.toLowerCase().includes(filter));
+                renderTable(usedTable, visibleDataUsed, true, currentPage);
+            }
+        }
+    </script>
 </body>
 </html>
