@@ -9,375 +9,357 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ==================== Theme & Color Variables ==================== */
-        :root {
-            --primary-color: #2c3e50;
-            --primary-gradient: linear-gradient(45deg, #3498db, #2c3e50);
-            --secondary-color: #7f8c8d;
-            --background-color: #ecf0f1;
-            --card-background: #ffffff;
-            --text-color: #34495e;
-            --text-light: #95a5a6;
-            --border-color: #bdc3c7;
-            --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-            --approved-color: #27ae60;
-            --rejected-color: #c0392b;
-            --pending-color: #f39c12;
-        }
-
-        body {
-            font-family: 'Kanit', sans-serif;
-            background-color: var(--background-color);
-            margin: 0;
-            padding: 30px;
-            color: var(--text-color);
-            line-height: 1.6;
-        }
-
-        /* ==================== Main Container & Layout ==================== */
-        .container {
-            max-width: 95%; 
-            width: 95%;
-            margin: 0 auto;
-            background-color: var(--card-background);
-            border-radius: 16px;
-            box-shadow: var(--box-shadow);
-            padding: 40px;
-            position: relative;
-        }
-
-        h1 {
-            text-align: center;
-            font-weight: 700;
-            margin-bottom: 30px;
-            font-size: 2.2em;
-            color: var(--primary-color);
-            position: relative;
-            padding-bottom: 15px;
-        }
-        h1::after {
-            content: '';
-            display: block;
-            width: 80px;
-            height: 4px;
-            background: var(--primary-gradient);
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 2px;
-        }
-
-        /* ==================== Controls & Filters ==================== */
-        .controls,
-        .filter-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .controls label,
-        .filter-controls label {
-            color: var(--text-color);
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .controls input[type="date"],
-        .filter-controls input[type="text"],
-        .filter-controls select {
-            padding: 10px 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 16px;
-            color: var(--text-color);
-            transition: all 0.3s ease;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
-        
-        .controls input:focus,
-        .filter-controls input:focus,
-        .filter-controls select:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
-        }
-
-        .controls button,
-        .filter-controls button,
-        .action-button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            color: white;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .controls button i,
-        .filter-controls button i,
-        .action-button i {
-            font-size: 1.1em;
-        }
-
-        #loadDataButton { background: var(--primary-gradient); }
-        #loadDataButton:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(52, 152, 219, 0.2); }
-        
-        #resetButton { background-color: var(--secondary-color); }
-        #resetButton:hover { background-color: #6c757d; transform: translateY(-3px); }
-
-        #sortButton { background-color: #3498db; }
-        #sortButton:hover { background-color: #2980b9; transform: translateY(-3px); }
-        
-        .action-button {
-            padding: 8px 16px;
-            font-size: 14px;
-            margin: 0 4px;
-            box-shadow: none;
-            justify-content: center;
-        }
-        .action-button:hover { transform: translateY(-2px); }
-        
-        .save-button {
-        background-color: #28a745; /* เขียว */
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        cursor: pointer;
-        border-radius: 5px;
-        }
-
-        .save-button:hover {
-        background-color: #218838; /* เขียวเข้ม */
-        }
-
-        .save-button:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-        }
-        
-        .print-button { background-color: #555555; }
-        .print-button:hover { background-color: #333333; }
-        .print-button:disabled { cursor: not-allowed; opacity: 0.6; }
-
-        /* ==================== Table Styles ==================== */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        table thead th {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 18px 15px;
-            text-align: center;
-            font-weight: 600;
-            white-space: nowrap;
-            font-size: 1.1em;
-        }
-
-        table tbody tr {
-            background-color: var(--card-background);
-            transition: background-color 0.2s ease, transform 0.2s ease;
-        }
-        table tbody tr:hover {
-            background-color: #f7f9fb;
-            transform: scale(1.01);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        table td {
-            padding: 15px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: middle;
-        }
-        
-        .status-cell-content,
-        .action-cell-content {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .status-approved, .status-rejected, .status-pending {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9em;
-            display: inline-block;
-            text-align: center; 
-        }
-        .status-approved { background-color: var(--approved-color); color: white; }
-        .status-rejected { background-color: var(--rejected-color); color: white; }
-        .status-pending { background-color: var(--pending-color); color: #333; }
-
-        /* ==================== Loading Overlay Styles ==================== */
-        #loading-overlay {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        #loading-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .spinner {
-            border: 4px solid var(--border-color);
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-
-        .loading-text {
-            margin-top: 15px;
-            font-size: 1.2em;
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* ==================== Responsive Design ==================== */
-        @media (max-width: 768px) {
-            .container { padding: 20px; }
-            .controls, .filter-controls { flex-direction: column; align-items: stretch; }
-            .controls button, .filter-controls button { width: 100%; }
-            table, thead, tbody, th, td, tr { display: block; }
-            thead tr { position: absolute; top: -9999px; left: -9999px; }
-            tr { border: 1px solid var(--border-color); margin-bottom: 15px; border-radius: 8px; }
-            td { border: none; position: relative; padding-left: 50%; text-align: left; }
-            td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 10px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                font-weight: 600;
-                color: var(--primary-color);
-            }
-        }
-        /* === ปรับปุ่มและแถบสถานะให้ขนาดใกล้เคียงกัน === */
-        .action-button,
-        .save-button,
-        .print-button,
-        .status-approved,
-        .status-rejected,
-        .status-pending {
-            min-width: 100px;     /* ความกว้างขั้นต่ำ */
-            padding: 8px 16px;      /* ความสูงและขอบใน */
-            font-size: 14px;         /* ขนาดตัวอักษรเท่ากัน */
-            border-radius: 20px;    /* มนเท่ากัน */
-            text-align: center;      /* จัดกลางข้อความ */
-            display: inline-flex;    /* จัดไอคอน+ข้อความกลาง */
-            justify-content: center;
-            align-items: center;
-            gap: 6px;                /* ระยะห่างระหว่าง icon + text */
-            box-sizing: border-box;
-        }
-        .controls .action-button {
-        padding: 12px 24px;       /* ขนาดเท่ากับปุ่มโหลดข้อมูล/ตั้งค่าเริ่มต้น */
-        font-size: 16px;
-        font-weight: 500;
-        color: white;
-        border-radius: 8px;
-        text-decoration: none;    /* สำหรับ <a> */
-        display: inline-flex;    /* กึ่งกลางแนวนอน-แนวตั้ง */
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: all 0.3s ease;
-        }
-        .controls .action-button:hover {
-            transform: translateY(-3px);
-        }
-
-        /* ปุ่ม Pagination */
-        .pagination-button {
-        margin: 0 3px;
-        padding: 0.4rem 0.8rem;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        background: #f8f9fa;  /* สีปกติ */
-        color: #333;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        }
-
-        .pagination-button:hover {
-        background: #007bff;    /* สีฟ้าเมื่อ hover */
-        color: #fff;
-        border-color: #007bff;
-        }
-
-        .pagination-button.active {
-        background: #0056b3;    /* สีฟ้าเข้มสำหรับหน้าปัจจุบัน */
-        color: #fff;
-        font-weight: bold;
-        border-color: #0056b3;
-        }
-
-        .pagination-button:disabled {
-        background: #e0e0e0;
-        color: #999;
-        cursor: not-allowed;
-        border-color: #ccc;
-        }
-        #summaryButton {
+       /* ==================== Theme & Variables ==================== */
+    /* เก็บสีหลัก/รอง เฉดสีสถานะ และเงา */
+    :root {
+        --primary-color: #2c3e50;
+        --primary-gradient: linear-gradient(45deg, #3498db, #2c3e50);
+        --secondary-color: #7f8c8d;
+        --background-color: #ecf0f1;
+        --card-background: #ffffff;
+        --text-color: #34495e;
+        --text-light: #95a5a6;
+        --border-color: #bdc3c7;
+        --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        --approved-color: #27ae60;
+        --rejected-color: #c0392b;
+        --pending-color: #f39c12;
+    }
+    
+    /* ==================== Base ==================== */
+    /* ตั้งค่าฟอนต์ พื้นหลัง ขอบเขตตัวอักษร */
+    body {
+        font-family: 'Kanit', sans-serif;
+        background-color: var(--background-color);
+        margin: 0;
+        padding: 30px;
+        color: var(--text-color);
+        line-height: 1.6;
+    }
+    
+    /* ==================== Layout Container ==================== */
+    /* กล่องหลักครอบทุก content */
+    .container {
+        max-width: 95%;
+        width: 95%;
+        margin: 0 auto;
+        background-color: var(--card-background);
+        border-radius: 16px;
+        box-shadow: var(--box-shadow);
+        padding: 40px;
+        position: relative;
+    }
+    
+    /* ==================== Heading ==================== */
+    /* หัวข้อใหญ่ + เส้นขีด gradient */
+    h1 {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 30px;
+        font-size: 2.2em;
+        color: var(--primary-color);
+        position: relative;
+        padding-bottom: 15px;
+    }
+    h1::after {
+        content: '';
+        display: block;
+        width: 80px;
+        height: 4px;
         background: var(--primary-gradient);
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 2px;
+    }
+    
+    /* ==================== Controls & Filters ==================== */
+    /* แถวควบคุมด้านบน + filter */
+    .controls,
+    .filter-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+    
+    .controls label,
+    .filter-controls label {
+        color: var(--text-color);
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    
+    .controls input[type="date"],
+    .filter-controls input[type="text"],
+    .filter-controls select {
+        padding: 10px 14px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 16px;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+    
+    .controls input:focus,
+    .filter-controls input:focus,
+    .filter-controls select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
+    }
+    
+    /* ==================== Buttons ==================== */
+    /* ปุ่มหลักทั้งหมด */
+    .controls button,
+    .filter-controls button,
+    .action-button {
         padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
         font-size: 16px;
         font-weight: 500;
         color: white;
-        border-radius: 8px;
-        border: none;
+        transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
+    }
+    
+    .controls button i,
+    .filter-controls button i,
+    .action-button i {
+        font-size: 1.1em;
+    }
+    
+    /* ปุ่มโหลดข้อมูล */
+    #loadDataButton {
+        background: var(--primary-gradient);
+    }
+    #loadDataButton:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(52, 152, 219, 0.2);
+    }
+    
+    /* ปุ่มตั้งค่าเริ่มต้น */
+    #resetButton {
+        background-color: var(--secondary-color);
+    }
+    #resetButton:hover {
+        background-color: #6c757d;
+        transform: translateY(-3px);
+    }
+    
+    /* ปุ่มเรียงข้อมูล */
+    #sortButton {
+        background-color: #3498db;
+    }
+    #sortButton:hover {
+        background-color: #2980b9;
+        transform: translateY(-3px);
+    }
+    
+    /* ปุ่มดูตารางสรุป */
+    #summaryButton {
+        background: var(--primary-gradient);
+    }
+    #summaryButton:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(52, 152, 219, 0.2);
+    }
+    
+    /* ปุ่มบันทึก */
+    .save-button {
+        background-color: #28a745;
+    }
+    .save-button:hover {
+        background-color: #218838;
+    }
+    .save-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    /* ปุ่มพิมพ์ */
+    .print-button {
+        background-color: #555555;
+    }
+    .print-button:hover {
+        background-color: #333333;
+    }
+    .print-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    /* ปุ่มหน้า Pagination */
+    .pagination-button {
+        margin: 0 3px;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background: #f8f9fa;
+        color: #333;
+        font-weight: 500;
         cursor: pointer;
         transition: all 0.3s ease;
+    }
+    .pagination-button:hover {
+        background: #007bff;
+        color: #fff;
+        border-color: #007bff;
+    }
+    .pagination-button.active {
+        background: #0056b3;
+        color: #fff;
+        font-weight: bold;
+        border-color: #0056b3;
+    }
+    .pagination-button:disabled {
+        background: #e0e0e0;
+        color: #999;
+        cursor: not-allowed;
+        border-color: #ccc;
+    }
+    
+    /* ==================== Table ==================== */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    table thead th {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 18px 15px;
+        text-align: center;
+        font-weight: 600;
+        white-space: nowrap;
+        font-size: 1.1em;
+    }
+    
+    table tbody tr {
+        background-color: var(--card-background);
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+    table tbody tr:hover {
+        background-color: #f7f9fb;
+        transform: scale(1.01);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    table td {
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+    
+    /* ป้ายสถานะ */
+    .status-cell-content,
+    .action-cell-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .status-approved,
+    .status-rejected,
+    .status-pending {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9em;
+        display: inline-block;
+        text-align: center;
+    }
+    .status-approved {
+        background-color: var(--approved-color);
+        color: white;
+    }
+    .status-rejected {
+        background-color: var(--rejected-color);
+        color: white;
+    }
+    .status-pending {
+        background-color: var(--pending-color);
+        color: #333;
+    }
+    
+    /* ==================== Loading Overlay ==================== */
+    #loading-overlay {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        opacity: 0;
+        visibility: hidden;
+    }
+    #loading-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .spinner {
+        border: 4px solid var(--border-color);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+    .loading-text {
+        margin-top: 15px;
+        font-size: 1.2em;
+        font-weight: 500;
+        color: var(--text-color);
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* ==================== Responsive ==================== */
+    @media (max-width: 768px) {
+        .container { padding: 20px; }
+        .controls, .filter-controls { flex-direction: column; align-items: stretch; }
+        .controls button, .filter-controls button { width: 100%; }
+        table, thead, tbody, th, td, tr { display: block; }
+        thead tr { position: absolute; top: -9999px; left: -9999px; }
+        tr { border: 1px solid var(--border-color); margin-bottom: 15px; border-radius: 8px; }
+        td { border: none; position: relative; padding-left: 50%; text-align: left; }
+        td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 10px;
+            width: 45%;
+            padding-right: 10px;
+            white-space: nowrap;
+            font-weight: 600;
+            color: var(--primary-color);
         }
-        
-        #summaryButton:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(52, 152, 219, 0.2);
-        }
-
+    }
     </style>
 </head>
 <body>
