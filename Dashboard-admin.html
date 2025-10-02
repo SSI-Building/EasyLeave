@@ -429,6 +429,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> 
     <script>
+        document.getElementById("summaryButton").addEventListener("click", function() { window.location.href = "SummaryTable.html";});
         document.addEventListener('DOMContentLoaded', function() {
             const startDateInput = document.getElementById('startDate');
             const endDateInput = document.getElementById('endDate');
