@@ -185,6 +185,11 @@ function formatMinutesObject(minutes) {
   return { days, hours, mins };
 }
 
+// ✅ ฟังก์ชันแสดงผลตัวเลข ถ้าเป็น 0 ให้แสดงเป็น "-"
+function displayValue(val) {
+  return (val === 0 ? "-" : val);
+}
+
 async function loadDashboard() {
   await liff.init({ liffId });
   if(!liff.isLoggedIn()){ liff.login(); return; }
@@ -211,11 +216,16 @@ async function loadDashboard() {
         { type: 'ลาป่วย', min: data.set1[4] },
         { type: 'ลากิจ', min: data.set1[5] }
       ];
-      document.getElementById("remainTable").innerHTML = `
+  document.getElementById("remainTable").innerHTML = `
         <tr><th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th></tr>
         ${remainRows.map(r => {
             const t = formatMinutesObject(r.min);
-            return `<tr><td>${r.type}</td><td>${t.days}</td><td>${t.hours}</td><td>${t.mins}</td></tr>`;
+            return `<tr>
+              <td>${r.type}</td>
+              <td>${displayValue(t.days)}</td>
+              <td>${displayValue(t.hours)}</td>
+              <td>${displayValue(t.mins)}</td>
+            </tr>`;
         }).join('')}
       `;
 
@@ -229,10 +239,16 @@ async function loadDashboard() {
         <tr><th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th></tr>
         ${usedRows.map(r => {
             const t = formatMinutesObject(r.min);
-            return `<tr><td>${r.type}</td><td>${t.days}</td><td>${t.hours}</td><td>${t.mins}</td></tr>`;
+            return `<tr>
+              <td>${r.type}</td>
+              <td>${displayValue(t.days)}</td>
+              <td>${displayValue(t.hours)}</td>
+              <td>${displayValue(t.mins)}</td>
+            </tr>`;
         }).join('')}
       `;
     })
+
     .catch(err => { console.error(err); alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + err.message); })
     .finally(() => {
       document.getElementById("loadingScreen").classList.add('hidden');
