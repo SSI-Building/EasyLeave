@@ -146,16 +146,16 @@ tr:last-child td { border-bottom:none; }
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const name = sessionStorage.getItem("adminName");
-    const greetingDiv = document.querySelector(".greeting");
+  
+document.addEventListener("DOMContentLoaded", () => {
+  const name = sessionStorage.getItem("adminName");
+  const greetingDiv = document.querySelector(".greeting");
 
-    if (name && greetingDiv) {
-      greetingDiv.textContent = name;
-    } else {
-      greetingDiv.textContent = "Admin Dashboard";
-    }
-  });
+  if (greetingDiv) {
+    greetingDiv.textContent = name ? `สวัสดีคุณ${name}` : "Admin Dashboard";
+  }
+});
+  
 const EMP_LIST_URL = "https://script.google.com/macros/s/AKfycbyxbbP1-GJdavLejrM8Yi-w0Q_c4BFj0V-Nliv52fV_Vhen7rpZenq5t5gwwTsFtBzT_A/exec";
 const BALANCE_URL = "https://script.google.com/macros/s/AKfycbypMCM0IUoQuBiKy_W28zuwufN0s1XR6tIczx8A23srghg_w-wKuhbbiSeXGyFlL4JHNA/exec";
 
