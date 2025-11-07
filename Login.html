@@ -771,7 +771,6 @@ adminLineBtn.addEventListener('click', async () => {
     const lineUserId = profile.userId;
     console.log("LINE User ID:", lineUserId);
 
-    // ตรวจด้วย GET
     const response = await fetch(
       `https://script.google.com/macros/s/AKfycbwZdaR0GvIhfCTJBAlOFg7JjmPos84fZCcFGRmGG2iwsOfbzFsDooNn0eX_JU6w6P4vYQ/exec?lineUserId=${encodeURIComponent(lineUserId)}`
     );
@@ -779,12 +778,14 @@ adminLineBtn.addEventListener('click', async () => {
     console.log("ผลลัพธ์จาก Apps Script:", result);
 
     if (result.result === "success") {
-      // พบ -> ไปหน้า Admin
+      // ✅ เก็บชื่อไว้ใน sessionStorage
+      sessionStorage.setItem("adminName", result.name || "");
+
+      // ไปหน้า Admin
       window.location.href = "Addmin.html";
     } else {
-      // ไม่พบ -> เก็บค่า LineUserID แล้วไปหน้า register-admin (เพื่อให้หน้า register ดึงค่าไปใช้)
+      // ไม่พบ -> เก็บ LineUserID ไปหน้า register
       sessionStorage.setItem('lineUserId', lineUserId);
-      // ทางเลือก: แนบเป็นพารามิเตอร์ด้วยก็ได้ => register-admin.html?uid=...
       window.location.href = "register-admin.html";
     }
 
