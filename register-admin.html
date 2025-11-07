@@ -231,7 +231,8 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
         formData.append("employeeId", empId);
         formData.append("lineUserId", lineUserId);
 
-        const response = await fetch("https://script.google.com/macros/s/AKfycbwMq4Q9FzB3lMWbRe5nf9sALQzd7Of_Aig6y1UeRNqkGG0fiHH4ZKHotuS__ilr5dEl_A/exec", {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbzyaJ59p3ftHgGh9IWj625cJ5t6AamOGuSJG_Lf0VfHiYeDeIlpCiPz5DWnCbOR2bLuYw/exec
+", {
             method: "POST",
             body: formData
         });
@@ -240,12 +241,12 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
 
         if (result.result === "success") {
             messageDiv.style.color = "var(--primary-color-end)";
-            messageDiv.textContent = "✅ ลงทะเบียนสำเร็จ!";
+            messageDiv.textContent = "✅ ลงทะเบียน Admin สำเร็จ!";
             setTimeout(() => window.location.href = "Login.html", 1000);
         } else {
             messageDiv.style.color = "red";
             messageDiv.textContent = "❌ " + result.message;
-            submitBtn.disabled = false; // เปิดการใช้งานปุ่มอีกครั้งเมื่อเกิดข้อผิดพลาด
+            submitBtn.disabled = false;
         }
 
     } catch (err) {
