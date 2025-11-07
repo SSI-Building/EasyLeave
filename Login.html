@@ -574,6 +574,7 @@ body.theme-dark .login-button:hover:not(:disabled) {
         <input type="text" id="adminUsername" placeholder="Username">
         <input type="password" id="adminPassword" placeholder="Password">
         <button class="login-button" id="adminLoginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+        <button class="line-button" id="lineLoginAdmin"><i class="fab fa-line"></i> Login with LINE</button>
     </div>
 
     <div class="credits">
@@ -756,6 +757,14 @@ adminBtn.addEventListener('click', () => {
         setLoading(adminBtn, false, "Login");
     }, 500);
 });
+
+  // ปุ่ม LINE ของ Admin Tab
+document.getElementById("lineLoginAdmin").addEventListener("click", () => {
+  console.log("Login LINE สำหรับ Admin");
+  alert("Hello world"); // เพื่อทดสอบ
+  // ใส่โค้ด LINE login ของ Admin
+});
+
 </script>
 
 </body>
