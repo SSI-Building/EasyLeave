@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard (Select Employee)</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+:root {
+  --primary-color-start: #1994b6;
+  --primary-color-end: #36a761;
+  --text-color: #333;
+  --light-text-color: #666;
+  --background-color: #f0f2f5;
+  --card-background: #ffffff;
+  --shadow-light: 0 4px 15px rgba(0,0,0,0.08);
+  --border-color: #e0e0e0;
+}
+body {
+  font-family: 'Prompt', sans-serif;
+  background: var(--background-color);
+  margin:0;
+  padding:20px;
+  color:var(--text-color);
+  transition: all 0.3s ease;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+.container {
+  max-width: 700px;
+  margin:auto;
+  position:relative;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.container.loaded { opacity: 1; transform: translateY(0); }
+.header {
+  display:flex; align-items:center; gap:15px; margin-bottom:20px;
+  background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+  padding:18px; border-radius:12px; color:#fff;
+  box-shadow:var(--shadow-light); position:relative;
+}
+.profile-pic {
+  width:56px; height:56px; border-radius:50%;
+  background:rgba(255,255,255,0.2); object-fit:cover;
+  border:3px solid rgba(255,255,255,0.5);
+}
+.greeting { font-size:18px; font-weight:600; }
+.motivation { font-size:13px; color:rgba(255,255,255,0.85); margin-top:4px; }
+.header-icons { position:absolute; top:14px; right:16px; display:flex; flex-direction:column; gap:10px; }
+.settings-icon, .logout-icon { font-size:20px; color:#fff; cursor:pointer; }
+.theme-selector { position:absolute; top:68px; right:16px; background:var(--card-background); padding:10px; border-radius:8px; box-shadow:var(--shadow-light); display:none; flex-direction:column; gap:8px; z-index:10; }
+.theme-selector.active { display:flex; }
+.theme-option { padding:8px 12px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; border:1px solid var(--border-color); text-align:center; }
+.theme-preview { width: 18px; height: 18px; border-radius: 50%; display: inline-block; vertical-align: middle; margin-right: 8px; background: linear-gradient(45deg, var(--color-start), var(--color-end)); }
+/* Dropdown area under header */
+.controls { display:flex; gap:12px; margin-bottom:18px; align-items:center; }
+select#employeeSelect { flex:1; padding:10px 12px; border-radius:8px; border:1px solid var(--border-color); font-size:15px; outline:none; }
+/* Tables & cards */
+.table-container { background: var(--card-background); border-radius:12px; overflow:hidden; box-shadow: var(--shadow-light); margin-bottom:20px; padding:16px; }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:12px; text-align:center; font-size:15px; border-bottom:1px solid var(--border-color); }
+th { background: var(--background-color); font-weight:600; color: var(--text-color); }
+tr:last-child td { border-bottom:none; }
+.info-row { display:flex; gap:12px; margin-bottom:12px; }
+.card { flex:1; background:var(--card-background); border-radius:10px; padding:12px; box-shadow:var(--shadow-light); }
+.card h4 { margin:0 0 8px 0; font-size:14px; color:var(--light-text-color); }
+.card p { margin:0; font-weight:600; color:var(--text-color); word-break:break-word; }
+/* Buttons */
+.buttons { display:flex; gap:12px; margin-top:12px; }
+.btn { flex:1; padding:12px; border:none; border-radius:10px; font-weight:600; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; gap:8px; color:#fff; background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end)); box-shadow:0 4px 8px rgba(0,0,0,0.08); }
+.loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--background-color); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; flex-direction: column; gap: 20px; }
+.loading-screen.hidden { opacity: 0; pointer-events: none; }
+.spinner { border: 5px solid var(--border-color); border-top: 5px solid var(--primary-color-end); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+.loading-text { color: var(--text-color); font-size: 1.1em; font-weight: 500; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="loading-screen" id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-text">กำลังโหลดข้อมูล...</div>
+</div>
+
+<div class="container" id="mainContainer">
+  <div class="header">
+    <img id="profilePic" class="profile-pic" src="https://cdn-icons-png.flaticon.com/512/1946/1946429.png" alt="Profile">
+    <div>
+      <div class="greeting">Admin Dashboard</div>
+      <div class="motivation" id="motivation">เลือกพนักงานเพื่อดูสิทธิ์</div>
+    </div>
+    <div class="header-icons">
+      <i class="fas fa-cog settings-icon" id="settingsIcon"></i>
+      <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon"></i>
+    </div>
+  </div>
+
+  <!-- controls: dropdown -->
+  <div class="controls">
+    <select id="employeeSelect">
+      <option value="">-- เลือกพนักงาน --</option>
+    </select>
+    <button class="btn" id="refreshBtn" title="รีเฟรชรายชื่อ">รีเฟรช</button>
+  </div>
+
+  <div class="table-container">
+    <div class="info-row">
+      <div class="card">
+        <h4>ชื่อ</h4>
+        <p id="empName">-</p>
+      </div>
+      <div class="card">
+        <h4>LineUserID</h4>
+        <p id="empLine">-</p>
+      </div>
+    </div>
+
+    <div id="remainBlock">
+      <h4 style="text-align:left;margin:8px 0 10px 0;color:var(--light-text-color)">สิทธิลาคงเหลือ</h4>
+      <table id="remainTable"></table>
+    </div>
+
+    <div id="usedBlock" style="margin-top:12px">
+      <h4 style="text-align:left;margin:8px 0 10px 0;color:var(--light-text-color)">สิทธิลาที่ใช้</h4>
+      <table id="usedTable"></table>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button class="btn" onclick="window.location.href='leaveform.html'"><i class="fas fa-calendar-plus"></i> ลาออนไลน์</button>
+    <button class="btn" onclick="window.location.href='History.html'"><i class="fas fa-history"></i> ตรวจสอบสถานะ</button>
+  </div>
+</div>
+
+<script>
+/*
+  Behavior:
+  - ดึงรายการพนักงานจาก EMP_LIST_URL (ชื่อ + lineId)
+  - เติม dropdown
+  - เมือเลือก -> เรียก BALANCE_URL?action=getBalance&userId=LINEID
+  - แสดงผลตารางเหมือนของเดิม
+  - ไม่มี LIFF, หน้าเป็น admin-only
+*/
+
+const EMP_LIST_URL = "https://script.google.com/macros/s/AKfycbyxbbP1-GJdavLejrM8Yi-w0Q_c4BFj0V-Nliv52fV_Vhen7rpZenq5t5gwwTsFtBzT_A/exec";
+const BALANCE_URL = "https://script.google.com/macros/s/AKfycbypMCM0IUoQuBiKy_W28zuwufN0s1XR6tIczx8A23srghg_w-wKuhbbiSeXGyFlL4JHNA/exec";
+
+const employeeSelect = document.getElementById('employeeSelect');
+const empNameEl = document.getElementById('empName');
+const empLineEl = document.getElementById('empLine');
+const remainTable = document.getElementById('remainTable');
+const usedTable = document.getElementById('usedTable');
+const motivationEl = document.getElementById('motivation');
+const loadingScreen = document.getElementById('loadingScreen');
+const mainContainer = document.getElementById('mainContainer');
+const refreshBtn = document.getElementById('refreshBtn');
+
+const messages = [
+  "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
+  "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!"
+];
+
+// helper
+function formatMinutesObject(minutes) {
+  if (isNaN(minutes) || minutes === null) return { days: 0, hours: 0, mins: 0 };
+  const days = Math.floor(minutes / 480);
+  const hours = Math.floor((minutes % 480) / 60);
+  const mins = minutes % 60;
+  return { days, hours, mins };
+}
+function displayValue(val) { return (val === 0 ? "-" : val); }
+
+async function loadEmployeeList() {
+  // keep UI responsive
+  employeeSelect.innerHTML = '<option value="">-- กำลังโหลดรายชื่อ... --</option>';
+  try {
+    const res = await fetch(EMP_LIST_URL);
+    const data = await res.json();
+    // clear and populate
+    employeeSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
+    data.forEach(emp => {
+      // expect emp.name and emp.lineId
+      if (emp.name && emp.lineId) {
+        const opt = document.createElement('option');
+        opt.value = emp.lineId;
+        opt.textContent = emp.name;
+        employeeSelect.appendChild(opt);
+      }
+    });
+    // hide loading screen now that list loaded
+    loadingScreen.classList.add('hidden');
+    mainContainer.classList.add('loaded');
+  } catch (err) {
+    console.error("โหลดรายชื่อไม่สำเร็จ:", err);
+    employeeSelect.innerHTML = '<option value="">-- โหลดรายชื่อไม่สำเร็จ --</option>';
+    loadingScreen.classList.add('hidden');
+    mainContainer.classList.add('loaded');
+  }
+}
+
+async function loadBalanceForUser(lineUserId) {
+  // fetch balance using second GAS
+  try {
+    const url = `${BALANCE_URL}?action=getBalance&userId=${encodeURIComponent(lineUserId)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.error) {
+      alert(data.error);
+      clearTables();
+      return;
+    }
+
+    // set header values
+    empLineEl.textContent = lineUserId;
+    motivationEl.textContent = messages[Math.floor(Math.random() * messages.length)];
+
+    // set emp name (from dropdown)
+    empNameEl.textContent = employeeSelect.selectedOptions[0]?.textContent || "-";
+
+    // build remain table (set1)
+    const remainRows = [
+      { type: 'ลาพักร้อน', min: data.set1[3] },
+      { type: 'ลาป่วย', min: data.set1[4] },
+      { type: 'ลากิจ', min: data.set1[5] }
+    ];
+    remainTable.innerHTML = `<tr><th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th></tr>` +
+      remainRows.map(r => {
+        const t = formatMinutesObject(r.min);
+        return `<tr><td>${r.type}</td><td>${displayValue(t.days)}</td><td>${displayValue(t.hours)}</td><td>${displayValue(t.mins)}</td></tr>`;
+      }).join('');
+
+    // build used table (set2)
+    const usedRows = [
+      { type: 'ลาพักร้อน', min: data.set2[3] },
+      { type: 'ลาป่วย', min: data.set2[4] },
+      { type: 'ลากิจ', min: data.set2[5] },
+      { type: 'ขาดงานสะสม', min: data.set2[6] }
+    ];
+    usedTable.innerHTML = `<tr><th>ประเภทการลา</th><th>วัน</th><th>ชั่วโมง</th><th>นาที</th></tr>` +
+      usedRows.map(r => {
+        const t = formatMinutesObject(r.min);
+        return `<tr><td>${r.type}</td><td>${displayValue(t.days)}</td><td>${displayValue(t.hours)}</td><td>${displayValue(t.mins)}</td></tr>`;
+      }).join('');
+
+  } catch (err) {
+    console.error("โหลด balance ผิดพลาด:", err);
+    alert("เกิดข้อผิดพลาดในการโหลดข้อมูล (ดู console)");
+    clearTables();
+  }
+}
+
+function clearTables() {
+  remainTable.innerHTML = '';
+  usedTable.innerHTML = '';
+  empLineEl.textContent = '-';
+  empNameEl.textContent = '-';
+}
+
+employeeSelect.addEventListener('change', (e) => {
+  const lineId = e.target.value;
+  if (!lineId) {
+    clearTables();
+    motivationEl.textContent = "เลือกพนักงานเพื่อดูสิทธิ์";
+    return;
+  }
+  // show loading in tables while fetching
+  remainTable.innerHTML = `<tr><td colspan="4" style="padding:12px;text-align:center">⏳ กำลังโหลด...</td></tr>`;
+  usedTable.innerHTML = `<tr><td colspan="4" style="padding:12px;text-align:center">⏳ กำลังโหลด...</td></tr>`;
+  loadBalanceForUser(lineId);
+});
+
+refreshBtn.addEventListener('click', () => {
+  loadingScreen.classList.remove('hidden');
+  loadEmployeeList();
+});
+
+// settings icon toggles theme selector (no content of selector here but preserved for layout)
+document.getElementById('settingsIcon').addEventListener('click', ()=>{
+  const ts = document.querySelector('.theme-selector');
+  if (ts) ts.classList.toggle('active');
+});
+// logout icon for admin page just goto login
+document.getElementById('logoutIcon').addEventListener('click', ()=> { window.location.href = 'Login.html'; });
+
+// initial load
+window.onload = () => {
+  loadEmployeeList();
+};
+</script>
+</body>
+</html>
