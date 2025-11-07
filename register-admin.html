@@ -231,8 +231,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
         formData.append("employeeId", empId);
         formData.append("lineUserId", lineUserId);
 
-        const response = await fetch("https://script.google.com/macros/s/AKfycbzyaJ59p3ftHgGh9IWj625cJ5t6AamOGuSJG_Lf0VfHiYeDeIlpCiPz5DWnCbOR2bLuYw/exec
-", {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbzyaJ59p3ftHgGh9IWj625cJ5t6AamOGuSJG_Lf0VfHiYeDeIlpCiPz5DWnCbOR2bLuYw/exec", {
             method: "POST",
             body: formData
         });
