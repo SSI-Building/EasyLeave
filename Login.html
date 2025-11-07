@@ -781,8 +781,8 @@ adminLineBtn.addEventListener('click', async () => {
 
     const result = await response.json();
 
-    // ตรวจสอบผล (คาดว่า endpoint คืน { exists: true/false })
-    if (result.exists === true) {
+    // ตรวจสอบผลที่ส่งมาจาก Apps Script
+    if (result.result === "success") {
       window.location.href = "https://ssi-building.github.io/EasyLeave/Addmin.html";
     } else {
       alert("กรุณาลงทะเบียนก่อนใช้งานระบบ Admin");
