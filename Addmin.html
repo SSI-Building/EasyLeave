@@ -36,6 +36,7 @@ body {
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 .container.loaded { opacity: 1; transform: translateY(0); }
+
 .header {
   display:flex; align-items:center; gap:15px; margin-bottom:20px;
   background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
@@ -50,28 +51,49 @@ body {
 .greeting { font-size:18px; font-weight:600; }
 .motivation { font-size:13px; color:rgba(255,255,255,0.85); margin-top:4px; }
 .header-icons { position:absolute; top:14px; right:16px; display:flex; flex-direction:column; gap:10px; }
-.settings-icon, .logout-icon { font-size:20px; color:#fff; cursor:pointer; }
-.theme-selector { position:absolute; top:68px; right:16px; background:var(--card-background); padding:10px; border-radius:8px; box-shadow:var(--shadow-light); display:none; flex-direction:column; gap:8px; z-index:10; }
-.theme-selector.active { display:flex; }
-.theme-option { padding:8px 12px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:500; border:1px solid var(--border-color); text-align:center; }
-.theme-preview { width: 18px; height: 18px; border-radius: 50%; display: inline-block; vertical-align: middle; margin-right: 8px; background: linear-gradient(45deg, var(--color-start), var(--color-end)); }
-/* Dropdown area under header */
+.logout-icon { font-size:20px; color:#fff; cursor:pointer; }
+
+/* Dropdown area */
 .controls { display:flex; gap:12px; margin-bottom:18px; align-items:center; }
 select#employeeSelect { flex:1; padding:10px 12px; border-radius:8px; border:1px solid var(--border-color); font-size:15px; outline:none; }
+
 /* Tables & cards */
 .table-container { background: var(--card-background); border-radius:12px; overflow:hidden; box-shadow: var(--shadow-light); margin-bottom:20px; padding:16px; }
 table { width:100%; border-collapse:collapse; }
 th, td { padding:12px; text-align:center; font-size:15px; border-bottom:1px solid var(--border-color); }
 th { background: var(--background-color); font-weight:600; color: var(--text-color); }
 tr:last-child td { border-bottom:none; }
+
 .info-row { display:flex; gap:12px; margin-bottom:12px; }
-.card { flex:1; background:var(--card-background); border-radius:10px; padding:12px; box-shadow:var(--shadow-light); }
-.card h4 { margin:0 0 8px 0; font-size:14px; color:var(--light-text-color); }
-.card p { margin:0; font-weight:600; color:var(--text-color); word-break:break-word; }
-/* Buttons */
-.buttons { display:flex; gap:12px; margin-top:12px; }
-.btn { flex:1; padding:12px; border:none; border-radius:10px; font-weight:600; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; gap:8px; color:#fff; background: linear-gradient(45deg, var(--primary-color-start), var(--primary-color-end)); box-shadow:0 4px 8px rgba(0,0,0,0.08); }
-.loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--background-color); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; flex-direction: column; gap: 20px; }
+.card {
+  flex:1;
+  background:var(--card-background);
+  border-radius:10px;
+  padding:10px 12px;
+  box-shadow:var(--shadow-light);
+}
+.card h4 { margin:0 0 4px 0; font-size:13px; color:var(--light-text-color); }
+.card p { margin:0; font-weight:600; color:var(--text-color); word-break:break-word; font-size:15px; }
+
+/* Responsive: ปรับขนาดให้พอดีมือถือ */
+@media (max-width: 480px) {
+  body { padding: 12px; }
+  .header { padding: 14px; gap:10px; }
+  .profile-pic { width:48px; height:48px; }
+  .greeting { font-size:16px; }
+  .motivation { font-size:12px; }
+  th, td { font-size:14px; padding:10px; }
+  .card h4 { font-size:12px; }
+  .card p { font-size:14px; }
+}
+
+/* Loading screen */
+.loading-screen {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background-color: var(--background-color);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999; transition: opacity 0.5s ease; flex-direction: column; gap: 20px;
+}
 .loading-screen.hidden { opacity: 0; pointer-events: none; }
 .spinner { border: 5px solid var(--border-color); border-top: 5px solid var(--primary-color-end); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
 .loading-text { color: var(--text-color); font-size: 1.1em; font-weight: 500; }
@@ -92,12 +114,10 @@ tr:last-child td { border-bottom:none; }
       <div class="motivation" id="motivation">เลือกพนักงานเพื่อดูสิทธิ์</div>
     </div>
     <div class="header-icons">
-      <i class="fas fa-cog settings-icon" id="settingsIcon"></i>
       <i class="fas fa-sign-out-alt logout-icon" id="logoutIcon"></i>
     </div>
   </div>
 
-  <!-- controls: dropdown -->
   <div class="controls">
     <select id="employeeSelect">
       <option value="">-- เลือกพนักงาน --</option>
@@ -123,10 +143,6 @@ tr:last-child td { border-bottom:none; }
       <table id="usedTable"></table>
     </div>
   </div>
-
-  <div class="buttons">
-    <button class="btn"><i class="fas fa-arrow-left"></i> ย้อนกลับ</button>
-  </div>
 </div>
 
 <script>
@@ -146,6 +162,17 @@ const messages = [
   "ยินดีต้อนรับเข้าสู่ระบบ!", "ดีใจที่เจอคุณวันนี้!", "สู้ ๆ กับวันใหม่ครับ!",
   "ขอให้วันนี้เป็นวันที่ดี!", "ยิ้มรับความท้าทายวันนี้!", "ขอให้มีความสุขกับการทำงาน!"
 ];
+
+function applyStoredTheme() {
+  const theme = localStorage.getItem("themeColor");
+  if (theme) {
+    try {
+      const { start, end } = JSON.parse(theme);
+      document.documentElement.style.setProperty("--primary-color-start", start);
+      document.documentElement.style.setProperty("--primary-color-end", end);
+    } catch (e) { console.warn("themeColor parse error:", e); }
+  }
+}
 
 function formatMinutesObject(minutes) {
   if (isNaN(minutes) || minutes === null) return { days: 0, hours: 0, mins: 0 };
@@ -247,14 +274,12 @@ refreshBtn.addEventListener('click', () => {
   loadEmployeeList();
 });
 
-document.getElementById('settingsIcon').addEventListener('click', ()=>{
-  const ts = document.querySelector('.theme-selector');
-  if (ts) ts.classList.toggle('active');
+document.getElementById('logoutIcon').addEventListener('click', ()=> { 
+  window.location.href = 'Login.html'; 
 });
 
-document.getElementById('logoutIcon').addEventListener('click', ()=> { window.location.href = 'Login.html'; });
-
 window.onload = () => {
+  applyStoredTheme();
   loadEmployeeList();
 };
 </script>
