@@ -98,6 +98,28 @@ tr:last-child td { border-bottom:none; }
 .spinner { border: 5px solid var(--border-color); border-top: 5px solid var(--primary-color-end); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
 .loading-text { color: var(--text-color); font-size: 1.1em; font-weight: 500; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.btn {
+  background: linear-gradient(135deg, var(--primary-color-start), var(--primary-color-end));
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: var(--shadow-light);
+  transition: all 0.25s ease;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(1px);
+  opacity: 0.8;
+}
 </style>
 </head>
 <body>
@@ -122,7 +144,9 @@ tr:last-child td { border-bottom:none; }
     <select id="employeeSelect">
       <option value="">-- เลือกพนักงาน --</option>
     </select>
-    <button class="btn" id="refreshBtn" title="รีเฟรชรายชื่อ">รีเฟรช</button>
+    <button class="btn" id="refreshBtn" title="รีเฟรชรายชื่อ">
+    <i class="fas fa-sync-alt"></i> รีเฟรช
+  </button>
   </div>
 
   <div class="table-container">
@@ -146,16 +170,16 @@ tr:last-child td { border-bottom:none; }
 </div>
 
 <script>
-  
+
 document.addEventListener("DOMContentLoaded", () => {
   const name = sessionStorage.getItem("adminName");
   const greetingDiv = document.querySelector(".greeting");
 
   if (greetingDiv) {
-    greetingDiv.textContent = name ? `สวัสดีคุณ${name}` : "Admin Dashboard";
+    greetingDiv.textContent = name ? `สวัสดีคุณ ${name}` : "Admin Dashboard";
   }
 });
-  
+
 const EMP_LIST_URL = "https://script.google.com/macros/s/AKfycbyxbbP1-GJdavLejrM8Yi-w0Q_c4BFj0V-Nliv52fV_Vhen7rpZenq5t5gwwTsFtBzT_A/exec";
 const BALANCE_URL = "https://script.google.com/macros/s/AKfycbypMCM0IUoQuBiKy_W28zuwufN0s1XR6tIczx8A23srghg_w-wKuhbbiSeXGyFlL4JHNA/exec";
 
