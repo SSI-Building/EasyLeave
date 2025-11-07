@@ -780,7 +780,8 @@ adminLineBtn.addEventListener('click', async () => {
     if (result.result === "success") {
       window.location.href = "https://ssi-building.github.io/EasyLeave/Addmin.html";
     } else {
-      alert("กรุณาลงทะเบียนก่อนใช้งานระบบ Admin");
+      // ไม่พบผู้ใช้ -> ไปหน้า Register Admin
+      window.location.href = "https://ssi-building.github.io/EasyLeave/register-admin.html";
     }
 
   } catch (e) {
