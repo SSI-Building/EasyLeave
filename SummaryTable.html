@@ -368,7 +368,7 @@
                 tr += `<td>${formatMinutes(row.al)}</td>`;
                 tr += `<td>${formatMinutes(row.sl)}</td>`;
                 tr += `<td>${formatMinutes(row.bl)}</td>`;
-                if (includeAbsent) tr += `<td>${formatNumber(row.absent)}</td>`;
+                if (includeAbsent) tr += `<td>${formatMinutes(row.absent)}</td>`;
                 tr += "</tr>";
                 tbody.innerHTML += tr;
             });
