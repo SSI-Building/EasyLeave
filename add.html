@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Update Entitlement</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: "Prompt", sans-serif;
+        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+
+    .card {
+        background: #ffffffee;
+        padding: 30px 35px;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        width: 100%;
+        max-width: 450px;
+        animation: fadeIn 0.8s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+        text-align: center;
+        color: #0d47a1;
+        margin-bottom: 20px;
+        font-size: 26px;
+    }
+
+    label {
+        font-weight: 600;
+        display: block;
+        margin-top: 12px;
+        color: #0d47a1;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 4px;
+        border-radius: 10px;
+        border: 1.5px solid #90caf9;
+        font-size: 15px;
+        transition: 0.3s;
+    }
+
+    input:focus {
+        border-color: #0d47a1;
+        box-shadow: 0 0 8px #bbdefb;
+        outline: none;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 22px;
+        background: #0d47a1;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 17px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #1565c0;
+        transform: translateY(-2px);
+    }
+
+    #result {
+        margin-top: 15px;
+        text-align: center;
+        color: #1b5e20;
+        font-weight: bold;
+    }
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+    <h2>เพิ่มรายชื่อพนักงาน</h2>
+
+    <form id="dataForm">
+
+        <label>รหัสพนักงาน</label>
+        <input type="text" id="empId" required>
+
+        <label>ชื่อ-สกุล</label>
+        <input type="text" id="fullname" required>
+
+        <label>ตำแหน่ง</label>
+        <input type="text" id="position" required>
+
+        <label>วันเริ่มงาน</label>
+        <input type="date" id="startDate" required>
+
+        <label>ป่วย (SL) ใส่เป็น "วัน"</label>
+        <input type="number" id="slDay" min="0" value="0">
+
+        <label>กิจ (BL) ใส่เป็น "วัน"</label>
+        <input type="number" id="blDay" min="0" value="0">
+
+        <button type="button" onclick="submitData()">บันทึกข้อมูล</button>
+    </form>
+
+    <p id="result"></p>
+</div>
+
+<script>
+function submitData() {
+
+    const empId    = document.getElementById("empId").value;
+    const fullname = document.getElementById("fullname").value;
+    const position = document.getElementById("position").value;
+    const startDate = document.getElementById("startDate").value;
+    const slDay = parseFloat(document.getElementById("slDay").value || 0);
+    const blDay = parseFloat(document.getElementById("blDay").value || 0);
+
+    // ---- คำนวณวันทำงาน ----
+    const start = new Date(startDate);
+    const today = new Date();
+    const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+
+    // ---- คำนวณ AL ----
+    const AL = diffDays >= 365 ? 2880 : 0;
+
+    // ---- อายุงาน (เดือน) ----
+    const months =
+        (today.getFullYear() - start.getFullYear()) * 12 +
+        (today.getMonth() - start.getMonth());
+    const expMonth = months > 0 ? months : 0;
+
+    // ---- แปลงวันเป็นนาที ----
+    const SL = slDay * 480;
+    const BL = blDay * 480;
+
+    // ---- ส่งข้อมูลไป Google Script ----
+    fetch("https://script.google.com/macros/s/AKfycbx5VtC2940ZgAzop2v6hE35EpXNVmV9LneEBjyzpyXqfqITtWSkWMhrky72I3P5zpDgcA/exec", {
+        method: "POST",
+        body: JSON.stringify({
+            empId: empId,
+            fullname: fullname,
+            position: position,
+            startDate: startDate,
+            AL: AL,
+            SL: SL,
+            BL: BL,
+            exp: expMonth
+        })
+    })
+    .then(res => res.text())
+    .then(msg => document.getElementById("result").innerHTML = msg)
+    .catch(err => alert("Error: " + err));
+}
+</script>
+
+</body>
+</html>
