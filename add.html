@@ -86,6 +86,11 @@
         color: #1b5e20;
         font-weight: bold;
     }
+
+    .back-btn {
+        margin-top: 15px;
+        background: #757575;
+    }
 </style>
 
 </head>
@@ -115,7 +120,12 @@
         <label>กิจ (BL) ใส่เป็น "วัน"</label>
         <input type="number" id="blDay" min="0" value="0">
 
-        <button type="button" onclick="submitData()">บันทึกข้อมูล</button>
+        <button type="button" id="saveBtn" onclick="submitData()">บันทึกข้อมูล</button>
+
+        <button type="button" class="back-btn"
+            onclick="window.location.href='https://ssi-building.github.io/EasyLeave/Dashboard-admin.html'">
+            ⬅ กลับหน้าหลัก
+        </button>
     </form>
 
     <p id="result"></p>
@@ -124,32 +134,29 @@
 <script>
 function submitData() {
 
-    const empId    = document.getElementById("empId").value;
-    const fullname = document.getElementById("fullname").value;
-    const position = document.getElementById("position").value;
+    const empId    = document.getElementById("empId").value.trim();
+    const fullname = document.getElementById("fullname").value.trim();
+    const position = document.getElementById("position").value.trim();
     const startDate = document.getElementById("startDate").value;
+
+    if (!empId || !fullname || !position || !startDate) {
+        document.getElementById("result").innerHTML = "⚠ กรุณากรอกข้อมูลให้ครบถ้วน";
+        document.getElementById("result").style.color = "red";
+        return;
+    }
+
     const slDay = parseFloat(document.getElementById("slDay").value || 0);
     const blDay = parseFloat(document.getElementById("blDay").value || 0);
 
-    // ---- คำนวณวันทำงาน ----
-    const start = new Date(startDate);
-    const today = new Date();
-    const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+    // ป้องกันกดซ้ำ
+    const btn = document.getElementById("saveBtn");
+    btn.disabled = true;
+    btn.innerText = "กำลังบันทึก...";
 
-    // ---- คำนวณ AL ----
-    const AL = diffDays >= 365 ? 2880 : 0;
-
-    // ---- อายุงาน (เดือน) ----
-    const months =
-        (today.getFullYear() - start.getFullYear()) * 12 +
-        (today.getMonth() - start.getMonth());
-    const expMonth = months > 0 ? months : 0;
-
-    // ---- แปลงวันเป็นนาที ----
+    // คำนวณ SL/BL เป็นนาที
     const SL = slDay * 480;
     const BL = blDay * 480;
 
-    // ---- ส่งข้อมูลไป Google Script ----
     fetch("https://script.google.com/macros/s/AKfycbx5VtC2940ZgAzop2v6hE35EpXNVmV9LneEBjyzpyXqfqITtWSkWMhrky72I3P5zpDgcA/exec", {
         method: "POST",
         body: JSON.stringify({
@@ -157,15 +164,28 @@ function submitData() {
             fullname: fullname,
             position: position,
             startDate: startDate,
-            AL: AL,
             SL: SL,
-            BL: BL,
-            exp: expMonth
+            BL: BL
         })
     })
     .then(res => res.text())
-    .then(msg => document.getElementById("result").innerHTML = msg)
-    .catch(err => alert("Error: " + err));
+    .then(msg => {
+        document.getElementById("result").innerHTML = "✔ " + msg;
+        document.getElementById("result").style.color = "#1b5e20";
+
+        // ✔ เคลียร์ฟอร์ม
+        document.getElementById("dataForm").reset();
+
+        // ✔ เปิดปุ่มอีกครั้ง
+        btn.disabled = false;
+        btn.innerText = "บันทึกข้อมูล";
+    })
+    .catch(err => {
+        alert("Error: " + err);
+
+        btn.disabled = false;
+        btn.innerText = "บันทึกข้อมูล";
+    });
 }
 </script>
 
