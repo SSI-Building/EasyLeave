@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Update Entitlement</title>
+<title>เพิ่มรายชื่อพนักงาน</title>
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap');
+
     body {
         margin: 0;
         padding: 0;
@@ -25,6 +27,48 @@
         width: 100%;
         max-width: 450px;
         animation: fadeIn 0.8s ease;
+        position: relative;
+    }
+
+    /* แถวบน */
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+    }
+
+    /* ปุ่มย้อนกลับด้านบน */
+    .top-back-btn {
+        background: #6c757d;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: 0.2s;
+    }
+    .top-back-btn:hover {
+        background: #5a6268;
+    }
+
+    /* ปุ่มลบพนักงาน */
+    .top-delete-btn {
+        background: #d32f2f;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        gap: 6px;
+        transition: 0.2s;
+    }
+    .top-delete-btn:hover {
+        background: #b71c1c;
     }
 
     @keyframes fadeIn {
@@ -35,7 +79,7 @@
     h2 {
         text-align: center;
         color: #0d47a1;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         font-size: 26px;
     }
 
@@ -62,10 +106,10 @@
         outline: none;
     }
 
-    button {
+    .btn {
         width: 100%;
         padding: 12px;
-        margin-top: 22px;
+        margin-top: 18px;
         background: #0d47a1;
         color: white;
         border: none;
@@ -73,23 +117,18 @@
         font-size: 17px;
         cursor: pointer;
         transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
-
-    button:hover {
-        background: #1565c0;
-        transform: translateY(-2px);
-    }
+    .btn:hover { background: #1565c0; transform: translateY(-2px); }
 
     #result {
         margin-top: 15px;
         text-align: center;
         color: #1b5e20;
         font-weight: bold;
-    }
-
-    .back-btn {
-        margin-top: 15px;
-        background: #757575;
     }
 </style>
 
@@ -98,6 +137,18 @@
 <body>
 
 <div class="card">
+
+    <!-- แถวบน ปุ่มกลับ + ปุ่มลบพนักงาน -->
+    <div class="top-bar">
+        <a href="https://ssi-building.github.io/EasyLeave/Dashboard-admin.html" class="top-back-btn">
+            ← กลับหน้าหลัก
+        </a>
+
+        <a href="https://ssi-building.github.io/EasyLeave/delate.html" class="top-delete-btn">
+            🗑️ ลบพนักงาน
+        </a>
+    </div>
+
     <h2>เพิ่มรายชื่อพนักงาน</h2>
 
     <form id="dataForm">
@@ -120,12 +171,10 @@
         <label>กิจ (BL) ใส่เป็น "วัน"</label>
         <input type="number" id="blDay" min="0" value="0">
 
-        <button type="button" id="saveBtn" onclick="submitData()">บันทึกข้อมูล</button>
-
-        <button type="button" class="back-btn"
-            onclick="window.location.href='https://ssi-building.github.io/EasyLeave/Dashboard-admin.html'">
-            ⬅ กลับหน้าหลัก
+        <button type="button" id="saveBtn" class="btn" onclick="submitData()">
+            💾 บันทึกข้อมูล
         </button>
+
     </form>
 
     <p id="result"></p>
@@ -148,12 +197,10 @@ function submitData() {
     const slDay = parseFloat(document.getElementById("slDay").value || 0);
     const blDay = parseFloat(document.getElementById("blDay").value || 0);
 
-    // ป้องกันกดซ้ำ
     const btn = document.getElementById("saveBtn");
     btn.disabled = true;
     btn.innerText = "กำลังบันทึก...";
 
-    // คำนวณ SL/BL เป็นนาที
     const SL = slDay * 480;
     const BL = blDay * 480;
 
@@ -173,16 +220,13 @@ function submitData() {
         document.getElementById("result").innerHTML = "✔ " + msg;
         document.getElementById("result").style.color = "#1b5e20";
 
-        // ✔ เคลียร์ฟอร์ม
         document.getElementById("dataForm").reset();
 
-        // ✔ เปิดปุ่มอีกครั้ง
         btn.disabled = false;
         btn.innerText = "บันทึกข้อมูล";
     })
     .catch(err => {
         alert("Error: " + err);
-
         btn.disabled = false;
         btn.innerText = "บันทึกข้อมูล";
     });
