@@ -203,6 +203,13 @@
     #summaryButton2:hover {
         transform: translateY(-3px);
         box-shadow: 0 8px 15px rgba(52, 152, 219, 0.2);
+    }	/* ปุ่มดูตารางสรุป */
+    #AddButton {
+        background: var(--primary-gradient);
+    }
+    #AddButton :hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(52, 152, 219, 0.2);
     }
     
 /* ==================== ปุ่มบันทึก ==================== */
@@ -417,10 +424,11 @@
             <input type="date" id="startDate">
             <label for="endDate"><i class="fas fa-calendar-alt"></i> วันที่สิ้นสุด:</label>
             <input type="date" id="endDate">
-            <button id="loadDataButton"><i class="fas fa-sync-alt"></i> โหลดข้อมูล</button>
-            <button id="resetButton"><i class="fas fa-undo"></i> ตั้งค่าเริ่มต้น</button>
-            <button class="action-button" id="summaryButton"><i class="fa fa-table"></i>ตารางสรุปรวม</button>
-            <button class="action-button" id="summaryButton2"><i class="fa-solid fa-id-card-clip"></i>ตารางรายบุคคล</button>
+            <button id="loadDataButton"><i class="fas fa-sync-alt"></i>Refresh</button>
+            <button id="resetButton"><i class="fas fa-undo"></i>Default</button>
+            <button class="action-button" id="summaryButton"><i class="fa fa-table"></i></button>
+            <button class="action-button" id="summaryButton2"><i class="fa-solid fa-id-card-clip"></i></button>
+            <button class="action-button" id="AddButton"><i class="fa-solid fa-plus-minus"></i></i></button>
         </div>
         
         <div class="filter-controls">
@@ -533,6 +541,9 @@ animate();
     <script>
         document.getElementById("summaryButton").addEventListener("click", function() { window.location.href = "SummaryTable.html";});
 		document.getElementById("summaryButton2").addEventListener("click", function() { window.location.href = "Admin-desktop.html";});
+    document.getElementById("AddButton").addEventListener("click", function () {
+    window.location.href = "add.html";
+});
         document.addEventListener('DOMContentLoaded', function() {
             const startDateInput = document.getElementById('startDate');
             const endDateInput = document.getElementById('endDate');
