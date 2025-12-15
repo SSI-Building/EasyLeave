@@ -8,127 +8,169 @@
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap');
 
+    :root {
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --danger-color: #ef4444;
+        --danger-hover: #dc2626;
+        --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #cbebff 100%);
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --input-bg: #f3f4f6;
+        --text-color: #1e293b;
+    }
+
     body {
         margin: 0;
-        padding: 0;
+        padding: 20px;
         font-family: "Prompt", sans-serif;
-        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        background: var(--bg-gradient);
+        min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100vh;
+        box-sizing: border-box;
     }
 
     .card {
-        background: #ffffffee;
-        padding: 30px 35px;
-        border-radius: 20px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        background: var(--card-bg);
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
         width: 100%;
-        max-width: 450px;
-        animation: fadeIn 0.8s ease;
-        position: relative;
+        max-width: 420px;
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
     }
 
-    /* แถวบน */
+    /* Top Navigation */
     .top-bar {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 15px;
+        margin-bottom: 25px;
     }
 
-    /* ปุ่มย้อนกลับด้านบน */
-    .top-back-btn {
-        background: #6c757d;
-        color: white;
-        padding: 8px 12px;
-        border-radius: 8px;
+    .top-back-btn, .top-delete-btn {
+        padding: 8px 16px;
+        border-radius: 50px;
         font-size: 13px;
+        font-weight: 500;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        transition: 0.2s;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .top-back-btn {
+        background: #fff;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
     }
     .top-back-btn:hover {
-        background: #5a6268;
+        background: #f8fafc;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     }
 
-    /* ปุ่มลบพนักงาน */
     .top-delete-btn {
-        background: #d32f2f;
-        color: white;
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 13px;
-        display: inline-flex;
-        align-items: center;
-        text-decoration: none;
-        gap: 6px;
-        transition: 0.2s;
+        background: #fee2e2;
+        color: #b91c1c;
     }
     .top-delete-btn:hover {
-        background: #b71c1c;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        background: #fecaca;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220, 38, 38, 0.1);
     }
 
     h2 {
         text-align: center;
-        color: #0d47a1;
-        margin-bottom: 15px;
-        font-size: 26px;
+        color: var(--text-color);
+        margin: 0 0 25px 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
 
     label {
-        font-weight: 600;
+        font-size: 14px;
+        font-weight: 500;
+        color: #475569;
+        margin-bottom: 4px;
         display: block;
-        margin-top: 12px;
-        color: #0d47a1;
     }
 
     input {
         width: 100%;
-        padding: 10px;
-        margin-top: 4px;
-        border-radius: 10px;
-        border: 1.5px solid #90caf9;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        background: var(--input-bg);
         font-size: 15px;
-        transition: 0.3s;
+        color: #334155;
+        font-family: "Prompt", sans-serif;
+        box-sizing: border-box; /* สำคัญเพื่อไม่ให้ input ล้น */
+        transition: all 0.2s ease;
     }
 
     input:focus {
-        border-color: #0d47a1;
-        box-shadow: 0 0 8px #bbdefb;
+        background: #fff;
+        border-color: var(--primary-color);
         outline: none;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
     }
 
     .btn {
         width: 100%;
-        padding: 12px;
-        margin-top: 18px;
-        background: #0d47a1;
+        padding: 14px;
+        margin-top: 10px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
         color: white;
         border: none;
-        border-radius: 12px;
-        font-size: 17px;
+        border-radius: 14px;
+        font-size: 16px;
+        font-weight: 600;
         cursor: pointer;
-        transition: 0.3s;
+        transition: all 0.3s ease;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
     }
-    .btn:hover { background: #1565c0; transform: translateY(-2px); }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+
+    .btn:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
 
     #result {
-        margin-top: 15px;
+        margin-top: 20px;
         text-align: center;
-        color: #1b5e20;
-        font-weight: bold;
+        font-size: 14px;
+        min-height: 20px;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 
@@ -138,7 +180,6 @@
 
 <div class="card">
 
-    <!-- แถวบน ปุ่มกลับ + ปุ่มลบพนักงาน -->
     <div class="top-bar">
         <a href="https://ssi-building.github.io/EasyLeave/Dashboard-admin.html" class="top-back-btn">
             ← กลับหน้าหลัก
@@ -152,24 +193,36 @@
     <h2>เพิ่มรายชื่อพนักงาน</h2>
 
     <form id="dataForm">
+        <div>
+            <label>รหัสพนักงาน</label>
+            <input type="text" id="empId" required placeholder="เช่น EMP001">
+        </div>
 
-        <label>รหัสพนักงาน</label>
-        <input type="text" id="empId" required>
+        <div>
+            <label>ชื่อ-สกุล</label>
+            <input type="text" id="fullname" required placeholder="กรอกชื่อและนามสกุล">
+        </div>
 
-        <label>ชื่อ-สกุล</label>
-        <input type="text" id="fullname" required>
+        <div>
+            <label>ตำแหน่ง</label>
+            <input type="text" id="position" required placeholder="ระบุตำแหน่งงาน">
+        </div>
 
-        <label>ตำแหน่ง</label>
-        <input type="text" id="position" required>
+        <div>
+            <label>วันเริ่มงาน</label>
+            <input type="date" id="startDate" required>
+        </div>
 
-        <label>วันเริ่มงาน</label>
-        <input type="date" id="startDate" required>
-
-        <label>ป่วย (SL) ใส่เป็น "วัน"</label>
-        <input type="number" id="slDay" min="0" value="0">
-
-        <label>กิจ (BL) ใส่เป็น "วัน"</label>
-        <input type="number" id="blDay" min="0" value="0">
+        <div style="display: flex; gap: 15px;">
+            <div style="flex:1;">
+                <label>ป่วย (SL) / วัน</label>
+                <input type="number" id="slDay" min="0" value="0">
+            </div>
+            <div style="flex:1;">
+                <label>กิจ (BL) / วัน</label>
+                <input type="number" id="blDay" min="0" value="0">
+            </div>
+        </div>
 
         <button type="button" id="saveBtn" class="btn" onclick="submitData()">
             💾 บันทึกข้อมูล
@@ -190,7 +243,7 @@ function submitData() {
 
     if (!empId || !fullname || !position || !startDate) {
         document.getElementById("result").innerHTML = "⚠ กรุณากรอกข้อมูลให้ครบถ้วน";
-        document.getElementById("result").style.color = "red";
+        document.getElementById("result").style.color = "#ef4444";
         return;
     }
 
@@ -199,7 +252,7 @@ function submitData() {
 
     const btn = document.getElementById("saveBtn");
     btn.disabled = true;
-    btn.innerText = "กำลังบันทึก...";
+    btn.innerHTML = '<span style="animation: spin 1s linear infinite">⏳</span> กำลังบันทึก...';
 
     const SL = slDay * 480;
     const BL = blDay * 480;
@@ -218,20 +271,22 @@ function submitData() {
     .then(res => res.text())
     .then(msg => {
         document.getElementById("result").innerHTML = "✔ " + msg;
-        document.getElementById("result").style.color = "#1b5e20";
+        document.getElementById("result").style.color = "#16a34a";
 
         document.getElementById("dataForm").reset();
 
         btn.disabled = false;
-        btn.innerText = "บันทึกข้อมูล";
+        btn.innerText = "💾 บันทึกข้อมูล";
     })
     .catch(err => {
         alert("Error: " + err);
         btn.disabled = false;
-        btn.innerText = "บันทึกข้อมูล";
+        btn.innerText = "💾 บันทึกข้อมูล";
     });
 }
 </script>
-
+<style>
+@keyframes spin { 100% { transform: rotate(360deg); } }
+</style>
 </body>
 </html>
