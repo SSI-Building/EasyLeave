@@ -457,6 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("position").value = set1[2];
     document.getElementById("department").value = "BUS";
 
+
     // แสดงวันลาคงเหลือ
     const leaveTypeEl = document.getElementById("leaveType");
     const leaveBalanceInfo = document.createElement("div");
@@ -497,6 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const endDate = document.getElementById("endDate");
     const endTime = document.getElementById("endTime");
     const leaveDisplay = document.getElementById("leaveDaysDisplay");
+    const leaveMinutes = calculateLeaveMinutes(startDate.value, startTime.value, endDate.value, endTime.value);
 
     function calculateLeaveMinutes(sDate, sTime, eDate, eTime) {
         if (!sDate || !sTime || !eDate || !eTime) return 0;
@@ -591,29 +593,42 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("endDate"),
             document.getElementById("endTime")
         ];
+        
         let hasEmpty = false;
         fields.forEach(f => f.style.borderColor = 'var(--border-color)');
         fields.forEach(f => { if(!f.value.trim()){ f.style.borderColor='red'; hasEmpty=true; }});
 
         const docRadios = document.getElementsByName("hasDocument");
+
+        // --- เริ่มต้นการตรวจสอบเงื่อนไข ---
         if(!Array.from(docRadios).some(r=>r.checked)){ alert("กรุณาเลือกว่ามีเอกสารประกอบหรือไม่"); return; }
         if(hasEmpty){ alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (กรอบสีแดงคือช่องที่ว่าง)"); return; }
         if(signaturePad.isEmpty()){ alert("กรุณาเซ็นชื่อก่อนส่ง"); return; }
 
-        // ตรวจสอบสิทธิ์นาที
-        const leaveMinutes = calculateLeaveMinutes(startDate.value, startTime.value, endDate.value, endTime.value);
+        // 1. คำนวณค่านาทีที่ขอลาจริง ณ ตอนที่กดปุ่ม (ต้องคำนวณใหม่ตรงนี้)
+        const currentLeaveMinutes = calculateLeaveMinutes(startDate.value, startTime.value, endDate.value, endTime.value);
+
+        // 2. ตรวจสอบว่าค่าไม่เป็น 0 หรือ ติดลบ
+        if (currentLeaveMinutes <= 0) {
+            alert("⚠️ รวมเวลาลาไม่มีข้อมูล หรือเป็น 0 หรือติดลบ กรุณาตรวจสอบวันเริ่มและวันสิ้นสุดการลาอีกครั้ง");
+            return; 
+        }
+
+        // 3. ตรวจสอบสิทธิ์นาทีคงเหลือ
         const leaveType = leaveTypeEl.value;
         let maxMinutes = 0;
         switch(leaveType){
-            case "AL": maxMinutes=set1[3]; break;
-            case "SL": maxMinutes=set1[4]; break;
-            case "BL": maxMinutes=set1[5]; break;
+            case "AL": maxMinutes = set1[3]; break;
+            case "SL": maxMinutes = set1[4]; break;
+            case "BL": maxMinutes = set1[5]; break;
         }
-        if(leaveMinutes > maxMinutes){
-            alert(`จำนวนเวลาที่ขอ (${formatMinutes(leaveMinutes)}) เกินสิทธิ์คงเหลือ (${formatMinutes(maxMinutes)})`);
+
+        if(currentLeaveMinutes > maxMinutes){
+            alert(`จำนวนเวลาที่ขอ (${formatMinutes(currentLeaveMinutes)}) เกินสิทธิ์คงเหลือ (${formatMinutes(maxMinutes)})`);
             return;
         }
 
+        // --- ถ้าผ่านหมด ให้รวมข้อมูลส่งหน้า Preview ---
         const leaveData = {
             empId: document.getElementById("empId").value,
             empName: document.getElementById("empName").value,
@@ -626,9 +641,10 @@ document.addEventListener("DOMContentLoaded", () => {
             startTime: startTime.value,
             endDate: endDate.value,
             endTime: endTime.value,
-            leaveMinutes: leaveMinutes,
+            leaveMinutes: currentLeaveMinutes, // ใช้ตัวแปรที่เราเพิ่งเช็ค
             signatureData: signaturePad.toDataURL()
         };
+        
         localStorage.setItem("leavePreviewData", JSON.stringify(leaveData));
         window.location.href = "preview.html";
     });
