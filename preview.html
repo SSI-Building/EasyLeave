@@ -236,123 +236,100 @@ document.addEventListener("DOMContentLoaded", () => {
 
     
         function compressDataUrl(dataUrl, maxWidth = 600) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement("canvas");
-                    const ratio = img.width / img.height;
-                    const newW = Math.min(img.width, maxWidth);
-                    const newH = newW / ratio;
-                    canvas.width = newW;
-                    canvas.height = newH;
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const ratio = img.width / img.height;
+            const newW = Math.min(img.width, maxWidth);
+            const newH = newW / ratio;
+            canvas.width = newW;
+            canvas.height = newH;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, newW, newH);
+            // แปลงเป็น PNG (หรือ JPEG เพื่อขนาดที่เล็กลง)
+            resolve(canvas.toDataURL("image/png"));
+        };
+        img.onerror = reject;
+        img.src = dataUrl;
+    });
+}
+
+// --- ส่วนการกดปุ่มยืนยันและส่ง (แก้ไขจุดโหมดการส่ง) ---
+btnSubmit.addEventListener("click", async () => {
+    if (isSubmitting) return;
+    isSubmitting = true;
+    btnSubmit.disabled = true;
+    loadingOverlay.classList.add("visible");
+
+    try {
+        // 1. จัดการลายเซ็น
+        const signatureCanvas = document.getElementById("signaturePreview");
+        const originalSig = signatureCanvas.toDataURL();
+        leaveData.signature = await compressDataUrl(originalSig, 600);
+
+        // 2. คำนวณสิทธิการลาล่าสุด
+        let set1 = JSON.parse(localStorage.getItem("leaveSet1")) || [0,0,0,0,0,0];
+        let set2 = JSON.parse(localStorage.getItem("leaveSet2")) || [0,0,0,0,0,0];
         
-                    const ctx = canvas.getContext("2d");
-        
-                    // ไม่ต้องเติมสีพื้นหลัง (transparent)
-                    ctx.drawImage(img, 0, 0, newW, newH);
-        
-                    // แปลงเป็น PNG
-                    const compressed = canvas.toDataURL("image/png");
-                    resolve(compressed);
-                };
-                img.onerror = reject;
-                img.src = dataUrl;
-            });
-            }
+        const leaveMinutes = parseFloat(leaveData.leaveMinutes) || 0;
+        const leaveType = leaveData.leaveType;
 
+        if (leaveType === "AL") { 
+            set2[3] = (parseFloat(set2[3]) || 0) + leaveMinutes; 
+            set1[3] = (parseFloat(set1[3]) || 0) - leaveMinutes; 
+        } else if (leaveType === "SL") { 
+            set2[4] = (parseFloat(set2[4]) || 0) + leaveMinutes; 
+            set1[4] = (parseFloat(set1[4]) || 0) - leaveMinutes; 
+        } else if (leaveType === "BL") { 
+            set2[5] = (parseFloat(set2[5]) || 0) + leaveMinutes; 
+            set1[5] = (parseFloat(set1[5]) || 0) - leaveMinutes; 
+        }
 
-            btnSubmit.addEventListener("click", async () => {
-            if (isSubmitting) return;
-            isSubmitting = true;
-            btnSubmit.disabled = true;
-            loadingOverlay.classList.add("visible");
+        const usedTotal = (parseFloat(set2[3]) || 0) + (parseFloat(set2[4]) || 0) + (parseFloat(set2[5]) || 0);
+        const balanceTotal = (parseFloat(set1[3]) || 0) + (parseFloat(set1[4]) || 0) + (parseFloat(set1[5]) || 0);
 
-            // บีบลายเซ็นก่อนส่ง
-            const originalSig = canvas.toDataURL();
-            leaveData.signature = await compressDataUrl(originalSig, 600, 0.7);
+        // 3. เตรียม Data Object
+        const leaveDataToSend = {
+            ...leaveData,
+            startDate: leaveData.startDateFormatted,
+            startTime: leaveData.startTimeFormatted,
+            endDate: leaveData.endDateFormatted,
+            endTime: leaveData.endTimeFormatted,
+            set1,
+            set2,
+            usedTotal,
+            balanceTotal
+        };
 
-            // ส่วนเดิมของ set1/set2/usedTotal ...
-            let set1 = JSON.parse(localStorage.getItem("leaveSet1")) || [];
-            let set2 = JSON.parse(localStorage.getItem("leaveSet2")) || [];
-            
-            // กัน index ว่าง
-            set1[3] = set1[3] || 0; // AL
-            set1[4] = set1[4] || 0; // SL
-            set1[5] = set1[5] || 0; // BL
-            set2[3] = set2[3] || 0;
-            set2[4] = set2[4] || 0;
-            set2[5] = set2[5] || 0;
-            
-            // จำนวนการลาครั้งนี้ (นาที)
-            let leaveMinutes = parseFloat(leaveData.leaveMinutes) || 0;
-            const leaveType = leaveData.leaveType;
-            
-            // อัปเดท set2 (สิทธิที่ใช้ไป) และ set1 (สิทธิคงเหลือ)
-            if (leaveType === "AL") {
-                set2[3] += leaveMinutes;
-                set1[3] -= leaveMinutes;
-            }
-            else if (leaveType === "SL") {
-                set2[4] += leaveMinutes;
-                set1[4] -= leaveMinutes;
-            }
-            else if (leaveType === "BL") {
-                set2[5] += leaveMinutes;
-                set1[5] -= leaveMinutes;
-            }
+        const url = "https://script.google.com/macros/s/AKfycbyNtUVx6Xx-St1RH3cFT86db2nV0s_5uRE6MSHoZkwLqT_DIw_7ZN1gA4Zdj5SQoN50uw/exec";
 
-            
-            // คำนวณรวม
-            const usedTotal = set2[3] + set2[4] + set2[5];
-            const balanceTotal = set1[3] + set1[4] + set1[5];
-            
-            // เก็บข้อมูลลง leaveData
-            leaveData.set1 = set1;
-            leaveData.set2 = set2;
-            leaveData.usedAL = set2[3];
-            leaveData.usedSL = set2[4];
-            leaveData.usedBL = set2[5];
-            leaveData.usedTotal = usedTotal;
-            leaveData.balanceTotal = balanceTotal;
-            
-            // เก็บกลับไป localStorage ด้วย (กันค่าหลุด)
-            localStorage.setItem("leaveSet1", JSON.stringify(set1));
-            localStorage.setItem("leaveSet2", JSON.stringify(set2));
-            
-            // ส่งไป Apps Script
-            const leaveDataToSend = {
-                ...leaveData,
-                startDate: leaveData.startDateFormatted,
-                startTime: leaveData.startTimeFormatted,
-                endDate: leaveData.endDateFormatted,
-                endTime: leaveData.endTimeFormatted,
-                set1,
-                set2,
-                usedTotal,
-                balanceTotal
-            };
-
-
-            const url = "https://script.google.com/macros/s/AKfycbyNtUVx6Xx-St1RH3cFT86db2nV0s_5uRE6MSHoZkwLqT_DIw_7ZN1gA4Zdj5SQoN50uw/exec";
-
-            try {
-                await fetch(url, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(leaveDataToSend)
-                });
-                alert("ส่งคำขอเรียบร้อยแล้ว");
-                localStorage.removeItem("leavePreviewData");
-                window.location.href = "Dashboard.html";
-            } catch (err) {
-                console.error("Fetch Error:", err);
-                alert("เกิดข้อผิดพลาดในการส่งข้อมูล");
-                isSubmitting = false;
-                btnSubmit.disabled = false;
-                loadingOverlay.classList.remove("visible");
-            }
+        // 4. ส่งข้อมูล (จุดสำคัญ: ใช้ mode 'cors' และ Content-Type 'text/plain')
+        await fetch(url, {
+            method: "POST",
+            mode: "cors", 
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(leaveDataToSend)
         });
+
+        // 5. เมื่อสำเร็จ: อัปเดต Storage และไปหน้าถัดไป
+        localStorage.setItem("leaveSet1", JSON.stringify(set1));
+        localStorage.setItem("leaveSet2", JSON.stringify(set2));
+        
+        alert("ส่งคำขอเรียบร้อยแล้ว");
+        localStorage.removeItem("leavePreviewData");
+        window.location.href = "Dashboard.html";
+
+    } catch (err) {
+        console.error("Fetch Error:", err);
+        alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง");
+        isSubmitting = false;
+        btnSubmit.disabled = false;
+        loadingOverlay.classList.remove("visible");
+    }
+});
 
 });
 </script>
