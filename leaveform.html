@@ -627,7 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
             endDate: endDate.value,
             endTime: endTime.value,
             leaveMinutes: leaveMinutes,
-            signatureData: signaturePad.toDataURL()
+            signature: signaturePad.toDataURL()
         };
         localStorage.setItem("leavePreviewData", JSON.stringify(leaveData));
         window.location.href = "preview.html";
