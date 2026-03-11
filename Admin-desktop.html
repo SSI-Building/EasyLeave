@@ -29,7 +29,7 @@
             min-height: 100vh;
         }
 
-        /* Sidebar - ส่วนควบคุม */
+        /* Sidebar - ส่วนควบคุมด้านซ้าย */
         .sidebar {
             width: 300px;
             background: white;
@@ -40,6 +40,24 @@
             position: fixed;
             height: 100vh;
             box-sizing: border-box;
+            z-index: 100;
+        }
+
+        /* ปุ่มย้อนกลับ */
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+            transform: translateX(-5px);
         }
 
         .logo-area {
@@ -47,19 +65,19 @@
             align-items: center;
             gap: 12px;
             color: var(--primary);
-            margin-bottom: 50px; /* เพิ่มระยะจาก Logo ลงมา */
+            margin-bottom: 50px;
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
-            gap: 20px; /* ระยะห่างระหว่างองค์ประกอบใน Sidebar */
+            gap: 20px;
         }
 
         label { 
             font-size: 14px; 
             color: var(--text-muted);
-            margin-bottom: -10px; /* ให้ Label ชิด Dropdown เล็กน้อย */
+            margin-bottom: -10px;
         }
 
         select {
@@ -71,6 +89,7 @@
             outline: none;
             transition: all 0.3s ease;
             background-color: #fcfdfe;
+            cursor: pointer;
         }
 
         select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1); }
@@ -96,21 +115,21 @@
         .main-content {
             margin-left: 300px;
             flex: 1;
-            padding: 50px 60px; /* เพิ่ม Padding ให้ดูโปร่งกว้างขวาง */
+            padding: 50px 60px;
             max-width: 1200px;
         }
 
         .page-header {
-            margin-bottom: 45px; /* ระยะห่างระหว่างหัวข้อใหญ่กับ Card แถวแรก */
+            margin-bottom: 45px;
         }
 
-        .page-header h2 { font-size: 28px; margin-bottom: 8px; }
+        .page-header h2 { font-size: 28px; margin-bottom: 8px; margin-top: 0; }
 
-        /* Grid System */
+        /* Grid Layout สำหรับ Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 30px; /* ช่องว่างระหว่าง Card แต่ละใบ */
+            gap: 30px;
             margin-bottom: 35px;
         }
 
@@ -120,10 +139,9 @@
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.02);
             border: 1px solid rgba(0,0,0,0.03);
-            transition: transform 0.3s ease;
         }
 
-        .card h3 { margin-bottom: 25px; font-size: 20px; }
+        .card h3 { margin-top: 0; margin-bottom: 25px; font-size: 20px; }
 
         .info-header {
             display: flex;
@@ -139,7 +157,7 @@
             color: var(--primary);
         }
 
-        /* Tables */
+        /* Table Style */
         .table-container {
             overflow: hidden;
             border-radius: 12px;
@@ -169,8 +187,9 @@
 
         .loading-shimmer {
             text-align: center;
-            padding: 20px;
+            padding: 40px 0;
             color: var(--text-muted);
+            font-style: italic;
             animation: pulse 1.5s infinite;
         }
 
@@ -181,13 +200,18 @@
 <body>
 
     <aside class="sidebar">
+        <a href="Dashboard-admin.html" class="back-link">
+            <i data-lucide="arrow-left" size="18"></i>
+            <span>ย้อนกลับหน้าหลัก</span>
+        </a>
+
         <div class="logo-area">
             <i data-lucide="shield-check" size="32"></i>
             <h3 style="margin:0; letter-spacing: 1px;">LEAVE ADMIN</h3>
         </div>
 
         <div class="control-group">
-            <label>เลือกพนักงาน</label>
+            <label>เลือกพนักงานเพื่อดูสิทธิ</label>
             <select id="employeeSelect">
                 <option value="">-- เลือกพนักงาน --</option>
             </select>
@@ -269,7 +293,10 @@
     </main>
 
     <script>
+        // เรียกใช้ Icons
         lucide.createIcons();
+
+        // API Links
         const EMP_API="https://script.google.com/macros/s/AKfycbyxbbP1-GJdavLejrM8Yi-w0Q_c4BFj0V-Nliv52fV_Vhen7rpZenq5t5gwwTsFtBzT_A/exec";
         const BALANCE_API="https://script.google.com/macros/s/AKfycbwl2fhFIT6ZqVMb4YVQBjybIyRkzeSr3zXGpz-YE-ArsYTTidvAPqyQ5nOw9D0zMOVIew/exec";
 
@@ -279,6 +306,7 @@
         const remainTable = document.getElementById("remainTable").querySelector('tbody');
         const usedTable = document.getElementById("usedTable").querySelector('tbody');
 
+        // ฟังก์ชันคำนวณเวลา
         function formatMinutes(min){
             min = Number(min) || 0;
             let days = Math.floor(min/480);
@@ -287,6 +315,7 @@
             return {days, hours, minutes};
         }
 
+        // โหลดรายชื่อพนักงาน
         async function loadEmployeeList(){
             employeeSelect.innerHTML = "<option>กำลังโหลดรายชื่อ...</option>";
             try {
@@ -304,13 +333,14 @@
             }
         }
 
+        // เมื่อเลือกพนักงาน
         employeeSelect.addEventListener("change", async function(){
             const userId = this.value;
             if(!userId) return;
 
             empName.textContent = this.selectedOptions[0].textContent;
-            remainTable.innerHTML = "<tr><td colspan='4' class='loading-shimmer'>กำลังดึงข้อมูล...</td></tr>";
-            usedTable.innerHTML = "<tr><td colspan='4' class='loading-shimmer'>กำลังดึงข้อมูล...</td></tr>";
+            remainTable.innerHTML = "<tr><td colspan='4' class='loading-shimmer'>กำลังดึงข้อมูลสิทธิ...</td></tr>";
+            usedTable.innerHTML = "<tr><td colspan='4' class='loading-shimmer'>กำลังดึงข้อมูลประวัติ...</td></tr>";
 
             try {
                 const res = await fetch(`${BALANCE_API}?userId=${userId}`);
@@ -331,16 +361,18 @@
                 ], "badge-used");
 
             } catch(err) {
-                remainTable.innerHTML = "<tr><td colspan='4'>โหลดข้อมูลไม่สำเร็จ</td></tr>";
+                remainTable.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red; padding:20px;'>เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>";
+                usedTable.innerHTML = "<tr><td colspan='4' style='text-align:center; color:red; padding:20px;'>เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>";
             }
         });
 
+        // ฟังก์ชันแสดงผลตาราง
         function renderTable(tableElem, dataArr, badgeClass) {
             tableElem.innerHTML = "";
             dataArr.forEach(item => {
                 const t = formatMinutes(item.val);
                 tableElem.innerHTML += `<tr>
-                    <td>${item.label}</td>
+                    <td style="font-weight:500;">${item.label}</td>
                     <td class="${badgeClass}">${t.days}</td>
                     <td>${t.hours}</td>
                     <td>${t.minutes}</td>
@@ -348,6 +380,7 @@
             });
         }
 
+        // เริ่มต้นโหลดข้อมูล
         loadEmployeeList();
     </script>
 </body>
