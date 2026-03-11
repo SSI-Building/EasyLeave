@@ -43,18 +43,25 @@
         }
 
         .back-btn {
-            color: var(--text-main);
+            color: var(--warning); /* เปลี่ยนเป็นสีแดง/ชมพู ให้รู้ว่าเป็นปุ่มออก */
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 5px;
             font-size: 14px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: 'Prompt';
         }
 
         .nav-title {
             font-weight: 600;
             font-size: 16px;
             color: var(--primary);
+            text-align: center;
+            flex: 1;
         }
 
         /* Main Container */
@@ -86,7 +93,7 @@
             border-radius: 12px;
             border: 1.5px solid #e2e8f0;
             font-family: 'Prompt';
-            font-size: 16px; /* ป้องกัน iOS Auto-zoom */
+            font-size: 16px;
             appearance: none;
             background-color: #f8fafc;
         }
@@ -191,12 +198,13 @@
 <body>
 
     <nav class="top-nav">
-        <a href="Login.html" class="back-btn">
-            <i data-lucide="chevron-left" size="24"></i>
-            ย้อนกลับ
-        </a>
-        <div class="nav-title">Leave Dashboard</div>
-        <div style="width: 24px;"></div> </nav>
+        <button onclick="handleLogout()" class="back-btn">
+            <i data-lucide="log-out" size="20"></i>
+            ออก
+        </button>
+        <div class="nav-title" id="adminDisplayName">Leave Dashboard</div>
+        <div style="width: 40px;"></div> 
+    </nav>
 
     <div class="container">
         
@@ -269,6 +277,34 @@
     </div>
 
     <script>
+        // --- 1. ระบบความปลอดภัย (Security Check) ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const adminName = sessionStorage.getItem("adminName");
+            const displayEl = document.getElementById("adminDisplayName");
+
+            if (!adminName) {
+                alert("เซสชันหมดอายุหรือยังไม่ได้เข้าสู่ระบบ กรุณาเข้าสู่ระบบอีกครั้ง");
+                window.location.href = 'Login.html';
+                return;
+            }
+
+            if (displayEl) {
+                displayEl.textContent = `Admin: ${adminName}`;
+            }
+            
+            // โหลดรายชื่อพนักงานเมื่อยืนยันตัวตนผ่าน
+            loadEmployeeList();
+        });
+
+        // ฟังก์ชัน Logout
+        function handleLogout() {
+            if(confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+                sessionStorage.clear(); // ล้างข้อมูล session ทั้งหมด
+                window.location.href = 'Login.html';
+            }
+        }
+
+        // --- 2. ฟังก์ชันการทำงานเดิม ---
         lucide.createIcons();
         const EMP_API="https://script.google.com/macros/s/AKfycbyxbbP1-GJdavLejrM8Yi-w0Q_c4BFj0V-Nliv52fV_Vhen7rpZenq5t5gwwTsFtBzT_A/exec";
         const BALANCE_API="https://script.google.com/macros/s/AKfycbwl2fhFIT6ZqVMb4YVQBjybIyRkzeSr3zXGpz-YE-ArsYTTidvAPqyQ5nOw9D0zMOVIew/exec";
@@ -288,25 +324,34 @@
         }
 
         async function loadEmployeeList(){
-            employeeSelect.innerHTML = "<option>กำลังโหลด...</option>";
+            employeeSelect.innerHTML = "<option>กำลังโหลดรายชื่อ...</option>";
             try {
                 const res = await fetch(EMP_API);
                 const data = await res.json();
                 employeeSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
                 data.forEach(emp => {
-                    const opt = document.createElement("option");
-                    opt.value = emp.lineId;
-                    opt.textContent = emp.name;
-                    employeeSelect.appendChild(opt);
+                    if (emp.name && emp.lineId) {
+                        const opt = document.createElement("option");
+                        opt.value = emp.lineId;
+                        opt.textContent = emp.name;
+                        employeeSelect.appendChild(opt);
+                    }
                 });
             } catch(err) {
-                employeeSelect.innerHTML = "<option>Error!</option>";
+                console.error("Load Error:", err);
+                employeeSelect.innerHTML = "<option>ไม่สามารถโหลดรายชื่อได้</option>";
             }
         }
 
         employeeSelect.addEventListener("change", async function(){
             const userId = this.value;
-            if(!userId) return;
+            if(!userId) {
+                empName.textContent = "ยังไม่ได้เลือก";
+                workAge.textContent = "-";
+                remainTable.innerHTML = "<tr><td colspan='4' class='loading-text'>กรุณาเลือกชื่อพนักงาน</td></tr>";
+                usedTable.innerHTML = "<tr><td colspan='4' class='loading-text'>กรุณาเลือกชื่อพนักงาน</td></tr>";
+                return;
+            }
 
             empName.textContent = this.selectedOptions[0].textContent;
             remainTable.innerHTML = "<tr><td colspan='4' class='loading-text'>กำลังดึงข้อมูล...</td></tr>";
@@ -315,6 +360,12 @@
             try {
                 const res = await fetch(`${BALANCE_API}?userId=${userId}`);
                 const data = await res.json();
+                
+                if(data.error) {
+                    alert(data.error);
+                    return;
+                }
+
                 workAge.textContent = data.work_age || "-";
                 
                 renderTable(remainTable, [
@@ -330,7 +381,8 @@
                 ], "text-warning");
 
             } catch(err) {
-                remainTable.innerHTML = "<tr><td colspan='4' style='color:red;'>Failed to load</td></tr>";
+                console.error("API Error:", err);
+                remainTable.innerHTML = "<tr><td colspan='4' style='color:red; text-align:center;'>โหลดข้อมูลผิดพลาด</td></tr>";
             }
         });
 
@@ -346,8 +398,6 @@
                 </tr>`;
             });
         }
-
-        loadEmployeeList();
     </script>
 </body>
 </html>
