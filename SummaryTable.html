@@ -29,7 +29,6 @@
             background-color: var(--bg);
         }
 
-        /* Layout Area */
         .app-wrapper { display: flex; flex-direction: column; height: 100vh; padding: 20px; }
         
         .header-nav {
@@ -48,7 +47,6 @@
         .btn-excel { background: #10b981; color: white; border: none; }
         .btn-excel:hover { background: #059669; color: white; }
 
-        /* Card & Table */
         .main-card {
             background: var(--card); border-radius: 20px;
             display: flex; flex-direction: column; flex-grow: 1;
@@ -59,9 +57,10 @@
         .toolbar {
             padding: 15px 20px; border-bottom: 1px solid var(--border);
             display: flex; justify-content: space-between; align-items: center;
+            gap: 15px;
         }
 
-        .tab-switcher { display: flex; background: #f1f5f9; padding: 4px; border-radius: 10px; }
+        .tab-switcher { display: flex; background: #f1f5f9; padding: 4px; border-radius: 10px; flex-shrink: 0; }
         .tab-node {
             padding: 8px 20px; border: none; border-radius: 7px;
             cursor: pointer; font-family: 'Prompt'; font-size: 14px;
@@ -69,12 +68,19 @@
         }
         .tab-node.active { background: white; color: var(--primary); font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        .search-container { position: relative; width: 350px; }
+        .filter-group { display: flex; gap: 10px; align-items: center; flex-grow: 1; justify-content: flex-end; }
+        
+        .sort-select {
+            padding: 10px; border-radius: 10px; border: 1px solid var(--border);
+            font-family: 'Prompt'; outline: none; cursor: pointer; background: white;
+            font-size: 14px; color: var(--text-title); min-width: 180px;
+        }
+
+        .search-container { position: relative; width: 300px; }
         .search-container input {
-            width: 100%; padding: 10px 15px 10px 40px; border-radius: 10px;
+            width: 100%; padding: 10px 15px; border-radius: 10px;
             border: 1px solid var(--border); outline: none; font-family: 'Prompt';
         }
-        .search-container i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-body); }
 
         .table-area { flex-grow: 1; overflow: hidden; }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
@@ -100,15 +106,12 @@
         }
         .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Print Settings */
         #print-section { display: none; }
 
         @media print {
             body * { visibility: hidden; }
             #print-section, #print-section * { visibility: visible; }
-            #print-section {
-                display: block !important; position: absolute; left: 0; top: 0; width: 100%;
-            }
+            #print-section { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
             .print-header { text-align: center; margin-bottom: 20px; }
             .print-table { width: 100%; border-collapse: collapse; }
             .print-table th, .print-table td { border: 1px solid #333; padding: 8px; text-align: left; font-size: 12px; }
@@ -135,8 +138,16 @@
                 <button class="tab-node active" id="btnRemain">สิทธิคงเหลือ</button>
                 <button class="tab-node" id="btnUsed">สิทธิที่ใช้ไป</button>
             </div>
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="ค้นหารหัส หรือ ชื่อพนักงาน...">
+            
+            <div class="filter-group">
+                <select id="sortOrder" class="sort-select">
+                    <option value="none">↕️ จัดเรียงข้อมูล</option>
+                    <option value="desc">🔼 จำนวนมากที่สุด</option>
+                    <option value="asc">🔽 จำนวนน้อยที่สุด</option>
+                </select>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="ค้นหารหัส หรือ ชื่อพนักงาน...">
+                </div>
             </div>
         </div>
 
@@ -179,13 +190,11 @@
         rowsPerPage = Math.floor((h - 45) / 43) || 10;
     }
 
-    // ฟังก์ชันแปลงนาทีตามสูตรที่ให้มา
     function formatFullTime(totalMin) {
         if (!totalMin || totalMin <= 0) return "-";
         const days = Math.floor(totalMin / 480);
         const hrs = Math.floor((totalMin % 480) / 60);
         const mins = totalMin % 60;
-
         let res = "";
         if (days > 0) res += days + " Day ";
         if (hrs > 0) res += hrs + " Hr ";
@@ -202,9 +211,24 @@
     function render() {
         const tbody = document.getElementById('tableBody');
         const search = document.getElementById('searchInput').value.toLowerCase();
+        const sortOrder = document.getElementById('sortOrder').value;
         const data = mode === 'remain' ? db.balance : db.records;
         
-        const filtered = data.filter(r => r.name.toLowerCase().includes(search) || r.empId.toLowerCase().includes(search));
+        // กรองข้อมูล
+        let filtered = data.filter(r => 
+            (r.name || "").toLowerCase().includes(search) || 
+            (r.empId || "").toLowerCase().includes(search)
+        );
+
+        // จัดเรียงข้อมูล (บวก AL + SL + BL)
+        if (sortOrder !== 'none') {
+            filtered.sort((a, b) => {
+                const totalA = (Number(a.al) || 0) + (Number(a.sl) || 0) + (Number(a.bl) || 0);
+                const totalB = (Number(b.al) || 0) + (Number(b.sl) || 0) + (Number(b.bl) || 0);
+                return sortOrder === 'desc' ? totalB - totalA : totalA - totalB;
+            });
+        }
+
         const totalPages = Math.ceil(filtered.length / rowsPerPage);
         const slice = filtered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
@@ -237,12 +261,10 @@
         }
     }
 
-    // --- ฟังก์ชันสั่งพิมพ์ (พิมพ์ทั้งหมดทุกหน้า) ---
     function prepareAndPrint() {
         const printArea = document.getElementById('print-section');
         const data = mode === 'remain' ? db.balance : db.records;
         const title = mode === 'remain' ? "รายงานสรุปสิทธิลาคงเหลือ" : "รายงานสรุปสิทธิลาที่ใช้ไป";
-
         let html = `
             <div class="print-header">
                 <h2>${title}</h2>
@@ -251,23 +273,15 @@
             <table class="print-table">
                 <thead>
                     <tr>
-                        <th>รหัสพนักงาน</th>
-                        <th>ชื่อ-นามสกุล</th>
-                        <th>ตำแหน่ง</th>
-                        <th>พักร้อน (AL)</th>
-                        <th>ป่วย (SL)</th>
-                        <th>กิจ (BL)</th>
+                        <th>รหัสพนักงาน</th><th>ชื่อ-นามสกุล</th><th>ตำแหน่ง</th>
+                        <th>พักร้อน (AL)</th><th>ป่วย (SL)</th><th>กิจ (BL)</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${data.map(r => `
                         <tr>
-                            <td>${r.empId}</td>
-                            <td>${r.name}</td>
-                            <td>${r.position || '-'}</td>
-                            <td>${formatFullTime(r.al)}</td>
-                            <td>${formatFullTime(r.sl)}</td>
-                            <td>${formatFullTime(r.bl)}</td>
+                            <td>${r.empId}</td><td>${r.name}</td><td>${r.position || '-'}</td>
+                            <td>${formatFullTime(r.al)}</td><td>${formatFullTime(r.sl)}</td><td>${formatFullTime(r.bl)}</td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -277,12 +291,9 @@
         window.print();
     }
 
-    // --- ฟังก์ชัน Export Excel (พร้อมหัวข้อ) ---
     function exportExcelWithHeader() {
         const data = mode === 'remain' ? db.balance : db.records;
         const title = mode === 'remain' ? "สรุปสิทธิลาคงเหลือ" : "สรุปสิทธิลาที่ใช้ไป";
-
-        // แปลงข้อมูลนาทีเป็นข้อความ Day Hr Min ก่อนส่งออก
         const formattedData = data.map(r => ({
             "รหัสพนักงาน": r.empId,
             "ชื่อ-นามสกุล": r.name,
@@ -291,18 +302,13 @@
             "ลาป่วย (SL)": formatFullTime(r.sl),
             "ลากิจ (BL)": formatFullTime(r.bl)
         }));
-
         const worksheet = XLSX.utils.json_to_sheet(formattedData, { origin: "A2" });
-        
-        // ใส่หัวข้อที่แถว A1
         XLSX.utils.sheet_add_aoa(worksheet, [[title + " (ข้อมูล ณ " + new Date().toLocaleDateString('th-TH') + ")"]], { origin: "A1" });
-
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "LeaveSummary");
         XLSX.writeFile(workbook, `Report_${mode}_${new Date().getTime()}.xlsx`);
     }
 
-    // Tab Logic
     document.getElementById('btnRemain').onclick = (e) => {
         mode = 'remain';
         document.getElementById('main-title').innerText = "สรุปสิทธิลาคงเหลือ";
@@ -322,6 +328,7 @@
     };
 
     document.getElementById('searchInput').oninput = () => { currentPage = 1; render(); };
+    document.getElementById('sortOrder').onchange = () => { currentPage = 1; render(); };
     window.onresize = () => { calculateRows(); render(); };
 </script>
 
