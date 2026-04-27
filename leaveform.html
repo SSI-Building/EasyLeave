@@ -602,6 +602,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // ตรวจสอบสิทธิ์นาที
         const leaveMinutes = calculateLeaveMinutes(startDate.value, startTime.value, endDate.value, endTime.value);
+
+        if (leaveMinutes === 0) {
+        alert("เวลาในการลาต้องมากกว่า 0 กรุณาตรวจสอบวันและเวลาให้ถูกต้อง");
+        return;
+        }
+        
         const leaveType = leaveTypeEl.value;
         let maxMinutes = 0;
         switch(leaveType){
