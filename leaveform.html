@@ -604,7 +604,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const leaveMinutes = calculateLeaveMinutes(startDate.value, startTime.value, endDate.value, endTime.value);
 
         if (leaveMinutes === 0) {
-        alert("เวลาในการลาต้องมากกว่า 0 กรุณาตรวจสอบวันและเวลาให้ถูกต้อง");
+        alert("เวลาไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง เช่น 08:00-17:00");
         return;
         }
         
