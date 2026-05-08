@@ -960,20 +960,27 @@ animate();
             // ---- หาจุดกึ่งกลาง Column 1 ----
             const col1Mid = (tbx1 + colXs[0]) / 2;
 
-            // ---- วาดเส้นแนวนอน ----
-            for (let i = 0; i <= (tby2 - tby1) / rowHeight; i++) {
-                let y = tby1 + i * rowHeight;
-
-                // แถวที่ 3 = i=2, แถวที่ 4 = i=3
-                // แถวที่ 6 = i=5, แถวที่ 7 = i=6
-                if (i === 3 || i === 4 || i === 6 || i === 7) {
-                    // ✅ เริ่มจาก col1Mid
-                    doc.line(col1Mid, y, tbx2, y);
-                } else {
-                    // ✅ เส้นปกติเริ่มจาก tbx1
-                    doc.line(tbx1, y, tbx2, y);
-                }
-            }
+			// ---- วาดเส้นแนวนอน ----
+			for (let i = 0; i <= (tby2 - tby1) / rowHeight; i++) {
+			
+			    let y = tby1 + i * rowHeight;
+			
+			    // เส้นที่อยากให้เป็นจุด
+			    if (i === 3 || i === 4 || i === 6 || i === 7) {
+			
+			        const dottedLine = ".".repeat(132);
+			
+			        doc.setFontSize(10);
+			
+			        // วาดจุดแทนเส้น
+			        doc.text(dottedLine, col1Mid + 0, y + 1);
+			
+			    } else {
+			
+			        // เส้นปกติ
+			        doc.line(tbx1, y, tbx2, y);
+			    }
+			}
 
             // ---- วาดเส้นแนวตั้ง ----
             doc.line(tbx1, tby1, tbx1, tby2);
