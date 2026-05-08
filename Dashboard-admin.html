@@ -831,7 +831,7 @@ animate();
             x = 50; y = 85;
             doc.rect(x, y, size, size, 'S'); // วาดกรอบ
             
-            if (leaveType === "SL") {
+            if (leaveType === "SL1") {
                 doc.setFont("ZapfDingbats"); 
                 doc.setFontSize(size + 12); // ขนาดใหญ่ขึ้น
                 // เลื่อนตำแหน่งให้อยู่กลางกล่อง
@@ -851,7 +851,7 @@ animate();
             // Checkbox 3: ลากิจ
             y = 109;
             doc.rect(x, y, size, size, 'S'); // วาดกรอบ
-            if (leaveType === "BL") {
+            if (leaveType === "BL1") {
                 doc.setFont("ZapfDingbats"); 
                 doc.setFontSize(size + 12); // ปรับขนาดเครื่องหมาย ✓
                 doc.text("3", x + 0.7, y + size - 0.3); // ตำแหน่งเครื่องหมาย ✓
@@ -868,7 +868,7 @@ animate();
             // Checkbox 5: ลาพักร้อน
             x = 125; y = 85;
             doc.rect(x, y, size, size, 'S'); // วาดกรอบ
-            if (leaveType === "AL") {
+            if (leaveType === "AL1") {
                 doc.setFont("ZapfDingbats"); 
                 doc.setFontSize(size + 12); // ปรับขนาดเครื่องหมาย ✓
                 doc.text("3", x + 0.7, y + size - 0.3); 
@@ -1384,9 +1384,9 @@ animate();
     
 
             function getLeaveTypeDisplay(leaveType) {
-                if (leaveType === 'AL') return 'ลาพักร้อน (AL)';
-                if (leaveType === 'SL') return 'ลาป่วย (SL)';
-                if (leaveType === 'BL') return 'ลากิจ (BL)';
+                if (leaveType === 'AL1') return 'ลาพักร้อน (AL)';
+                if (leaveType === 'SL1') return 'ลาป่วย (SL)';
+                if (leaveType === 'BL1') return 'ลากิจ (BL)';
                 return leaveType;
             }
             
