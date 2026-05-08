@@ -275,13 +275,13 @@ btnSubmit.addEventListener("click", async () => {
         const leaveMinutes = parseFloat(leaveData.leaveMinutes) || 0;
         const leaveType = leaveData.leaveType;
 
-        if (leaveType === "AL1") { 
+        if (leaveType === "AL") { 
             set2[3] = (parseFloat(set2[3]) || 0) + leaveMinutes; 
             set1[3] = (parseFloat(set1[3]) || 0) - leaveMinutes; 
-        } else if (leaveType === "SL1") { 
+        } else if (leaveType === "SL") { 
             set2[4] = (parseFloat(set2[4]) || 0) + leaveMinutes; 
             set1[4] = (parseFloat(set1[4]) || 0) - leaveMinutes; 
-        } else if (leaveType === "BL1") { 
+        } else if (leaveType === "BL") { 
             set2[5] = (parseFloat(set2[5]) || 0) + leaveMinutes; 
             set1[5] = (parseFloat(set1[5]) || 0) - leaveMinutes; 
         }
