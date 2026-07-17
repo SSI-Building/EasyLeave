@@ -207,7 +207,7 @@
     #AddButton {
         background: var(--primary-gradient);
     }
-    #AddButton :hover {
+    #AddButton:hover {   /* <--- ลบช่องว่างออก ให้ติดกันแบบนี้ครับ */
         transform: translateY(-3px);
         box-shadow: 0 8px 15px rgba(52, 152, 219, 0.2);
     }
@@ -436,9 +436,8 @@
             <button id="resetButton"><i class="fas fa-undo"></i>Default</button>
             <button class="action-button" id="summaryButton" title="ตารางสรุปทั้งหมด และปริ้นตาราง"><i class="fa fa-table"></i></button>
             <button class="action-button" id="summaryButton2" title="ข้อมูลรายบุคคคล"><i class="fa-solid fa-id-card-clip"></i></button>
-            <button class="action-button" id="AddButton" title="เพิ่ม/ลบ รายชื่อพนักงาน"><i class="fa-solid fa-plus-minus"></i></button>
-            <button class="action-button" id="exportHistoryButton">
-            <i class="fa-solid fa-link"></i></button>
+            <button class="action-button" id="AddButton" title="เพิ่ม/ลบ รายชื่อพนักงาน"><i class="fa-solid fa-user-plus"></i></button>
+            <button class="action-button" id="exportHistoryButton"title="Update ข้อมูลการลาลงในระบบ SSI"><i class="fa-solid fa-link"></i></button>
         </div>
         
         <div class="filter-controls">
@@ -663,7 +662,7 @@ document.getElementById("exportHistoryButton").addEventListener("click", exportH
 async function exportHistory() {
     // แสดง Loading
     document.getElementById("loading-overlay").classList.add("visible");
-    document.querySelector(".loading-text").textContent = "กExport Excel & Link to Upload...";
+    document.querySelector(".loading-text").textContent = "Export Excel & Link to Upload...";
 
     try {
         // 1. ดึงข้อมูลเบื้องหลังโดยไม่เปิด Tab ใหม่
