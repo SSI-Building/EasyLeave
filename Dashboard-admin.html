@@ -211,6 +211,14 @@
         transform: translateY(-3px);
         box-shadow: 0 8px 15px rgba(52, 152, 219, 0.2);
     }
+    #exportHistoryButton{
+    background:#1D6F42;
+}
+
+#exportHistoryButton:hover{
+    transform:translateY(-3px);
+    box-shadow:0 8px 15px rgba(29,111,66,.3);
+}
     
 /* ==================== ปุ่มบันทึก ==================== */
 .save-button {
@@ -429,6 +437,9 @@
             <button class="action-button" id="summaryButton" title="ตารางสรุปทั้งหมด และปริ้นตาราง"><i class="fa fa-table"></i></button>
             <button class="action-button" id="summaryButton2" title="ข้อมูลรายบุคคคล"><i class="fa-solid fa-id-card-clip"></i></button>
             <button class="action-button" id="AddButton" title="เพิ่ม/ลบ รายชื่อพนักงาน"><i class="fa-solid fa-plus-minus"></i></button>
+            <button class="action-button" id="exportHistoryButton">
+            <i class="fa-solid fa-file-excel"></i>
+            </button>
         </div>
         
         <div class="filter-controls">
@@ -646,7 +657,33 @@ animate();
             return d.toLocaleDateString("th-TH", { timeZone: "Asia/Bangkok" });
             }
 
+const EXPORT_URL =
+"https://script.google.com/macros/s/AKfycbw9FGCNCI2nkv1mHcANpFjYIniaTO_tdLYx5LGD9xuDcbw0pnc9wd7D0yUtROUCAYsW/exec?action=exportHistory";
 
+document
+    .getElementById("exportHistoryButton")
+    .addEventListener("click", exportHistory);
+
+function exportHistory() {
+
+    // แสดง Loading
+    document.getElementById("loading-overlay").classList.add("visible");
+    document.querySelector(".loading-text").textContent = "กำลัง Export Excel...";
+
+    // เปิด Apps Script เพื่อดาวน์โหลด Excel
+    window.open(EXPORT_URL, "_blank");
+
+    // รอ 2 วินาทีแล้วเปิดหน้า Upload
+    setTimeout(() => {
+
+        document.getElementById("loading-overlay").classList.remove("visible");
+        document.querySelector(".loading-text").textContent = "กำลังโหลดข้อมูล...";
+
+        window.open("http://192.168.3.31/leave", "_blank");
+
+    }, 2000);
+
+}
             // function printRow(rowData) {const { jsPDF } = window.jspdf; 'เว้นไว้มันยาวมาก'
             //function printRow(rowData)เว้นไว้
             function printRow(rowData) {
