@@ -657,32 +657,57 @@ animate();
             return d.toLocaleDateString("th-TH", { timeZone: "Asia/Bangkok" });
             }
 
-const EXPORT_URL =
-"https://script.google.com/macros/s/AKfycbw9FGCNCI2nkv1mHcANpFjYIniaTO_tdLYx5LGD9xuDcbw0pnc9wd7D0yUtROUCAYsW/exec?action=exportHistory";
+const EXPORT_URL = "https://script.google.com/macros/s/AKfycbw9FGCNCI2nkv1mHcANpFjYIniaTO_tdLYx5LGD9xuDcbw0pnc9wd7D0yUtROUCAYsW/exec?action=exportHistory";
 
-document
-    .getElementById("exportHistoryButton")
-    .addEventListener("click", exportHistory);
+document.getElementById("exportHistoryButton").addEventListener("click", exportHistory);
 
-function exportHistory() {
-
+async function exportHistory() {
     // แสดง Loading
     document.getElementById("loading-overlay").classList.add("visible");
     document.querySelector(".loading-text").textContent = "กำลัง Export Excel...";
 
-    // เปิด Apps Script เพื่อดาวน์โหลด Excel
-    window.open(EXPORT_URL, "_blank");
+    try {
+        // 1. ดึงข้อมูลเบื้องหลังโดยไม่เปิด Tab ใหม่
+        const response = await fetch(EXPORT_URL);
+        const result = await response.json();
 
-    // รอ 2 วินาทีแล้วเปิดหน้า Upload
-    setTimeout(() => {
+        // 2. แปลงข้อมูลที่ได้กลับมาเป็นไฟล์ (Blob)
+        const fileResponse = await fetch(`data:${result.mimeType};base64,${result.data}`);
+        const blob = await fileResponse.blob();
 
-        document.getElementById("loading-overlay").classList.remove("visible");
+        // 3. สร้างชื่อไฟล์รูปแบบ BUS-LeaveSystem-Update-YYYYMMDDHHMMSS
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const hh = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        const fileName = `BUS-LeaveSystem-Update-${yyyy}${mm}${dd}${hh}${min}${ss}.xlsx`;
+
+        // 4. สร้างคำสั่งจำลองการกดดาวน์โหลด
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = downloadUrl;
+        a.download = fileName; // บังคับเปลี่ยนชื่อไฟล์ตรงนี้
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(downloadUrl); // คืนหน่วยความจำ
+
+        // 5. รอ 2 วินาทีแล้วเปิดหน้า Upload (ทำงานตามปกติของคุณเลย)
         document.querySelector(".loading-text").textContent = "กำลังโหลดข้อมูล...";
+        setTimeout(() => {
+            document.getElementById("loading-overlay").classList.remove("visible");
+            window.open("http://192.168.3.31/leave", "_blank");
+        }, 2000);
 
-        window.open("http://192.168.3.31/leave", "_blank");
-
-    }, 2000);
-
+    } catch (error) {
+        console.error("เกิดข้อผิดพลาดในการโหลดไฟล์:", error);
+        alert("เกิดข้อผิดพลาดในการดาวน์โหลด กรุณาลองใหม่อีกครั้ง");
+        document.getElementById("loading-overlay").classList.remove("visible");
+    }
 }
             // function printRow(rowData) {const { jsPDF } = window.jspdf; 'เว้นไว้มันยาวมาก'
             //function printRow(rowData)เว้นไว้
