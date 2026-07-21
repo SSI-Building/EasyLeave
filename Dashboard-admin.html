@@ -1161,121 +1161,123 @@
                 });
             }
 
-        async function printRow(rowData) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            await drawSingleLeavePage(doc, rowData);
-            const blob = doc.output('blob');
-            const url = URL.createObjectURL(blob);
-            const win = window.open(url, '_blank');
-            if (!win) { doc.save(`ใบลา_${rowData[1]}.pdf`); }
-        }
+                    async function printRow(rowData) {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF();
+                        await drawSingleLeavePage(doc, rowData);
+                        const blob = doc.output('blob');
+                        const url = URL.createObjectURL(blob);
+                        const win = window.open(url, '_blank');
+                        if (!win) { doc.save(`ใบลา_${rowData[1]}.pdf`); }
+                    }
 
-        // ==================== 6. AI Chat Bot & Commands ====================
-        const GROQ_API_KEY = "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"; 
+                    // ==================== 6. AI Chat Bot & Commands ====================
+                    const GROQ_API_KEY = "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"; 
 
-        const chatToggleBtn = document.getElementById('chat-toggle-btn');
-        const chatWindow = document.getElementById('ai-chat-window');
-        const closeChatBtn = document.getElementById('close-chat-btn');
-        const sendChatBtn = document.getElementById('send-chat-btn');
-        const chatInput = document.getElementById('chat-input');
-        const chatMessages = document.getElementById('chat-messages');
+                    const chatToggleBtn = document.getElementById('chat-toggle-btn');
+                    const chatWindow = document.getElementById('ai-chat-window');
+                    const closeChatBtn = document.getElementById('close-chat-btn');
+                    const sendChatBtn = document.getElementById('send-chat-btn');
+                    const chatInput = document.getElementById('chat-input');
+                    const chatMessages = document.getElementById('chat-messages');
 
-        chatToggleBtn.addEventListener('click', () => chatWindow.classList.remove('hidden'));
-        closeChatBtn.addEventListener('click', () => chatWindow.classList.add('hidden'));
+                    chatToggleBtn.addEventListener('click', () => chatWindow.classList.remove('hidden'));
+                    closeChatBtn.addEventListener('click', () => chatWindow.classList.add('hidden'));
 
-        sendChatBtn.addEventListener('click', handleSendMessage);
-        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSendMessage(); });
+                    sendChatBtn.addEventListener('click', handleSendMessage);
+                    chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSendMessage(); });
 
-		async function handleSendMessage() {
-		    const text = chatInput.value.trim();
-		    if (!text) return;
-		
-		    appendMessage(text, 'user-message');
-		    chatInput.value = '';
-		    const typingMsg = appendMessage('กำลังคิด...', 'ai-message');
-		
-		    // เช็คว่าเป็นคำสั่งด่วนหรือไม่ (ถ้าใช่ ไม่ต้องส่งข้อมูลตารางไปเลย เพื่อประหยัดโทเค็น)
-		    const isCommand = text.includes("ปริ้น") || text.includes("พิมพ์") || text.includes("อนุมัติ");
-		
-		    let dataContext = "";
-		    if (!isCommand) {
-		        // 💡 ส่งข้อมูลแบบกระชับสุดๆ แต่มี "ชื่อ, ประเภท, วันที่เริ่มลา, สถานะ" ครบถ้วน
-		        // เพื่อให้ AI เอาไปคำนวณสัปดาห์นี้ / สัปดาห์ที่แล้ว และนับจำนวนได้
-		        dataContext = filteredAndSortedData.map(row => 
-		            `[${row[1]}|ประเภท:${row[4]}|เริ่ม:${(row[5]||'').substring(0,10)}|สถานะ:${row[10]}]`
-		        ).slice(0, 25).join(", ");
-		    }
-		
-		    // ดึงวันที่ปัจจุบันของระบบไปบอก AI
-		    const todayStr = new Date().toISOString().substring(0, 10);
-		
-		    const systemPrompt = `คุณคือผู้ช่วย HR อัจฉริยะ วันที่ปัจจุบันคือ: ${todayStr}
-		    ข้อมูลการลาในระบบ: ${dataContext}
-		    
-		    คำแนะนำการวิเคราะห์:
-		    - คุณสามารถนับจำนวนครั้งและวิเคราะห์ได้ว่า "ใครลามากสุด" จากข้อมูลที่ให้ไป
-		    - หากมีคำถามเกี่ยวกับ "สัปดาห์นี้" หรือ "สัปดาห์ที่แล้ว" ให้ตรวจสอบวันที่ (เริ่ม: YYYY-MM-DD) เทียบกับวันที่ปัจจุบัน แล้วสรุปคำตอบให้ชัดเจน
-		    
-		    เงื่อนไขคำสั่งพิเศษ:
-		    1. ถ้าผู้ใช้สั่ง "ปริ้น" หรือ "พิมพ์" แต่ยังไม่ระบุสถานะ ให้ตอบกลับว่า "ต้องการปริ้นรายการที่ อนุมัติแล้ว หรือ รออนุมัติ ครับ?"
-		    2. ถ้าผู้ใช้ระบุสถานะชัดเจน ให้ตอบกลับเป็น JSON เท่านั้น: {"action":"print", "status":"Approved"} หรือ {"action":"print", "status":"pending"}
-		    3. ถ้าผู้ใช้สั่ง "อนุมัติทั้งหมด" ให้ตอบกลับเป็น JSON เท่านั้น: {"action":"approve_all"}
-		    4. นอกนั้นให้ตอบคำถามทั่วไปเป็นภาษาไทย สั้น กระชับ ตรงประเด็น`;
-		
-		    try {
-		        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-		            method: "POST",
-		            headers: { 
-		                "Authorization": `Bearer ${GROQ_API_KEY}`, 
-		                "Content-Type": "application/json" 
-		            },
-		            body: JSON.stringify({
-		                model: "llama-3.3-70b-versatile",
-		                messages: [
-		                    { role: "system", content: systemPrompt }, 
-		                    { role: "user", content: text }
-		                ],
-		                temperature: 0.2, 
-		                max_tokens: 400
-		            })
-		        });
-		
-		        const data = await response.json();
-		        chatMessages.removeChild(typingMsg);
-		
-		        if (!response.ok || data.error) {
-		            appendMessage(`⚠️ Groq แจ้งว่า: ${data.error?.message || response.statusText}`, 'ai-message');
-		            return;
-		        }
-		
-		        let aiResponse = data.choices[0].message.content.trim().replace(/```json/g, '').replace(/```/g, '').trim();
-		
-		        try {
-		            const command = JSON.parse(aiResponse);
-		            if (command.action === "print") {
-		                appendMessage(`รับทราบครับ! กำลังรวบรวม PDF สถานะ "${command.status}" เป็นไฟล์เดียว...`, 'ai-message');
-		                executePrintByAI(command.status);
-		            } else if (command.action === "approve_all") {
-		                appendMessage('รับทราบครับ! กำลังดำเนินการอนุมัติรายการที่รออยู่ทั้งหมด...', 'ai-message');
-		                executeApproveAllByAI();
-		            }
-		        } catch (e) {
-		            let quickOptions = [];
-		            if (aiResponse.includes("ต้องการปริ้นรายการที่")) {
-		                quickOptions = [
-		                    { label: "✅ อนุมัติแล้ว", value: "ปริ้นรายการที่อนุมัติแล้ว" },
-		                    { label: "⏳ รออนุมัติ", value: "ปริ้นรายการที่รออนุมัติ" }
-		                ];
-		            }
-		            appendMessage(aiResponse, 'ai-message', quickOptions);
-		        }
-		    } catch (error) {
-		        console.error("AI Error:", error);
-		        chatMessages.removeChild(typingMsg);
-		        appendMessage('เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI', 'ai-message');
-		    }
-		}
+                      async function handleSendMessage() {
+                          let text = chatInput.value.trim();
+                          if (!text) return;
+
+                          appendMessage(text, 'user-message');
+                          chatInput.value = '';
+                          const typingMsg = appendMessage('กำลังคิด...', 'ai-message');
+
+                          const isCommand = text.includes("ปริ้น") || text.includes("พิมพ์") || text.includes("อนุมัติ");
+                          
+                          let dataContext = "";
+                          if (!isCommand) {
+                              dataContext = filteredAndSortedData.map(row => 
+                                  `[ชื่อ:${row[1]}|ประเภท:${row[4]}|เริ่ม:${(row[5]||'').substring(0,10)}|สถานะ:${row[10]}]`
+                              ).slice(0, 30).join(", ");
+                          }
+
+                          const todayStr = new Date().toISOString().substring(0, 10);
+
+                          const systemPrompt = `คุณคือผู้ช่วย HR วันที่ปัจจุบันคือ: ${todayStr}
+                          ข้อมูลในระบบ: ${dataContext}
+                          
+                          🧠 ส่วนการวิเคราะห์ข้อมูล:
+                          - สามารถนับจำนวนครั้งและบอกได้ว่า "ใครลามากสุด" จากข้อมูลที่ให้ไป
+                          
+                          🖨️ ส่วนกฎการสั่งงาน (สำคัญมาก):
+                          1. ถ้าสั่ง "ปริ้น" หรือ "พิมพ์" เดี่ยวๆ -> ให้ถามว่า "ต้องการปริ้นสถานะ อนุมัติแล้ว หรือ รออนุมัติ ครับ?"
+                          2. ถ้าระบุสถานะแล้ว (เช่น "ปริ้นที่อนุมัติแล้ว") -> ห้ามพิมพ์รายชื่อ ให้ถามว่า "พบรายการดังกล่าว ต้องการปริ้นทั้งหมด หรือ ระบุหน้า (หน้า 1, หน้า 2)"
+                          3. ถ้าสั่ง "ปริ้นทั้งหมด" -> ตอบ JSON: {"action":"print", "status":"Approved", "type":"all"} (เปลี่ยน status เป็น pending หากเลือก รออนุมัติ)
+                          4. ถ้าสั่งเป็นหน้า เช่น "หน้า 1 (Approved)" -> ตอบ JSON: {"action":"print", "status":"Approved", "type":"page", "page": 1}
+                          5. ถ้าผู้ใช้สั่งเกี่ยวกับอนุมัติ เช่น "ช่วยอนุมัติหน่อย", "อนุมัติให้หน่อย" -> ให้ถามยืนยันว่า "ต้องการอนุมัติรายการที่รออยู่ทั้งหมดเลยใช่ไหมครับ?"
+                          6. ถ้าผู้ใช้ยืนยันชัดเจน เช่น "อนุมัติทั้งหมด", "ใช่ทั้งหมด" -> ตอบ JSON: {"action":"approve_all"}
+                          7. นอกนั้นตอบสั้นๆ กระชับ เป็นภาษาไทย`;
+
+                          try {
+                              const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                                  method: "POST",
+                                  headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+                                  body: JSON.stringify({
+                                      model: "llama-3.3-70b-versatile",
+                                      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: text }],
+                                      temperature: 0.1, max_tokens: 300
+                                  })
+                              });
+
+                              const data = await response.json();
+                              chatMessages.removeChild(typingMsg);
+
+                              if (!response.ok || data.error) return appendMessage(`⚠️ Groq แจ้งว่า: ${data.error?.message}`, 'ai-message');
+
+                              let aiResponse = data.choices[0].message.content.trim().replace(/```json/g, '').replace(/```/g, '').trim();
+
+                              try {
+                                  const command = JSON.parse(aiResponse);
+                                  if (command.action === "approve_all") {
+                                      appendMessage('รับทราบครับ! กำลังดำเนินการอนุมัติ...', 'ai-message');
+                                      executeApproveAllByAI();
+                                  } else if (command.action === "print") {
+                                      appendMessage(`รับทราบครับ! กำลังเริ่มจัดทำเอกสาร...`, 'ai-message');
+                                      executePrintByAI(command.status, command.type, command.page); 
+                                  }
+                              } catch (e) {
+                                  let quickOptions = [];
+                                  
+                                  if (aiResponse.includes("อนุมัติแล้ว หรือ รออนุมัติ")) {
+                                      quickOptions = [
+                                          { label: "✅ อนุมัติแล้ว", value: "ปริ้นที่อนุมัติแล้ว" },
+                                          { label: "⏳ รออนุมัติ", value: "ปริ้นที่รออนุมัติ" }
+                                      ];
+                                  } else if (aiResponse.includes("ระบุหน้า")) {
+                                      const targetStatus = (text.includes("Approved") || text.includes("อนุมัติแล้ว")) ? "Approved" : "pending";
+                                      quickOptions = [
+                                          { label: "🖨️ ปริ้นทั้งหมด", value: `ปริ้นทั้งหมด (${targetStatus})` },
+                                          { label: "📄 หน้า 1", value: `หน้า 1 (${targetStatus})` },
+                                          { label: "📄 หน้า 2", value: `หน้า 2 (${targetStatus})` },
+                                          { label: "❌ ยกเลิก", value: "ยกเลิก" }
+                                      ];
+                                  } else if (aiResponse.includes("อนุมัติรายการที่รออยู่ทั้งหมดเลยใช่ไหม")) {
+                                      // 🌟 เพิ่มปุ่มให้กดยืนยันอนุมัติแบบง่ายๆ
+                                      quickOptions = [
+                                          { label: "✅ ใช่, อนุมัติทั้งหมด", value: "อนุมัติทั้งหมด" },
+                                          { label: "❌ ไม่เป็นไร", value: "ยกเลิก" }
+                                      ];
+                                  }
+                                  appendMessage(aiResponse, 'ai-message', quickOptions);
+                              }
+                          } catch (error) {
+                              chatMessages.removeChild(typingMsg);
+                              appendMessage('เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI', 'ai-message');
+                          }
+                      }
 
         function appendMessage(text, className, options = []) {
             const msgDiv = document.createElement('div');
@@ -1325,29 +1327,48 @@
             return msgDiv;
         }
 
-        async function executePrintByAI(status) {
-            const itemsToPrint = allData.filter(row => row[10] && row[10].toLowerCase() === status.toLowerCase());
-            if (itemsToPrint.length === 0) {
-                appendMessage(`ไม่พบรายการที่มีสถานะ "${status}" ให้ปริ้นเลยครับ`, 'ai-message');
-                return;
-            }
+                  async function executePrintByAI(status, type, pageNum) {
+                      let itemsToPrint = allData.filter(row => row[10] && row[10].toLowerCase() === status.toLowerCase());
+                      if (itemsToPrint.length === 0) return appendMessage(`ไม่พบรายการสถานะ "${status}" เลยครับ`, 'ai-message');
+                      
+                      if (type === "page" && pageNum) {
+                          const rowsPerPage = 7;
+                          const start = (pageNum - 1) * rowsPerPage;
+                          const end = start + rowsPerPage;
+                          itemsToPrint = itemsToPrint.slice(start, end);
+                          if (itemsToPrint.length === 0) return appendMessage(`หน้า ${pageNum} ไม่มีข้อมูลให้ปริ้นแล้วครับ`, 'ai-message');
+                      }
 
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                for (let i = 0; i < itemsToPrint.length; i++) {
-                    if (i > 0) doc.addPage();
-                    await drawSingleLeavePage(doc, itemsToPrint[i]);
-                }
-                const blob = doc.output('blob');
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-                appendMessage(`สร้าง PDF รวมจำนวน ${itemsToPrint.length} รายการเสร็จเรียบร้อยครับ!`, 'ai-message');
-            } catch (error) {
-                console.error("Print Error:", error);
-                appendMessage('เกิดข้อผิดพลาดในการสร้างไฟล์ PDF ครับ', 'ai-message');
-            }
-        }
+                      // 🌟 ดึง Loading Screen (ตัวหมุนๆ สีฟ้า) ขึ้นมาโชว์
+                      const loadingOverlay = document.getElementById('loading-overlay');
+                      const loadingText = document.querySelector('.loading-text');
+                      if (loadingText) loadingText.textContent = `กำลังสร้างเอกสาร PDF ${itemsToPrint.length} แผ่น...`;
+                      loadingOverlay.classList.add('visible'); // เปิดหน้าจอโหลด
+
+                      appendMessage(`กำลังสร้าง PDF จำนวน ${itemsToPrint.length} แผ่น (หน้าจอโหลดกำลังทำงาน)...`, 'ai-message');
+                      
+                      try {
+                          const { jsPDF } = window.jspdf;
+                          const doc = new jsPDF();
+                          
+                          for (let i = 0; i < itemsToPrint.length; i++) {
+                              if (i > 0) doc.addPage();
+                              await drawSingleLeavePage(doc, itemsToPrint[i]);
+                          }
+                          
+                          const fileName = type === 'page' ? `ใบลา_${status}_หน้า_${pageNum}.pdf` : `ใบลา_${status}_ทั้งหมด.pdf`;
+                          doc.save(fileName);
+                          
+                          appendMessage(`ดาวน์โหลด ${fileName} สำเร็จเรียบร้อยครับ! 🎉`, 'ai-message');
+                      } catch (error) {
+                          console.error(error);
+                          appendMessage('เกิดข้อผิดพลาดในการสร้างไฟล์ PDF', 'ai-message');
+                      } finally {
+                          // 🌟 ปิดหน้าจอโหลดเมื่อเสร็จสิ้น
+                          loadingOverlay.classList.remove('visible');
+                          if (loadingText) loadingText.textContent = 'กำลังโหลดข้อมูล...'; // คืนค่าข้อความเดิม
+                      }
+                  }
 
         async function executeApproveAllByAI() {
             const pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
