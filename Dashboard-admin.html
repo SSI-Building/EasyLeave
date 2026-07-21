@@ -1327,48 +1327,62 @@
             return msgDiv;
         }
 
-                  async function executePrintByAI(status, type, pageNum) {
-                      let itemsToPrint = allData.filter(row => row[10] && row[10].toLowerCase() === status.toLowerCase());
-                      if (itemsToPrint.length === 0) return appendMessage(`ไม่พบรายการสถานะ "${status}" เลยครับ`, 'ai-message');
-                      
-                      if (type === "page" && pageNum) {
-                          const rowsPerPage = 7;
-                          const start = (pageNum - 1) * rowsPerPage;
-                          const end = start + rowsPerPage;
-                          itemsToPrint = itemsToPrint.slice(start, end);
-                          if (itemsToPrint.length === 0) return appendMessage(`หน้า ${pageNum} ไม่มีข้อมูลให้ปริ้นแล้วครับ`, 'ai-message');
-                      }
+                      // ==========================================
+                      // 🖨️ ระบบปริ้น (แบบเหมาทั้งหมด หรือระบุหน้า)
+                      // ==========================================
+                      async function executePrintByAI(status, type, pageNum) {
+                          // 🌟 แก้ไข: เปลี่ยนจาก allData เป็น filteredAndSortedData 
+                          // เพื่อให้ AI จัดเรียงข้อมูล (ใหม่สุดอยู่หน้า 1) ตรงกับหน้าเว็บ 100%
+                          let itemsToPrint = filteredAndSortedData.filter(row => row[10] && row[10].toLowerCase() === status.toLowerCase());
 
-                      // 🌟 ดึง Loading Screen (ตัวหมุนๆ สีฟ้า) ขึ้นมาโชว์
-                      const loadingOverlay = document.getElementById('loading-overlay');
-                      const loadingText = document.querySelector('.loading-text');
-                      if (loadingText) loadingText.textContent = `กำลังสร้างเอกสาร PDF ${itemsToPrint.length} แผ่น...`;
-                      loadingOverlay.classList.add('visible'); // เปิดหน้าจอโหลด
-
-                      appendMessage(`กำลังสร้าง PDF จำนวน ${itemsToPrint.length} แผ่น (หน้าจอโหลดกำลังทำงาน)...`, 'ai-message');
-                      
-                      try {
-                          const { jsPDF } = window.jspdf;
-                          const doc = new jsPDF();
-                          
-                          for (let i = 0; i < itemsToPrint.length; i++) {
-                              if (i > 0) doc.addPage();
-                              await drawSingleLeavePage(doc, itemsToPrint[i]);
+                          if (itemsToPrint.length === 0) {
+                              return appendMessage(`ไม่พบรายการสถานะ "${status}" เลยครับ`, 'ai-message');
                           }
+
+                          // 2. ถ้าผู้ใช้สั่งปริ้น "แบบระบุหน้า" ให้หั่นข้อมูล (หน้าละ 7 คน)
+                          if (type === "page" && pageNum) {
+                              const rowsPerPage = 7; 
+                              const start = (pageNum - 1) * rowsPerPage;
+                              const end = start + rowsPerPage;
+                              
+                              itemsToPrint = itemsToPrint.slice(start, end);
+                              
+                              if (itemsToPrint.length === 0) {
+                                  return appendMessage(`หน้า ${pageNum} ไม่มีข้อมูลให้ปริ้นแล้วครับ`, 'ai-message');
+                              }
+                          }
+
+                          // 🌟 ดึง Loading Screen (ตัวหมุนๆ) ขึ้นมาโชว์บังหน้าจอ
+                          const loadingOverlay = document.getElementById('loading-overlay');
+                          const loadingText = document.querySelector('.loading-text');
+                          if (loadingText) loadingText.textContent = `กำลังสร้างเอกสาร PDF ${itemsToPrint.length} แผ่น...`;
+                          loadingOverlay.classList.add('visible'); 
+
+                          appendMessage(`กำลังสร้าง PDF จำนวน ${itemsToPrint.length} แผ่น (หน้าจอโหลดกำลังทำงาน)...`, 'ai-message');
                           
-                          const fileName = type === 'page' ? `ใบลา_${status}_หน้า_${pageNum}.pdf` : `ใบลา_${status}_ทั้งหมด.pdf`;
-                          doc.save(fileName);
-                          
-                          appendMessage(`ดาวน์โหลด ${fileName} สำเร็จเรียบร้อยครับ! 🎉`, 'ai-message');
-                      } catch (error) {
-                          console.error(error);
-                          appendMessage('เกิดข้อผิดพลาดในการสร้างไฟล์ PDF', 'ai-message');
-                      } finally {
-                          // 🌟 ปิดหน้าจอโหลดเมื่อเสร็จสิ้น
-                          loadingOverlay.classList.remove('visible');
-                          if (loadingText) loadingText.textContent = 'กำลังโหลดข้อมูล...'; // คืนค่าข้อความเดิม
+                          try {
+                              const { jsPDF } = window.jspdf;
+                              const doc = new jsPDF();
+                              
+                              for (let i = 0; i < itemsToPrint.length; i++) {
+                                  if (i > 0) doc.addPage();
+                                  await drawSingleLeavePage(doc, itemsToPrint[i]);
+                              }
+                              
+                              // บังคับดาวน์โหลดลงเครื่อง
+                              const fileName = type === 'page' ? `ใบลา_${status}_หน้า_${pageNum}.pdf` : `ใบลา_${status}_ทั้งหมด.pdf`;
+                              doc.save(fileName);
+                              
+                              appendMessage(`ดาวน์โหลด ${fileName} สำเร็จเรียบร้อยครับ! 🎉`, 'ai-message');
+                          } catch (error) {
+                              console.error(error);
+                              appendMessage('เกิดข้อผิดพลาดในการสร้างไฟล์ PDF', 'ai-message');
+                          } finally {
+                              // 🌟 ปิดหน้าจอโหลดเมื่อเสร็จสิ้น
+                              loadingOverlay.classList.remove('visible');
+                              if (loadingText) loadingText.textContent = 'กำลังโหลดข้อมูล...'; // คืนค่าข้อความเดิม
+                          }
                       }
-                  }
 
         async function executeApproveAllByAI() {
             const pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
