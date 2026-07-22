@@ -1189,7 +1189,12 @@
                     }
 
                     // ==================== 6. AI Chat Bot & Commands ====================
-                    const GROQ_API_KEY = "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"; 
+                    const GROQ_API_KEYS = [
+                                            "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",
+                                            "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"
+                                            // ถ้าอนาคตมีคีย์เพิ่ม ก็ใส่ลูกน้ำแล้วเพิ่มบรรทัดต่อได้เลยครับ
+                                            ];
+                    let currentKeyIndex = 0; // ตัวแปรสำหรับจำว่าตอนนี้ใช้คีย์ตัวที่เท่าไหร่
 
                     const chatToggleBtn = document.getElementById('chat-toggle-btn');
                     const chatWindow = document.getElementById('ai-chat-window');
@@ -1204,187 +1209,204 @@
                     sendChatBtn.addEventListener('click', handleSendMessage);
                     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSendMessage(); });
 
-                    async function handleSendMessage() {
-                        let text = chatInput.value.trim();
-                        if (!text) return;
+                                async function handleSendMessage() {
+                                                        let text = chatInput.value.trim();
+                                                        if (!text) return;
 
-                        appendMessage(text, 'user-message');
-                        chatInput.value = '';
-                        const typingMsg = appendMessage('กำลังคิด...', 'ai-message');
+                                                        appendMessage(text, 'user-message');
+                                                        chatInput.value = '';
+                                                        const typingMsg = appendMessage('กำลังคิด...', 'ai-message');
 
-                        const isCommand = text.includes("ปริ้น") || text.includes("พิมพ์") || text.includes("อนุมัติ");
-                        
-                        let dataContext = "";
-                        if (!isCommand) {
-                            dataContext = filteredAndSortedData.map(row => 
-                                `[ชื่อ:${row[1]}|ประเภท:${row[4]}|เริ่ม:${(row[5]||'').substring(0,10)}|สถานะ:${row[10]}]`
-                            ).slice(0, 30).join(", ");
-                        }
+                                                        const isCommand = text.includes("ปริ้น") || text.includes("พิมพ์") || text.includes("อนุมัติ");
+                                                        
+                                                        let dataContext = "";
+                                                        // ปิดการดึงข้อมูลพนักงานส่งไปให้ AI เพื่อประหยัดโควตา Token
+                                                        // if (!isCommand) {
+                                                        //     dataContext = filteredAndSortedData.map(row => 
+                                                        //         `[ชื่อ:${row[1]}|ประเภท:${row[4]}|เริ่ม:${(row[5]||'').substring(0,10)}|สถานะ:${row[10]}]`
+                                                        //     ).slice(0, 30).join(", ");
+                                                        // }
 
-                        const todayStr = new Date().toISOString().substring(0, 10);
+                                                        const todayStr = new Date().toISOString().substring(0, 10);
 
-                        const systemPrompt = `คุณคือผู้ช่วย HR ที่ฉลาดและเป็นมิตร วันที่ปัจจุบันคือ: ${todayStr}
-                        ข้อมูลในระบบ: ${dataContext}
+                                                        const systemPrompt = `คุณคือผู้ช่วย HR ที่ฉลาดและเป็นมิตร วันที่ปัจจุบันคือ: ${todayStr}
+                                                        ข้อมูลในระบบ: ${dataContext}
+                                                        
+                                                        🧠 บทบาทของคุณ:
+                                                        - คุณสามารถคุยเล่น ตอบคำถามทั่วไป ปรึกษาปัญหา HR หรือเรื่องทั่วไปได้อย่างเป็นธรรมชาติ
+                                                        - สามารถวิเคราะห์ข้อมูลจาก Context เช่น "ใครลามากสุด" "วันนี้มีคนลาไหม"
+                                                        - **สำคัญมาก:** ถ้าผู้ใช้พิมพ์แชทพูดคุยทั่วไป ให้คุณตอบเป็น "ข้อความภาษาไทยปกติ"
+                                                        - **สำคัญที่สุด:** แต่ถ้าผู้ใช้ "สั่งให้ควบคุมหน้าเว็บ" ให้คุณตอบกลับเป็นรูปแบบ JSON เท่านั้น (ห้ามมีข้อความอื่นปนเด็ดขาด)
+                                                        
+                                                        💻 ควบคุมหน้าเว็บ (ตอบเป็น JSON เท่านั้น):
+                                                        1. สั่ง "รีเฟรช", "โหลดหน้าใหม่" -> {"action":"refresh"}
+                                                        2. สั่ง "รีเซ็ต", "ล้างค่า" -> {"action":"reset"}
+                                                        3. หาชื่อ (เช่น "หาชื่อ สมชาย") -> {"action":"search", "keyword":"สมชาย"}
+                                                        4. "เปิดตารางสรุป" -> {"action":"summary"}
+                                                        11. กรองประเภทการลา (เช่น ลาป่วย, ลาพักร้อน) -> {"action":"filter_type", "type":"SL1"} (ใช้ SL1=ป่วย, AL1=พักร้อน, BL1=กิจ)
+                                                        12. กรองสถานะ (เช่น ขอที่อนุมัติแล้ว) -> {"action":"filter_status", "status":"Approved"} (ใช้ Approved, pending, Rejected)
+                                                        13. เปลี่ยนวันที่ (เช่น ขอดูของเดือนนี้) -> {"action":"set_date", "start":"YYYY-MM-01", "end":"YYYY-MM-31"} (คำนวณวันที่ให้ถูกต้องตามที่ขอ)
+                                                        14. จัดเรียงข้อมูล (เช่น เรียงจากเก่าไปใหม่) -> {"action":"sort"}
+                                                        15. ส่งออกข้อมูล / อัปเดต SSI -> {"action":"export"}
+                                                        16. เพิ่มพนักงาน / ลบพนักงาน -> {"action":"nav_add"}
+                                                        17. ดูข้อมูลรายบุคคล -> {"action":"nav_personal"}
+                                                        
+                                                        🖨️ งานเอกสารและอนุมัติ (ห้ามลืมเด็ดขาด ตอบตามนี้เท่านั้น):
+                                                        5. สั่ง "ปริ้น" หรือ "พิมพ์" เดี่ยวๆ -> ให้ถามข้อความว่า "ต้องการปริ้นสถานะ อนุมัติแล้ว หรือ รออนุมัติ ครับ?"
+                                                        6. ถ้าผู้ใช้พิมพ์ว่า "ปริ้นที่รออนุมัติ" -> ให้ถามข้อความว่า "ต้องการปริ้น ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง ครับ?"
+                                                        7. ถ้าระบุสถานะครบแล้ว (เช่น "ปริ้นที่อนุมัติแล้ว", "รออนุมัติ ทั้งหมด", "รออนุมัติ แบบรับค่าจ้าง") -> ตอบข้อความว่า "พบรายการดังกล่าว ต้องการปริ้นทั้งหมด หรือ ระบุหน้า (หน้า 1, หน้า 2) ครับ?"
+                                                        8. สั่งปริ้นระบุจำนวนหน้าหรือทั้งหมด (เช่น "ปริ้นทั้งหมด (รออนุมัติ แบบรับค่าจ้าง)") -> ตอบ JSON: {"action":"print", "status":"pending", "pay_type":"paid", "type":"all"} (คำแนะนำ: pay_type ใช้ "all"=ทั้งหมด, "paid"=รับค่าจ้าง, "unpaid"=ไม่รับค่าจ้าง / ส่วน status ใช้ "Approved" หรือ "pending")
+                                                        9. สั่งปริ้นระบุหน้า (เช่น "หน้า 1 (ปริ้นที่อนุมัติแล้ว)") -> ตอบ JSON: {"action":"print", "status":"Approved", "pay_type":"all", "type":"page", "page": 1}
+                                                        10. ถ้าสั่ง "อนุมัติทั้งหมด" -> {"action":"approve_all"}`;
 
-                        🧠 บทบาทของคุณ:
-                        - คุณสามารถคุยเล่น ตอบคำถามทั่วไป ปรึกษาปัญหา HR หรือเรื่องทั่วไปได้อย่างเป็นธรรมชาติ
-                        - สามารถวิเคราะห์ข้อมูลจาก Context เช่น "ใครลามากสุด" "วันนี้มีคนลาไหม"
-                        - **สำคัญมาก:** ถ้าผู้ใช้พิมพ์แชทพูดคุยทั่วไป ให้คุณตอบเป็น "ข้อความภาษาไทยปกติ"
-                        - **สำคัญที่สุด:** แต่ถ้าผู้ใช้ "สั่งให้ควบคุมหน้าเว็บ" ให้คุณตอบกลับเป็นรูปแบบ JSON เท่านั้น (ห้ามมีข้อความอื่นปนเด็ดขาด)
+                                                        // เริ่มต้นระบบสลับคีย์อัตโนมัติ
+                                                        let response;
+                                                        let data;
+                                                        let success = false;
 
-                        💻 ควบคุมหน้าเว็บ (ตอบเป็น JSON เท่านั้น):
-                        1. สั่ง "รีเฟรช", "โหลดหน้าใหม่" -> {"action":"refresh"}
-                        2. สั่ง "รีเซ็ต", "ล้างค่า" -> {"action":"reset"}
-                        3. หาชื่อ (เช่น "หาชื่อ สมชาย") -> {"action":"search", "keyword":"สมชาย"}
-                        4. "เปิดตารางสรุป" -> {"action":"summary"}
-                        11. กรองประเภทการลา (เช่น ลาป่วย, ลาพักร้อน) -> {"action":"filter_type", "type":"SL1"} (ใช้ SL1=ป่วย, AL1=พักร้อน, BL1=กิจ)
-                        12. กรองสถานะ (เช่น ขอที่อนุมัติแล้ว) -> {"action":"filter_status", "status":"Approved"} (ใช้ Approved, pending, Rejected)
-                        13. เปลี่ยนวันที่ (เช่น ขอดูของเดือนนี้) -> {"action":"set_date", "start":"YYYY-MM-01", "end":"YYYY-MM-31"} (คำนวณวันที่ให้ถูกต้องตามที่ขอ)
-                        14. จัดเรียงข้อมูล (เช่น เรียงจากเก่าไปใหม่) -> {"action":"sort"}
-                        15. ส่งออกข้อมูล / อัปเดต SSI -> {"action":"export"}
-                        16. เพิ่มพนักงาน / ลบพนักงาน -> {"action":"nav_add"}
-                        17. ดูข้อมูลรายบุคคล -> {"action":"nav_personal"}
+                                                        while (currentKeyIndex < GROQ_API_KEYS.length && !success) {
+                                                            try {
+                                                                response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                                                                    method: "POST",
+                                                                    headers: { 
+                                                                        "Authorization": `Bearer ${GROQ_API_KEYS[currentKeyIndex]}`, 
+                                                                        "Content-Type": "application/json" 
+                                                                    },
+                                                                    body: JSON.stringify({
+                                                                        model: "llama-3.3-70b-versatile",
+                                                                        messages: [
+                                                                            { role: "system", content: systemPrompt }, 
+                                                                            { role: "user", content: text }
+                                                                        ],
+                                                                        temperature: 0.1, 
+                                                                        max_tokens: 300
+                                                                    })
+                                                                });
 
-                        🖨️ งานเอกสารและอนุมัติ (ห้ามลืมเด็ดขาด ตอบตามนี้เท่านั้น):
-                        5. สั่ง "ปริ้น" หรือ "พิมพ์" เดี่ยวๆ -> ให้ถามข้อความว่า "ต้องการปริ้นสถานะ อนุมัติแล้ว หรือ รออนุมัติ ครับ?"
-                        6. ถ้าผู้ใช้พิมพ์ว่า "ปริ้นที่รออนุมัติ" -> ให้ถามข้อความว่า "ต้องการปริ้น ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง ครับ?"
-                        7. ถ้าระบุสถานะครบแล้ว (เช่น "ปริ้นที่อนุมัติแล้ว", "รออนุมัติ ทั้งหมด", "รออนุมัติ แบบรับค่าจ้าง") -> ตอบข้อความว่า "พบรายการดังกล่าว ต้องการปริ้นทั้งหมด หรือ ระบุหน้า (หน้า 1, หน้า 2) ครับ?"
-                        8. สั่งปริ้นระบุจำนวนหน้าหรือทั้งหมด (เช่น "ปริ้นทั้งหมด (รออนุมัติ แบบรับค่าจ้าง)") -> ตอบ JSON: {"action":"print", "status":"pending", "pay_type":"paid", "type":"all"} 
-                        (คำแนะนำ: pay_type ใช้ "all"=ทั้งหมด, "paid"=รับค่าจ้าง, "unpaid"=ไม่รับค่าจ้าง / ส่วน status ใช้ "Approved" หรือ "pending")
-                        9. สั่งปริ้นระบุหน้า (เช่น "หน้า 1 (ปริ้นที่อนุมัติแล้ว)") -> ตอบ JSON: {"action":"print", "status":"Approved", "pay_type":"all", "type":"page", "page": 1}
-                        10. ถ้าสั่ง "อนุมัติทั้งหมด" -> {"action":"approve_all"}
-                        `;
+                                                                data = await response.json();
 
-                        try {
-                            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                                method: "POST",
-                                headers: { 
-                                    "Authorization": `Bearer ${GROQ_API_KEY}`, 
-                                    "Content-Type": "application/json" 
-                                },
-                                body: JSON.stringify({
-                                    model: "llama-3.3-70b-versatile",
-                                    messages: [
-                                        { role: "system", content: systemPrompt }, 
-                                        { role: "user", content: text }
-                                    ],
-                                    temperature: 0.1, 
-                                    max_tokens: 300
-                                })
-                            });
+                                                                // เช็ค Error
+                                                                if (!response.ok || data.error) {
+                                                                    let errorMessage = data.error?.message || "";
+                                                                    
+                                                                    // ถ้าระบุว่า Rate limit (โควตาเต็ม) ให้สลับคีย์
+                                                                    if (errorMessage.toLowerCase().includes("rate limit") || response.status === 429) {
+                                                                        console.warn(`คีย์ลำดับที่ ${currentKeyIndex + 1} โควตาเต็ม กำลังสลับไปใช้คีย์สำรอง...`);
+                                                                        currentKeyIndex++; // บวกตัวเลขเพื่อสลับไปใช้คีย์ตัวถัดไป
+                                                                        continue; // สั่งให้วนลูปกลับไปยิง API ใหม่อีกรอบทันที
+                                                                    } else {
+                                                                        break; // ถ้าพังเพราะ Error อื่นๆ ให้หยุดการทำงาน
+                                                                    }
+                                                                }
 
-                            const data = await response.json();
-                            chatMessages.removeChild(typingMsg);
+                                                                success = true; // ยิงผ่านแล้ว ออกจากลูปได้
+                                                            } catch (error) {
+                                                                console.error("Fetch API Error:", error);
+                                                                break; // เน็ตหลุด
+                                                            }
+                                                        }
 
-							if (!response.ok || data.error) {
-							    let errorMessage = data.error?.message || "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
-							    
-							    // ดักจับ Error กรณีใช้โควตาเต็ม (Rate limit)
-							    if (errorMessage.toLowerCase().includes("rate limit") || response.status === 429) {
-							        return appendMessage("⚠️ ขออภัยครับ ตอนนี้มีผู้ใช้งานระบบ AI จำนวนมากจนโควตาชั่วคราวเต็ม กรุณารอประมาณ 10-15 นาที แล้วลองพิมพ์คำสั่งใหม่อีกครั้งนะครับ 🙏", 'ai-message');
-							    }
-							    
-							    // ถ้าเป็น Error ปัญหาอื่นๆ
-							    return appendMessage(`⚠️ AI มีปัญหาขัดข้อง: ${errorMessage}`, 'ai-message');
-							}
+                                                        chatMessages.removeChild(typingMsg);
 
-                            let aiResponse = data.choices[0].message.content.trim().replace(/```json/g, '').replace(/```/g, '').trim();
+                                                        // ตรวจสอบผลลัพธ์หลังออกจากลูป
+                                                        if (!success) {
+                                                            if (currentKeyIndex >= GROQ_API_KEYS.length) {
+                                                                currentKeyIndex = 0; // ถ้ายิงจนครบทุกคีย์แล้วยังเต็มหมด ให้รีเซ็ตกลับไปเริ่มคีย์ที่ 1 ใหม่ในรอบหน้า
+                                                                return appendMessage("⚠️ ขออภัยครับ โควตา API ของทุกคีย์เต็มหมดแล้ว กรุณารอประมาณ 10-15 นาทีนะครับ 🙏", 'ai-message');
+                                                            } else if (data && data.error) {
+                                                                return appendMessage(`⚠️ AI มีปัญหาขัดข้อง: ${data.error.message}`, 'ai-message');
+                                                            } else {
+                                                                return appendMessage('⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI', 'ai-message');
+                                                            }
+                                                        }
 
-                            try {
-                                const command = JSON.parse(aiResponse);
-                                
-                                // จัดการคำสั่ง JSON
-                                if (command.action === "approve_all") {
-                                    appendMessage('รับทราบครับ! กำลังดำเนินการอนุมัติ...', 'ai-message');
-                                    executeApproveAllByAI();
-                                } else if (command.action === "print") {
-                                    appendMessage(`รับทราบครับ! กำลังดึงข้อมูล...`, 'ai-message');
-                                    executePrintByAI(command.status, command.type, command.page, command.pay_type); 
-                                } else if (command.action === "refresh") {
-                                    appendMessage('กำลังรีเฟรชข้อมูลให้ครับ 🔄', 'ai-message');
-                                    document.getElementById('loadDataButton').click();
-                                } else if (command.action === "reset") {
-                                    appendMessage('คืนค่าเริ่มต้นให้เรียบร้อยครับ 🧹', 'ai-message');
-                                    document.getElementById('resetButton').click();
-                                } else if (command.action === "search") {
-                                    appendMessage(`กำลังกรองรายชื่อที่มีคำว่า "${command.keyword}" ให้ครับ 🔍`, 'ai-message');
-                                    document.getElementById('searchName').value = command.keyword;
-                                    document.getElementById('searchName').dispatchEvent(new Event('input'));
-                                } else if (command.action === "summary") {
-                                    appendMessage('กำลังเปิดหน้าตารางสรุปให้ครับ 📊', 'ai-message');
-                                    document.getElementById('summaryButton').click();
-                                
-                                } else if (command.action === "summary") {
-                                appendMessage('กำลังเปิดหน้าตารางสรุปให้ครับ 📊', 'ai-message');
-                                document.getElementById('summaryButton').click();
-                                } 
-                                // 🔽🔽🔽 เริ่มคัดลอกและวางโค้ดส่วนนี้ต่อท้ายเงื่อนไข "summary" 🔽🔽🔽
-                                else if (command.action === "filter_type") {
-                                    appendMessage(`กำลังกรองประเภทการลาให้ครับ 🏷️`, 'ai-message');
-                                    document.getElementById('filterType').value = command.type;
-                                    document.getElementById('filterType').dispatchEvent(new Event('change'));
-                                } else if (command.action === "filter_status") {
-                                    appendMessage(`กำลังกรองสถานะให้ครับ 📌`, 'ai-message');
-                                    document.getElementById('filterStatus').value = command.status;
-                                    document.getElementById('filterStatus').dispatchEvent(new Event('change'));
-                                } else if (command.action === "set_date") {
-                                    appendMessage(`กำลังค้นหาข้อมูลตั้งแต่วันที่ ${command.start} ถึง ${command.end} ครับ 📅`, 'ai-message');
-                                    document.getElementById('startDate').value = command.start;
-                                    document.getElementById('endDate').value = command.end;
-                                    document.getElementById('loadDataButton').click();
-                                } else if (command.action === "sort") {
-                                    appendMessage('สลับการเรียงลำดับข้อมูลให้แล้วครับ ↕️', 'ai-message');
-                                    document.getElementById('sortButton').click();
-                                } else if (command.action === "export") {
-                                    appendMessage('กำลังเตรียมการส่งออกข้อมูลและอัปเดตระบบ SSI ครับ 🔗', 'ai-message');
-                                    document.getElementById('exportHistoryButton').click();
-                                } else if (command.action === "nav_add") {
-                                    appendMessage('กำลังพาไปหน้าจัดการพนักงานครับ 👥', 'ai-message');
-                                    document.getElementById('AddButton').click();
-                                } else if (command.action === "nav_personal") {
-                                    appendMessage('กำลังเปิดหน้าข้อมูลรายบุคคลให้ครับ 🪪', 'ai-message');
-                                    document.getElementById('summaryButton2').click();
-                                }
+                                                        // ถ้าสำเร็จ ดึงข้อความมาใช้งานตามปกติ
+                                                        let aiResponse = data.choices[0].message.content.trim().replace(/```json/g, '').replace(/```/g, '').trim();
 
-                            } catch (e) {
-                                // สร้างปุ่มตัวเลือก UI ในช่องแชท
-                                let quickOptions = [];
+                                                        try {
+                                                            const command = JSON.parse(aiResponse);
+                                                            
+                                                            // จัดการคำสั่ง JSON
+                                                            if (command.action === "approve_all") {
+                                                                appendMessage('รับทราบครับ! กำลังดำเนินการอนุมัติ...', 'ai-message');
+                                                                executeApproveAllByAI();
+                                                            } else if (command.action === "print") {
+                                                                appendMessage(`รับทราบครับ! กำลังดึงข้อมูล...`, 'ai-message');
+                                                                executePrintByAI(command.status, command.type, command.page, command.pay_type); 
+                                                            } else if (command.action === "refresh") {
+                                                                appendMessage('กำลังรีเฟรชข้อมูลให้ครับ 🔄', 'ai-message');
+                                                                document.getElementById('loadDataButton').click();
+                                                            } else if (command.action === "reset") {
+                                                                appendMessage('คืนค่าเริ่มต้นให้เรียบร้อยครับ 🧹', 'ai-message');
+                                                                document.getElementById('resetButton').click();
+                                                            } else if (command.action === "search") {
+                                                                appendMessage(`กำลังกรองรายชื่อที่มีคำว่า "${command.keyword}" ให้ครับ 🔍`, 'ai-message');
+                                                                document.getElementById('searchName').value = command.keyword;
+                                                                document.getElementById('searchName').dispatchEvent(new Event('input'));
+                                                            } else if (command.action === "summary") {
+                                                                appendMessage('กำลังเปิดหน้าตารางสรุปให้ครับ 📊', 'ai-message');
+                                                                document.getElementById('summaryButton').click();
+                                                            } else if (command.action === "filter_type") {
+                                                                appendMessage(`กำลังกรองประเภทการลาให้ครับ 🏷️`, 'ai-message');
+                                                                document.getElementById('filterType').value = command.type;
+                                                                document.getElementById('filterType').dispatchEvent(new Event('change'));
+                                                            } else if (command.action === "filter_status") {
+                                                                appendMessage(`กำลังกรองสถานะให้ครับ 📌`, 'ai-message');
+                                                                document.getElementById('filterStatus').value = command.status;
+                                                                document.getElementById('filterStatus').dispatchEvent(new Event('change'));
+                                                            } else if (command.action === "set_date") {
+                                                                appendMessage(`กำลังค้นหาข้อมูลตั้งแต่วันที่ ${command.start} ถึง ${command.end} ครับ 📅`, 'ai-message');
+                                                                document.getElementById('startDate').value = command.start;
+                                                                document.getElementById('endDate').value = command.end;
+                                                                document.getElementById('loadDataButton').click();
+                                                            } else if (command.action === "sort") {
+                                                                appendMessage('สลับการเรียงลำดับข้อมูลให้แล้วครับ ↕️', 'ai-message');
+                                                                document.getElementById('sortButton').click();
+                                                            } else if (command.action === "export") {
+                                                                appendMessage('กำลังเตรียมการส่งออกข้อมูลและอัปเดตระบบ SSI ครับ 🔗', 'ai-message');
+                                                                document.getElementById('exportHistoryButton').click();
+                                                            } else if (command.action === "nav_add") {
+                                                                appendMessage('กำลังพาไปหน้าจัดการพนักงานครับ 👥', 'ai-message');
+                                                                document.getElementById('AddButton').click();
+                                                            } else if (command.action === "nav_personal") {
+                                                                appendMessage('กำลังเปิดหน้าข้อมูลรายบุคคลให้ครับ 🪪', 'ai-message');
+                                                                document.getElementById('summaryButton2').click();
+                                                            }
 
-                                if (aiResponse.includes("อนุมัติแล้ว หรือ รออนุมัติ")) {
-                                    quickOptions = [
-                                        { label: "✅ อนุมัติแล้ว", value: "ปริ้นที่อนุมัติแล้ว" },
-                                        { label: "⏳ รออนุมัติ", value: "ปริ้นที่รออนุมัติ" }
-                                    ];
-                                } else if (aiResponse.includes("ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง")) {
-                                    quickOptions = [
-                                        { label: "📄 ทั้งหมด", value: "รออนุมัติ ทั้งหมด" },
-                                        { label: "💰 แบบรับค่าจ้าง", value: "รออนุมัติ แบบรับค่าจ้าง" },
-                                        { label: "🚫 แบบไม่รับค่าจ้าง", value: "รออนุมัติ แบบไม่รับค่าจ้าง" }
-                                    ];
-                                } else if (aiResponse.includes("ระบุหน้า")) {
-                                    // ดึงข้อความก่อนหน้าที่ผู้ใช้เลือกมาเป็น Context 
-                                    // เช่น "รออนุมัติ แบบรับค่าจ้าง"
-                                    let contextStr = text; 
-                                    quickOptions = [
-                                        { label: "🖨️ ปริ้นทั้งหมด", value: `ปริ้นทั้งหมด (${contextStr})` },
-                                        { label: "📄 หน้า 1", value: `หน้า 1 (${contextStr})` },
-                                        { label: "📄 หน้า 2", value: `หน้า 2 (${contextStr})` },
-                                        { label: "❌ ยกเลิก", value: "ยกเลิก" }
-                                    ];
-                                } else if (aiResponse.includes("อนุมัติรายการที่รออยู่ทั้งหมดเลยใช่ไหม")) {
-                                    quickOptions = [
-                                        { label: "✅ ใช่, อนุมัติทั้งหมด", value: "อนุมัติทั้งหมด" },
-                                        { label: "❌ ไม่เป็นไร", value: "ยกเลิก" }
-                                    ];
-                                }
-                                appendMessage(aiResponse, 'ai-message', quickOptions);
-                            }
-                        } catch (error) {
-                            console.error("Fetch API Error:", error);
-                            chatMessages.removeChild(typingMsg);
-                            appendMessage('เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI', 'ai-message');
-                        }
-                    }
+                                                        } catch (e) {
+                                                            // สร้างปุ่มตัวเลือก UI ในช่องแชท
+                                                            let quickOptions = [];
+
+                                                            if (aiResponse.includes("อนุมัติแล้ว หรือ รออนุมัติ")) {
+                                                                quickOptions = [
+                                                                    { label: "✅ อนุมัติแล้ว", value: "ปริ้นที่อนุมัติแล้ว" },
+                                                                    { label: "⏳ รออนุมัติ", value: "ปริ้นที่รออนุมัติ" }
+                                                                ];
+                                                            } else if (aiResponse.includes("ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง")) {
+                                                                quickOptions = [
+                                                                    { label: "📄 ทั้งหมด", value: "รออนุมัติ ทั้งหมด" },
+                                                                    { label: "💰 แบบรับค่าจ้าง", value: "รออนุมัติ แบบรับค่าจ้าง" },
+                                                                    { label: "🚫 แบบไม่รับค่าจ้าง", value: "รออนุมัติ แบบไม่รับค่าจ้าง" }
+                                                                ];
+                                                            } else if (aiResponse.includes("ระบุหน้า")) {
+                                                                // ดึงข้อความก่อนหน้าที่ผู้ใช้เลือกมาเป็น Context 
+                                                                // เช่น "รออนุมัติ แบบรับค่าจ้าง"
+                                                                let contextStr = text; 
+                                                                quickOptions = [
+                                                                    { label: "🖨️ ปริ้นทั้งหมด", value: `ปริ้นทั้งหมด (${contextStr})` },
+                                                                    { label: "📄 หน้า 1", value: `หน้า 1 (${contextStr})` },
+                                                                    { label: "📄 หน้า 2", value: `หน้า 2 (${contextStr})` },
+                                                                    { label: "❌ ยกเลิก", value: "ยกเลิก" }
+                                                                ];
+                                                            } else if (aiResponse.includes("อนุมัติรายการที่รออยู่ทั้งหมดเลยใช่ไหม")) {
+                                                                quickOptions = [
+                                                                    { label: "✅ ใช่, อนุมัติทั้งหมด", value: "อนุมัติทั้งหมด" },
+                                                                    { label: "❌ ไม่เป็นไร", value: "ยกเลิก" }
+                                                                ];
+                                                            }
+                                                            appendMessage(aiResponse, 'ai-message', quickOptions);
+                                                        }
+                                                    }
 
         function appendMessage(text, className, options = []) {
             const msgDiv = document.createElement('div');
