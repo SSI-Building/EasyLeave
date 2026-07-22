@@ -1191,7 +1191,8 @@
                     // ==================== 6. AI Chat Bot & Commands ====================
                     const GROQ_API_KEYS = [
                                             "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",
-                                            "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"
+                                            "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",
+											"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"
                                             // ถ้าอนาคตมีคีย์เพิ่ม ก็ใส่ลูกน้ำแล้วเพิ่มบรรทัดต่อได้เลยครับ
                                             ];
                     let currentKeyIndex = 0; // ตัวแปรสำหรับจำว่าตอนนี้ใช้คีย์ตัวที่เท่าไหร่
@@ -1220,12 +1221,12 @@
                                                         const isCommand = text.includes("ปริ้น") || text.includes("พิมพ์") || text.includes("อนุมัติ");
                                                         
                                                         let dataContext = "";
-                                                        // ปิดการดึงข้อมูลพนักงานส่งไปให้ AI เพื่อประหยัดโควตา Token
-                                                        // if (!isCommand) {
-                                                        //     dataContext = filteredAndSortedData.map(row => 
-                                                        //         `[ชื่อ:${row[1]}|ประเภท:${row[4]}|เริ่ม:${(row[5]||'').substring(0,10)}|สถานะ:${row[10]}]`
-                                                        //     ).slice(0, 30).join(", ");
-                                                        // }
+                                                        
+                                                        if (!isCommand) {
+                                                        dataContext = filteredAndSortedData.map(row => 
+                                                        `[ชื่อ:${row[1]}|ประเภท:${row[4]}|เริ่ม:${(row[5]||'').substring(0,10)}|สถานะ:${row[10]}]`
+                                                        ).slice(0, 30).join(", ");
+                                                        }
 
                                                         const todayStr = new Date().toISOString().substring(0, 10);
 
