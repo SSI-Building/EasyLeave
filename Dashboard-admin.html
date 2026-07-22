@@ -941,7 +941,7 @@
                         // Checkbox 1: ลาป่วย
                         x = 50; y = 85;
                         doc.rect(x, y, size, size, 'S'); 
-                        if (leaveType === "SL1") {
+                        if (leaveType === "SL1" || leaveType === "SL2") {
                             doc.setFont("ZapfDingbats"); 
                             doc.setFontSize(size + 12); 
                             doc.text("3", x + size / 2 - 1.5, y + size - 0.5);
@@ -956,7 +956,7 @@
 
                         // Checkbox 3
                         y = 109; doc.rect(x, y, size, size, 'S'); 
-                        if (leaveType === "BL1") {
+                        if (leaveType === "BL1" || leaveType === "BL2"){
                             doc.setFont("ZapfDingbats"); 
                             doc.setFontSize(size + 12); 
                             doc.text("3", x + 0.7, y + size - 0.3); 
