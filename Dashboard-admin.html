@@ -287,6 +287,38 @@
         .chat-footer { display: flex; padding: 10px; border-top: 1px solid var(--border-color); background: white; }
         .chat-footer input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
         .chat-footer button { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 10px; cursor: pointer; }
+
+        /* ==================== สไตล์สำหรับ Pay Status Badge ==================== */
+        .pay-status-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .badge-paid, .badge-unpaid {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            
+            /* 🌟 เพิ่ม 4 บรรทัดนี้ เพื่อให้ขนาดเท่ากันเป๊ะ และจัดไอคอนให้อยู่ตรงกลาง */
+            width: 95px; 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px; /* ระยะห่างระหว่างไอคอนกับตัวอักษร */
+        }
+        .badge-paid {
+            background-color: #d4edda; /* พื้นสีเขียวอ่อน */
+            color: #155724; /* ตัวหนังสือสีเขียวเข้ม */
+            border: 1px solid #c3e6cb;
+        }
+        .badge-unpaid {
+            background-color: #e2e3e5; /* พื้นสีเทาอ่อน */
+            color: #383d41; /* ตัวหนังสือสีเทาเข้ม */
+            border: 1px solid #d6d8db;
+        }
+
     </style>
 </head>
 <body>
@@ -342,7 +374,8 @@
                         <th><i class="fas fa-id-card-alt"></i> รหัสพนักงาน</th>
                         <th><i class="fas fa-user"></i> ชื่อ-สกุล</th>
                         <th><i class="fas fa-clipboard"></i> ประเภทการลา</th>
-                        <th><i class="fas fa-calendar-day"></i> ลาตั้งแค่วันที่</th>
+                        <th><i class="fas fa-coins"></i> Pay Status</th>
+                        <th><i class="fas fa-calendar-day"></i> ตั้งแต่วันที่</th>
                         <th><i class="fas fa-clock"></i> เวลา(เริ่ม)</th>
                         <th><i class="fas fa-calendar-day"></i> ถึงวันที่</th>
                         <th><i class="fas fa-clock"></i> เวลา(สิ้นสุด)</th>
@@ -582,12 +615,17 @@
 
                 pageData.forEach(rowData => {
                     const tr = document.createElement('tr');
-                    const headers = ["รหัสพนักงาน", "ชื่อ-สกุล", "ประเภทการลา", "ลาตั้งแค่วันที่", "เวลา(เริ่ม)", "ถึงวันที่", "เวลา(สิ้นสุด)", "จำนวนวันลา", "สถานะ", "วันที่ยื่นคำร้อง", "ดำเนินการ"];
+                    // 🌟 เพิ่ม "Pay Status" เข้าไปใน headers
+                    const headers = ["รหัสพนักงาน", "ชื่อ-สกุล", "ประเภทการลา", "Pay Status", "ลาตั้งแค่วันที่", "เวลา(เริ่ม)", "ถึงวันที่", "เวลา(สิ้นสุด)", "จำนวนวันลา", "สถานะ", "วันที่ยื่นคำร้อง", "ดำเนินการ"];
 
                     const displayData = [
                         rowData[0] || '',
                         rowData[1] || '',
-                        getLeaveTypeDisplay(rowData[4], rowData[14]),
+                        getLeaveTypeDisplay(rowData[4]),
+                        
+                        // 🌟 เรียกใช้ฟังก์ชันดึงค่า Paid / Unpaid 
+                        getPayStatus(rowData[4], rowData[14]), 
+                        
                         formatDateForDisplay(rowData[5]) || '',
                         rowData[6] || '',
                         formatDateForDisplay(rowData[7]) || '',
@@ -597,9 +635,10 @@
                         formatDateForDisplay(rowData[11]) || ''
                     ];
 
-                    displayData.forEach((item, index) => {
+                        displayData.forEach((item, index) => {
                         const td = document.createElement('td');
                         td.setAttribute('data-label', headers[index]);
+                        
                         if (headers[index] === "สถานะ") {
                             const statusContent = document.createElement('div');
                             statusContent.classList.add('status-cell-content');
@@ -611,11 +650,29 @@
                             else if (status === 'pending') statusSpan.classList.add('status-pending');
                             statusContent.appendChild(statusSpan);
                             td.appendChild(statusContent);
-                        } else {
+                            
+                            } else if (headers[index] === "Pay Status") {
+                            const payContent = document.createElement('div');
+                            payContent.classList.add('pay-status-cell');
+                            const badge = document.createElement('span');
+                            
+                            // 🌟 ตรวจสอบเงื่อนไขเพื่อใส่คลาสสี และไอคอน SVG
+                            if (item === 'Paid') {
+                                badge.classList.add('badge-paid');
+                                badge.innerHTML = `<i class="fas fa-coins"></i> Paid`; 
+                            } else {
+                                badge.classList.add('badge-unpaid');
+                                badge.innerHTML = `<i class="fas fa-ban"></i> Unpaid`;
+                            }
+                            
+                            payContent.appendChild(badge);
+                            td.appendChild(payContent);
+                            
+                            } else {
                             td.textContent = item;
                         }
                         tr.appendChild(td);
-                    });
+                        });
 
                     // Action Column
                     const actionTd = document.createElement('td');
@@ -742,27 +799,18 @@
             }
         }
 
-                function getLeaveTypeDisplay(leaveType, hasDocument) {
-                            // 1. ลาพักร้อน (ได้เงินเสมอ ไม่ว่าเอกสารจะเป็นอะไร และไม่ว่ารหัสจะเป็น AL หรือ AL1)
-                            if (leaveType === 'AL1' || leaveType === 'AL') {
-                                return 'ลาพักร้อน (AL) 💰';
-                            }
-                            
-                            // 2. กำหนดอีโมจิตามเอกสารประกอบ (ถ้า "มี" ให้ใส่ 💰 ถ้าไม่ใช่ให้เว้นว่าง)
-                            let moneyEmoji = (hasDocument === 'มี') ? ' 💰' : '';
-                            
-                            // 3. ลาป่วย
-                            if (leaveType === 'SL1' || leaveType === 'SL2' || leaveType === 'SL') {
-                                return 'ลาป่วย (SL)' + moneyEmoji;
-                            }
-                            
-                            // 4. ลากิจ
-                            if (leaveType === 'BL1' || leaveType === 'BL2' || leaveType === 'BL') {
-                                return 'ลากิจ (BL)' + moneyEmoji;
-                            }
-                            
-                            // กรณีลาอื่นๆ
+                        function getLeaveTypeDisplay(leaveType) {
+                            // คืนค่าฟังก์ชันนี้ให้กลับมาโชว์แค่ชื่อประเภทการลาเหมือนเดิม
+                            if (leaveType === 'AL1' || leaveType === 'AL') return 'ลาพักร้อน (AL)';
+                            if (leaveType === 'SL1' || leaveType === 'SL2' || leaveType === 'SL') return 'ลาป่วย (SL)';
+                            if (leaveType === 'BL1' || leaveType === 'BL2' || leaveType === 'BL') return 'ลากิจ (BL)';
                             return leaveType;
+                        }
+
+                        // 🌟 เพิ่มฟังก์ชันใหม่ สำหรับคำนวณ Pay Status โดยเฉพาะ
+                        function getPayStatus(leaveType, hasDocument) {
+                            if (leaveType === 'AL1' || leaveType === 'AL') return 'Paid';
+                            return (hasDocument === 'มี') ? 'Paid' : 'Unpaid';
                         }
         
         function getStatusDisplay(status) {
