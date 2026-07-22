@@ -1276,9 +1276,17 @@
                             const data = await response.json();
                             chatMessages.removeChild(typingMsg);
 
-                            if (!response.ok || data.error) {
-                                return appendMessage(`⚠️ Groq แจ้งว่า: ${data.error?.message}`, 'ai-message');
-                            }
+							if (!response.ok || data.error) {
+							    let errorMessage = data.error?.message || "เกิดข้อผิดพลาดไม่ทราบสาเหตุ";
+							    
+							    // ดักจับ Error กรณีใช้โควตาเต็ม (Rate limit)
+							    if (errorMessage.toLowerCase().includes("rate limit") || response.status === 429) {
+							        return appendMessage("⚠️ ขออภัยครับ ตอนนี้มีผู้ใช้งานระบบ AI จำนวนมากจนโควตาชั่วคราวเต็ม กรุณารอประมาณ 10-15 นาที แล้วลองพิมพ์คำสั่งใหม่อีกครั้งนะครับ 🙏", 'ai-message');
+							    }
+							    
+							    // ถ้าเป็น Error ปัญหาอื่นๆ
+							    return appendMessage(`⚠️ AI มีปัญหาขัดข้อง: ${errorMessage}`, 'ai-message');
+							}
 
                             let aiResponse = data.choices[0].message.content.trim().replace(/```json/g, '').replace(/```/g, '').trim();
 
