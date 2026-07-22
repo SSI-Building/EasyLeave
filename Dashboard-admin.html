@@ -587,7 +587,7 @@
                     const displayData = [
                         rowData[0] || '',
                         rowData[1] || '',
-                        getLeaveTypeDisplay(rowData[4]),
+                        getLeaveTypeDisplay(rowData[4], rowData[14]),
                         formatDateForDisplay(rowData[5]) || '',
                         rowData[6] || '',
                         formatDateForDisplay(rowData[7]) || '',
@@ -742,12 +742,28 @@
             }
         }
 
-        function getLeaveTypeDisplay(leaveType) {
-            if (leaveType === 'AL1') return 'ลาพักร้อน (AL)';
-            if (leaveType === 'SL1') return 'ลาป่วย (SL)';
-            if (leaveType === 'BL1') return 'ลากิจ (BL)';
-            return leaveType;
-        }
+                function getLeaveTypeDisplay(leaveType, hasDocument) {
+                            // 1. ลาพักร้อน (ได้เงินเสมอ ไม่ว่าเอกสารจะเป็นอะไร และไม่ว่ารหัสจะเป็น AL หรือ AL1)
+                            if (leaveType === 'AL1' || leaveType === 'AL') {
+                                return 'ลาพักร้อน (AL) 💰';
+                            }
+                            
+                            // 2. กำหนดอีโมจิตามเอกสารประกอบ (ถ้า "มี" ให้ใส่ 💰 ถ้าไม่ใช่ให้เว้นว่าง)
+                            let moneyEmoji = (hasDocument === 'มี') ? ' 💰' : '';
+                            
+                            // 3. ลาป่วย
+                            if (leaveType === 'SL1' || leaveType === 'SL2' || leaveType === 'SL') {
+                                return 'ลาป่วย (SL)' + moneyEmoji;
+                            }
+                            
+                            // 4. ลากิจ
+                            if (leaveType === 'BL1' || leaveType === 'BL2' || leaveType === 'BL') {
+                                return 'ลากิจ (BL)' + moneyEmoji;
+                            }
+                            
+                            // กรณีลาอื่นๆ
+                            return leaveType;
+                        }
         
         function getStatusDisplay(status) {
             if (status === 'Approved') return 'อนุมัติแล้ว';
@@ -1230,11 +1246,12 @@
                         17. ดูข้อมูลรายบุคคล -> {"action":"nav_personal"}
 
                         🖨️ งานเอกสารและอนุมัติ (ห้ามลืมเด็ดขาด ตอบตามนี้เท่านั้น):
-                        5. สั่ง "ปริ้น" หรือ "พิมพ์" เดี่ยวๆ -> ให้ถามว่า "ต้องการปริ้นสถานะ อนุมัติแล้ว หรือ รออนุมัติ ครับ?" (ตอบเป็นข้อความธรรมดา)
-                        6. ถ้าระบุสถานะแล้ว (เช่น "ปริ้นที่อนุมัติแล้ว") -> ตอบข้อความว่า "พบรายการดังกล่าว ต้องการปริ้นทั้งหมด หรือ ระบุหน้า (หน้า 1, หน้า 2)"
-                        7. สั่ง "ปริ้นทั้งหมด" (พร้อมสถานะ) -> {"action":"print", "status":"Approved", "type":"all"} (เปลี่ยน status ตามที่ผู้ใช้เลือก)
-                        8. สั่งปริ้นระบุหน้า เช่น "หน้า 1 (Approved)" -> {"action":"print", "status":"Approved", "type":"page", "page": 1}
-                        9. ถ้าถามเรื่องอนุมัติ เช่น "ช่วยอนุมัติหน่อย" -> ตอบข้อความว่า "ต้องการอนุมัติรายการที่รออยู่ทั้งหมดเลยใช่ไหมครับ?"
+                        5. สั่ง "ปริ้น" หรือ "พิมพ์" เดี่ยวๆ -> ให้ถามข้อความว่า "ต้องการปริ้นสถานะ อนุมัติแล้ว หรือ รออนุมัติ ครับ?"
+                        6. ถ้าผู้ใช้พิมพ์ว่า "ปริ้นที่รออนุมัติ" -> ให้ถามข้อความว่า "ต้องการปริ้น ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง ครับ?"
+                        7. ถ้าระบุสถานะครบแล้ว (เช่น "ปริ้นที่อนุมัติแล้ว", "รออนุมัติ ทั้งหมด", "รออนุมัติ แบบรับค่าจ้าง") -> ตอบข้อความว่า "พบรายการดังกล่าว ต้องการปริ้นทั้งหมด หรือ ระบุหน้า (หน้า 1, หน้า 2) ครับ?"
+                        8. สั่งปริ้นระบุจำนวนหน้าหรือทั้งหมด (เช่น "ปริ้นทั้งหมด (รออนุมัติ แบบรับค่าจ้าง)") -> ตอบ JSON: {"action":"print", "status":"pending", "pay_type":"paid", "type":"all"} 
+                        (คำแนะนำ: pay_type ใช้ "all"=ทั้งหมด, "paid"=รับค่าจ้าง, "unpaid"=ไม่รับค่าจ้าง / ส่วน status ใช้ "Approved" หรือ "pending")
+                        9. สั่งปริ้นระบุหน้า (เช่น "หน้า 1 (ปริ้นที่อนุมัติแล้ว)") -> ตอบ JSON: {"action":"print", "status":"Approved", "pay_type":"all", "type":"page", "page": 1}
                         10. ถ้าสั่ง "อนุมัติทั้งหมด" -> {"action":"approve_all"}
                         `;
 
@@ -1274,7 +1291,7 @@
                                     executeApproveAllByAI();
                                 } else if (command.action === "print") {
                                     appendMessage(`รับทราบครับ! กำลังดึงข้อมูล...`, 'ai-message');
-                                    executePrintByAI(command.status, command.type, command.page); 
+                                    executePrintByAI(command.status, command.type, command.page, command.pay_type); 
                                 } else if (command.action === "refresh") {
                                     appendMessage('กำลังรีเฟรชข้อมูลให้ครับ 🔄', 'ai-message');
                                     document.getElementById('loadDataButton').click();
@@ -1324,18 +1341,26 @@
                             } catch (e) {
                                 // สร้างปุ่มตัวเลือก UI ในช่องแชท
                                 let quickOptions = [];
-                                
+
                                 if (aiResponse.includes("อนุมัติแล้ว หรือ รออนุมัติ")) {
                                     quickOptions = [
                                         { label: "✅ อนุมัติแล้ว", value: "ปริ้นที่อนุมัติแล้ว" },
                                         { label: "⏳ รออนุมัติ", value: "ปริ้นที่รออนุมัติ" }
                                     ];
-                                } else if (aiResponse.includes("ระบุหน้า")) {
-                                    const targetStatus = (text.includes("Approved") || text.includes("อนุมัติแล้ว")) ? "Approved" : "pending";
+                                } else if (aiResponse.includes("ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง")) {
                                     quickOptions = [
-                                        { label: "🖨️ ปริ้นทั้งหมด", value: `ปริ้นทั้งหมด (${targetStatus})` },
-                                        { label: "📄 หน้า 1", value: `หน้า 1 (${targetStatus})` },
-                                        { label: "📄 หน้า 2", value: `หน้า 2 (${targetStatus})` },
+                                        { label: "📄 ทั้งหมด", value: "รออนุมัติ ทั้งหมด" },
+                                        { label: "💰 แบบรับค่าจ้าง", value: "รออนุมัติ แบบรับค่าจ้าง" },
+                                        { label: "🚫 แบบไม่รับค่าจ้าง", value: "รออนุมัติ แบบไม่รับค่าจ้าง" }
+                                    ];
+                                } else if (aiResponse.includes("ระบุหน้า")) {
+                                    // ดึงข้อความก่อนหน้าที่ผู้ใช้เลือกมาเป็น Context 
+                                    // เช่น "รออนุมัติ แบบรับค่าจ้าง"
+                                    let contextStr = text; 
+                                    quickOptions = [
+                                        { label: "🖨️ ปริ้นทั้งหมด", value: `ปริ้นทั้งหมด (${contextStr})` },
+                                        { label: "📄 หน้า 1", value: `หน้า 1 (${contextStr})` },
+                                        { label: "📄 หน้า 2", value: `หน้า 2 (${contextStr})` },
                                         { label: "❌ ยกเลิก", value: "ยกเลิก" }
                                     ];
                                 } else if (aiResponse.includes("อนุมัติรายการที่รออยู่ทั้งหมดเลยใช่ไหม")) {
@@ -1401,63 +1426,64 @@
             return msgDiv;
         }
 
-                      // ==========================================
-                      // 🖨️ ระบบปริ้น (แบบเหมาทั้งหมด หรือระบุหน้า)
-                      // ==========================================
-                      async function executePrintByAI(status, type, pageNum) {
-                          // 🌟 แก้ไข: เปลี่ยนจาก allData เป็น filteredAndSortedData 
-                          // เพื่อให้ AI จัดเรียงข้อมูล (ใหม่สุดอยู่หน้า 1) ตรงกับหน้าเว็บ 100%
-                          let itemsToPrint = filteredAndSortedData.filter(row => row[10] && row[10].toLowerCase() === status.toLowerCase());
+                    async function executePrintByAI(status, type, pageNum, payType = "all") {
+                        // 1. กรองตามสถานะ อนุมัติ/รออนุมัติ
+                        let itemsToPrint = filteredAndSortedData.filter(row => row[10] && row[10].toLowerCase() === status.toLowerCase());
 
-                          if (itemsToPrint.length === 0) {
-                              return appendMessage(`ไม่พบรายการสถานะ "${status}" เลยครับ`, 'ai-message');
-                          }
+                        // 2. กรองตามการรับค่าจ้าง (AL1, SL1, BL1 = ได้เงิน / SL2, BL2 = ไม่ได้เงิน)
+                        if (payType === "paid") {
+                            itemsToPrint = itemsToPrint.filter(row => ['AL1', 'AL', 'SL1', 'BL1'].includes(row[4]));
+                        } else if (payType === "unpaid") {
+                            itemsToPrint = itemsToPrint.filter(row => ['SL2', 'BL2'].includes(row[4]));
+                        }
 
-                          // 2. ถ้าผู้ใช้สั่งปริ้น "แบบระบุหน้า" ให้หั่นข้อมูล (หน้าละ 7 คน)
-                          if (type === "page" && pageNum) {
-                              const rowsPerPage = 7; 
-                              const start = (pageNum - 1) * rowsPerPage;
-                              const end = start + rowsPerPage;
-                              
-                              itemsToPrint = itemsToPrint.slice(start, end);
-                              
-                              if (itemsToPrint.length === 0) {
-                                  return appendMessage(`หน้า ${pageNum} ไม่มีข้อมูลให้ปริ้นแล้วครับ`, 'ai-message');
-                              }
-                          }
+                        if (itemsToPrint.length === 0) {
+                            let msg = `ไม่พบรายการสถานะ "${status}"`;
+                            if (payType === "paid") msg += " แบบรับค่าจ้าง";
+                            if (payType === "unpaid") msg += " แบบไม่รับค่าจ้าง";
+                            return appendMessage(msg + ' เลยครับ', 'ai-message');
+                        }
 
-                          // 🌟 ดึง Loading Screen (ตัวหมุนๆ) ขึ้นมาโชว์บังหน้าจอ
-                          const loadingOverlay = document.getElementById('loading-overlay');
-                          const loadingText = document.querySelector('.loading-text');
-                          if (loadingText) loadingText.textContent = `กำลังสร้างเอกสาร PDF ${itemsToPrint.length} แผ่น...`;
-                          loadingOverlay.classList.add('visible'); 
+                        if (type === "page" && pageNum) {
+                            const rowsPerPage = 7; 
+                            const start = (pageNum - 1) * rowsPerPage;
+                            const end = start + rowsPerPage;
+                            
+                            itemsToPrint = itemsToPrint.slice(start, end);
+                            
+                            if (itemsToPrint.length === 0) {
+                                return appendMessage(`หน้า ${pageNum} ไม่มีข้อมูลให้ปริ้นแล้วครับ`, 'ai-message');
+                            }
+                        }
 
-                          appendMessage(`กำลังสร้าง PDF จำนวน ${itemsToPrint.length} แผ่น (หน้าจอโหลดกำลังทำงาน)...`, 'ai-message');
-                          
-                          try {
-                              const { jsPDF } = window.jspdf;
-                              const doc = new jsPDF();
-                              
-                              for (let i = 0; i < itemsToPrint.length; i++) {
-                                  if (i > 0) doc.addPage();
-                                  await drawSingleLeavePage(doc, itemsToPrint[i]);
-                              }
-                              
-                              // บังคับดาวน์โหลดลงเครื่อง
-                              const fileName = type === 'page' ? `ใบลา_${status}_หน้า_${pageNum}.pdf` : `ใบลา_${status}_ทั้งหมด.pdf`;
-                              doc.save(fileName);
-                              
-                              appendMessage(`ดาวน์โหลด ${fileName} สำเร็จเรียบร้อยครับ! 🎉`, 'ai-message');
-                          } catch (error) {
-                              console.error(error);
-                              appendMessage('เกิดข้อผิดพลาดในการสร้างไฟล์ PDF', 'ai-message');
-                          } finally {
-                              // 🌟 ปิดหน้าจอโหลดเมื่อเสร็จสิ้น
-                              loadingOverlay.classList.remove('visible');
-                              if (loadingText) loadingText.textContent = 'กำลังโหลดข้อมูล...'; // คืนค่าข้อความเดิม
-                          }
-                      }
+                        const loadingOverlay = document.getElementById('loading-overlay');
+                        const loadingText = document.querySelector('.loading-text');
+                        if (loadingText) loadingText.textContent = `กำลังสร้างเอกสาร PDF ${itemsToPrint.length} แผ่น...`;
+                        loadingOverlay.classList.add('visible'); 
 
+                        appendMessage(`กำลังสร้าง PDF จำนวน ${itemsToPrint.length} แผ่น (หน้าจอโหลดกำลังทำงาน)...`, 'ai-message');
+                        
+                        try {
+                            const { jsPDF } = window.jspdf;
+                            const doc = new jsPDF();
+                            
+                            for (let i = 0; i < itemsToPrint.length; i++) {
+                                if (i > 0) doc.addPage();
+                                await drawSingleLeavePage(doc, itemsToPrint[i]);
+                            }
+                            
+                            const fileName = type === 'page' ? `ใบลา_${status}_หน้า_${pageNum}.pdf` : `ใบลา_${status}_ทั้งหมด.pdf`;
+                            doc.save(fileName);
+                            
+                            appendMessage(`ดาวน์โหลด ${fileName} สำเร็จเรียบร้อยครับ! 🎉`, 'ai-message');
+                        } catch (error) {
+                            console.error(error);
+                            appendMessage('เกิดข้อผิดพลาดในการสร้างไฟล์ PDF', 'ai-message');
+                        } finally {
+                            loadingOverlay.classList.remove('visible');
+                            if (loadingText) loadingText.textContent = 'กำลังโหลดข้อมูล...'; 
+                        }
+                    }
         async function executeApproveAllByAI() {
             const pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
             if (pendingItems.length === 0) {
