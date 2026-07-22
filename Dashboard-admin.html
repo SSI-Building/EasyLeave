@@ -1259,7 +1259,7 @@
                     sendChatBtn.addEventListener('click', handleSendMessage);
                     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSendMessage(); });
 
-                                async function handleSendMessage() {
+                                                    async function handleSendMessage() {
                                                         let text = chatInput.value.trim();
                                                         if (!text) return;
 
@@ -1326,7 +1326,14 @@
                                                         - "ปริ้นทั้งหมด (รออนุมัติ แบบไม่รับค่าจ้าง)" -> {"action":"print", "status":"pending", "pay_type":"unpaid", "type":"all"}
                                                         - "หน้า 1 (รออนุมัติ แบบไม่รับค่าจ้าง)" -> {"action":"print", "status":"pending", "pay_type":"unpaid", "type":"page", "page": 1}
                                                         - "หน้า 2 (รออนุมัติ แบบไม่รับค่าจ้าง)" -> {"action":"print", "status":"pending", "pay_type":"unpaid", "type":"page", "page": 2}
-                                                        - ถ้าสั่ง "อนุมัติทั้งหมด" -> {"action":"approve_all"}`;
+                                                        🔸 กฎการโต้ตอบข้อความ (ถ้าผู้ใช้พิมพ์ฝั่งซ้าย ให้คุณตอบกลับด้วยฝั่งขวาเป๊ะๆ):
+                                                        - "อนุมัติ" -> ต้องการอนุมัติ ทั้งหมด, อนุมัติ Paid ทั้งหมด หรือ อนุมัติ Unpaid ทั้งหมด ครับ?
+                                                        - "ช่วยอนุมัติหน่อย" -> ต้องการอนุมัติ ทั้งหมด, อนุมัติ Paid ทั้งหมด หรือ อนุมัติ Unpaid ทั้งหมด ครับ?
+
+                                                        🔸 กฎการแปลงเป็น JSON (ถ้าผู้ใช้พิมพ์ข้อความที่มีวงเล็บ ให้ตอบเป็น JSON เท่านั้น):
+                                                        - "อนุมัติทั้งหมด" -> {"action":"approve_all", "pay_type":"all"}
+                                                        - "อนุมัติ Paid ทั้งหมด" -> {"action":"approve_all", "pay_type":"paid"}
+                                                        - "อนุมัติ Unpaid ทั้งหมด" -> {"action":"approve_all", "pay_type":"unpaid"}`;
 
                                                         // เริ่มต้นระบบสลับคีย์อัตโนมัติ
                                                         let response;
@@ -1397,8 +1404,9 @@
                                                             
                                                             // จัดการคำสั่ง JSON
                                                             if (command.action === "approve_all") {
-                                                                appendMessage('รับทราบครับ! กำลังดำเนินการอนุมัติ...', 'ai-message');
-                                                                executeApproveAllByAI();
+                                                                let msgType = command.pay_type === 'paid' ? 'เฉพาะ Paid 🟢' : command.pay_type === 'unpaid' ? 'เฉพาะ Unpaid ⚪' : 'ทั้งหมด ✅';
+                                                                appendMessage(`รับทราบครับ! กำลังดำเนินการอนุมัติ ${msgType}...`, 'ai-message');
+                                                                executeApproveAllByAI(command.pay_type); // ส่งค่าประเภทไปให้ระบบจัดการ
                                                             } else if (command.action === "print") {
                                                                 appendMessage(`รับทราบครับ! กำลังดึงข้อมูล...`, 'ai-message');
                                                                 executePrintByAI(command.status, command.type, command.page, command.pay_type); 
@@ -1467,12 +1475,14 @@
                                                                     { label: "📄 หน้า 2", value: `หน้า 2 (${contextStr})` },
                                                                     { label: "❌ ยกเลิก", value: "ยกเลิก" }
                                                                 ];
-                                                            } else if (aiResponse.includes("อนุมัติรายการที่รออยู่ทั้งหมดเลยใช่ไหม")) {
-                                                                quickOptions = [
-                                                                    { label: "✅ ใช่, อนุมัติทั้งหมด", value: "อนุมัติทั้งหมด" },
-                                                                    { label: "❌ ไม่เป็นไร", value: "ยกเลิก" }
-                                                                ];
-                                                            }
+                                                                } else if (aiResponse.includes("ต้องการอนุมัติ ทั้งหมด, อนุมัติ Paid ทั้งหมด หรือ อนุมัติ Unpaid ทั้งหมด")) {
+                                                                    quickOptions = [
+                                                                        { label: "✅ อนุมัติทั้งหมด", value: "อนุมัติทั้งหมด" },
+                                                                        { label: "🟢 อนุมัติ Paid", value: "อนุมัติ Paid ทั้งหมด" },
+                                                                        { label: "⚪ อนุมัติ Unpaid", value: "อนุมัติ Unpaid ทั้งหมด" },
+                                                                        { label: "❌ ยกเลิก", value: "ยกเลิก" }
+                                                                    ];
+                                                                }
                                                             appendMessage(aiResponse, 'ai-message', quickOptions);
                                                         }
                                                     }
@@ -1583,23 +1593,48 @@
                             if (loadingText) loadingText.textContent = 'กำลังโหลดข้อมูล...'; 
                         }
                     }
-        async function executeApproveAllByAI() {
-            const pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
+        async function executeApproveAllByAI(payType = "all") {
+            // 1. ดึงข้อมูลที่ "รออนุมัติ" (pending) ทั้งหมดมาก่อน
+            let pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
+            
+            // 2. กรองเพิ่มเติมตามประเภท Paid / Unpaid (ถ้าไม่ได้เลือก all)
+            if (payType === "paid") {
+                pendingItems = pendingItems.filter(row => {
+                    const leaveType = row[4];
+                    const hasDocument = row[14];
+                    // เงื่อนไข Paid: เป็น AL หรือ มีเอกสาร
+                    return (leaveType === 'AL1' || leaveType === 'AL' || hasDocument === 'มี');
+                });
+            } else if (payType === "unpaid") {
+                pendingItems = pendingItems.filter(row => {
+                    const leaveType = row[4];
+                    const hasDocument = row[14];
+                    // เงื่อนไข Unpaid: ไม่ใช่ AL และ ไม่มีเอกสาร
+                    return !(leaveType === 'AL1' || leaveType === 'AL' || hasDocument === 'มี');
+                });
+            }
+
+            // 3. ตรวจสอบว่ามีรายการให้ทำหรือไม่
             if (pendingItems.length === 0) {
-                appendMessage('ไม่มีรายการที่รออนุมัติในขณะนี้ครับ', 'ai-message');
+                let typeStr = payType === 'paid' ? 'Paid' : payType === 'unpaid' ? 'Unpaid' : 'ทั้งหมด';
+                appendMessage(`ไม่มีรายการที่รออนุมัติ (หมวดหมู่: ${typeStr}) ในขณะนี้ครับ`, 'ai-message');
                 return;
             }
 
+            // 4. เริ่มต้นอนุมัติ
             const loadingOverlay = document.getElementById('loading-overlay');
             loadingOverlay.classList.add('visible');
+            
             try {
                 const updatePromises = pendingItems.map(item => {
                     const uuid = item[19];
                     return fetch(`${webAppUrl}?action=update&uuid=${uuid}&status=Approved`);
                 });
+                
                 await Promise.all(updatePromises);
-                appendMessage(`อนุมัติสำเร็จทั้งสิ้น ${pendingItems.length} รายการเรียบร้อยแล้วครับ!`, 'ai-message');
-                document.getElementById('loadDataButton').click();
+                appendMessage(`อนุมัติสำเร็จทั้งสิ้น ${pendingItems.length} รายการเรียบร้อยแล้วครับ! 🎉`, 'ai-message');
+                document.getElementById('loadDataButton').click(); // สั่งรีเฟรชตารางใหม่
+                
             } catch(err) {
                 console.error(err);
                 appendMessage('เกิดข้อผิดพลาดระหว่างอนุมัติ กรุณาลองใหม่อีกครั้ง', 'ai-message');
