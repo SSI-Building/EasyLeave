@@ -290,12 +290,13 @@ btnSubmit.addEventListener("click", async () => {
         const balanceTotal = (parseFloat(set1[3]) || 0) + (parseFloat(set1[4]) || 0) + (parseFloat(set1[5]) || 0);
 
         // 3. เตรียม Data Object
+        // 3. เตรียม Data Object
         const leaveDataToSend = {
             ...leaveData,
             leaveType: 
             leaveData.leaveType === "AL" ? "AL1" : 
-            leaveData.leaveType === "BL" ? "BL1" : 
-            leaveData.leaveType === "SL" ? "SL1" : leaveData.leaveType,
+            leaveData.leaveType === "BL" ? (leaveData.hasDocument === "มี" ? "BL1" : "BL2") : 
+            leaveData.leaveType === "SL" ? (leaveData.hasDocument === "มี" ? "SL1" : "SL2") : leaveData.leaveType,
             startDate: leaveData.startDateFormatted,
             startTime: leaveData.startTimeFormatted,
             endDate: leaveData.endDateFormatted,
