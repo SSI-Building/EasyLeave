@@ -1299,46 +1299,47 @@
                                     { regex: /^มีกี่คน|ทั้งหมดกี่คน|จำนวนพนักงาน/, action: () => null, reply: `ตอนนี้มีข้อมูลในตารางทั้งหมด ${filteredAndSortedData.length} รายการครับ 📊` },
                                     
                                     // 2. Flow เลือกเมนู (ปุ่มกดชั้นแรก)
-                                    { 
-                                        regex: /^ปริ้น$|^พิมพ์$|^ช่วยปริ้นหน่อย$/, action: () => null, reply: "ต้องการปริ้นสถานะ อนุมัติแล้ว หรือ รออนุมัติ ครับ?",
-                                        options: [{ label: "✅ อนุมัติแล้ว", value: "ปริ้นที่อนุมัติแล้ว" }, { label: "⏳ รออนุมัติ", value: "ปริ้นที่รออนุมัติ" }]
-                                    },
-                                    { 
-                                        regex: /^ปริ้นที่รออนุมัติ$/, action: () => null, reply: "ต้องการปริ้น ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง ครับ?",
-                                        options: [{ label: "📄 ทั้งหมด", value: "รออนุมัติ ทั้งหมด" }, { label: "💰 แบบรับค่าจ้าง", value: "รออนุมัติ แบบรับค่าจ้าง" }, { label: "🚫 แบบไม่รับค่าจ้าง", value: "รออนุมัติ แบบไม่รับค่าจ้าง" }]
-                                    },
-									{ 
-							            regex: /^(ปริ้นที่อนุมัติแล้ว|รออนุมัติ ทั้งหมด|รออนุมัติ แบบรับค่าจ้าง|รออนุมัติ แบบไม่รับค่าจ้าง)$/i, action: () => null, reply: "พบรายการดังกล่าว ต้องการปริ้นทั้งหมด หรือ ระบุหน้า (หน้า 1, หน้า 2) ครับ?",
-							            options: [
-							                { label: "📄 หน้า 1", value: `หน้า 1 (${text})` }, 
-							                { label: "📄 หน้า 2", value: `หน้า 2 (${text})` }, 
-							                { label: "🖨️ ปริ้นทั้งหมด", value: `ปริ้นทั้งหมด (${text})` }, 
-							                { label: "❌ ยกเลิก", value: "ยกเลิก" }
-							            ]
-							        },
-                                    { 
-                                        regex: /^อนุมัติ$|^ช่วยอนุมัติหน่อย$/, action: () => null, reply: "ต้องการอนุมัติ ทั้งหมด, อนุมัติ Paid ทั้งหมด หรือ อนุมัติ Unpaid ทั้งหมด ครับ?",
-                                        options: [{ label: "✅ อนุมัติทั้งหมด", value: "อนุมัติทั้งหมด" }, { label: "🟢 อนุมัติ Paid", value: "อนุมัติ Paid ทั้งหมด" }, { label: "⚪ อนุมัติ Unpaid", value: "อนุมัติ Unpaid ทั้งหมด" }, { label: "❌ ยกเลิก", value: "ยกเลิก" }]
-                                    },
-                                    { regex: /^ยกเลิก$/, action: () => null, reply: "ยกเลิกคำสั่งให้เรียบร้อยครับ มีอะไรให้ผมช่วยอีกไหมครับ? 😊" },
+                                            { 
+                                                regex: /^ปริ้น$|^พิมพ์$|^ช่วยปริ้นหน่อย$/, action: () => null, reply: "ต้องการปริ้นสถานะ อนุมัติแล้ว หรือ รออนุมัติ ครับ?",
+                                                options: [{ label: "✅ อนุมัติแล้ว", value: "ปริ้นที่อนุมัติแล้ว" }, { label: "⏳ รออนุมัติ", value: "ปริ้นที่รออนุมัติ" }]
+                                            },
+                                            { 
+                                                regex: /^ปริ้นที่รออนุมัติ$/, action: () => null, reply: "ต้องการปริ้น ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง ครับ?",
+                                                options: [{ label: "📄 ทั้งหมด", value: "รออนุมัติ ทั้งหมด" }, { label: "💰 แบบรับค่าจ้าง", value: "รออนุมัติ แบบรับค่าจ้าง" }, { label: "🚫 แบบไม่รับค่าจ้าง", value: "รออนุมัติ แบบไม่รับค่าจ้าง" }]
+                                            },
+                                            { 
+                                                regex: /^(ปริ้นที่อนุมัติแล้ว|รออนุมัติ ทั้งหมด|รออนุมัติ แบบรับค่าจ้าง|รออนุมัติ แบบไม่รับค่าจ้าง)$/, action: () => null, 
+                                                // 🌟 แก้คำพูดตรงนี้ให้สอดคล้องกับปุ่ม
+                                                reply: "พบรายการดังกล่าว กรุณาระบุหน้า (หน้า 1, หน้า 2, หน้า 3) ครับ?",
+                                                options: [
+                                                    { label: "📄 หน้า 1", value: `หน้า 1 (${text})` }, 
+                                                    { label: "📄 หน้า 2", value: `หน้า 2 (${text})` }, 
+                                                    { label: "📄 หน้า 3", value: `หน้า 3 (${text})` }, // 🌟 เพิ่มหน้า 3
+                                                    { label: "❌ ยกเลิก", value: "ยกเลิก" } // 🌟 ลบปริ้นทั้งหมดทิ้งไป
+                                                ]
+                                            },
+                                            { 
+                                                regex: /^อนุมัติ$|^ช่วยอนุมัติหน่อย$/, action: () => null, reply: "ต้องการอนุมัติ ทั้งหมด, อนุมัติ Paid ทั้งหมด หรือ อนุมัติ Unpaid ทั้งหมด ครับ?",
+                                                options: [{ label: "✅ อนุมัติทั้งหมด", value: "อนุมัติทั้งหมด" }, { label: "🟢 อนุมัติ Paid", value: "อนุมัติ Paid ทั้งหมด" }, { label: "⚪ อนุมัติ Unpaid", value: "อนุมัติ Unpaid ทั้งหมด" }, { label: "❌ ยกเลิก", value: "ยกเลิก" }]
+                                            },
+                                            { regex: /^ยกเลิก$/, action: () => null, reply: "ยกเลิกคำสั่งให้เรียบร้อยครับ มีอะไรให้ผมช่วยอีกไหมครับ? 😊" },
 
-                                    // 🌟 3. Flow คำสั่งขั้นสุดท้าย (เช็คก่อนว่ามีข้อมูลไหม ค่อยโชว์ข้อความ)
-                                    // กลุ่มคำสั่งปริ้น: ลบข้อความแจ้งเตือนออก เพราะฟังก์ชัน executePrintByAI มีแจ้งเตือนของตัวเองอยู่แล้ว
-                                    { regex: /^ปริ้นทั้งหมด \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "all", null, "all") },
-                                    { regex: /^หน้า 1 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 1, "all") },
-                                    { regex: /^หน้า 2 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 2, "all") },
+                                            // 🌟 3. Flow คำสั่งขั้นสุดท้าย (เพิ่มหน้า 3 และลบคำสั่งปริ้นทั้งหมดทิ้ง)
+                                            { regex: /^หน้า 1 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 1, "all") },
+                                            { regex: /^หน้า 2 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 2, "all") },
+                                            { regex: /^หน้า 3 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 3, "all") },
 
-                                    { regex: /^ปริ้นทั้งหมด \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "all", null, "all") },
-                                    { regex: /^หน้า 1 \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "page", 1, "all") },
-                                    { regex: /^หน้า 2 \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "page", 2, "all") },
+                                            { regex: /^หน้า 1 \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "page", 1, "all") },
+                                            { regex: /^หน้า 2 \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "page", 2, "all") },
+                                            { regex: /^หน้า 3 \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "page", 3, "all") },
 
-                                    { regex: /^ปริ้นทั้งหมด \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "all", null, "paid") },
-                                    { regex: /^หน้า 1 \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 1, "paid") },
-                                    { regex: /^หน้า 2 \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 2, "paid") },
+                                            { regex: /^หน้า 1 \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 1, "paid") },
+                                            { regex: /^หน้า 2 \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 2, "paid") },
+                                            { regex: /^หน้า 3 \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 3, "paid") },
 
-                                    { regex: /^ปริ้นทั้งหมด \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "all", null, "unpaid") },
-                                    { regex: /^หน้า 1 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 1, "unpaid") },
-                                    { regex: /^หน้า 2 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 2, "unpaid") },
+                                            { regex: /^หน้า 1 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 1, "unpaid") },
+                                            { regex: /^หน้า 2 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 2, "unpaid") },
+                                            { regex: /^หน้า 3 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 3, "unpaid") },
 
                                     // กลุ่มคำสั่งอนุมัติ: ใช้ JS กรองข้อมูลดูก่อน ถ้า "มีข้อมูล" ถึงจะพิมพ์คำว่ากำลังดำเนินการ
                                     { 
