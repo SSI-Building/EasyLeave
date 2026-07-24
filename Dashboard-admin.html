@@ -1241,7 +1241,8 @@
                                             "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",
                                             "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",
 											"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",
-                                            "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"
+                                            "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",
+                                            "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"
                                             // ถ้าอนาคตมีคีย์เพิ่ม ก็ใส่ลูกน้ำแล้วเพิ่มบรรทัดต่อได้เลยครับ
                                             ];
                     let currentKeyIndex = 0; // ตัวแปรสำหรับจำว่าตอนนี้ใช้คีย์ตัวที่เท่าไหร่
@@ -1456,40 +1457,53 @@
                             if (chatHistory.length > 10) chatHistory.shift();
 
                             // ========================================================
-                            // 🟢 5. API CALL
-                            // ========================================================
-                            let data, success = false;
+                                // 🟢 5. API CALL (เวอร์ชันจับผิด Error แสดงผลให้เห็นจะๆ)
+                                // ========================================================
+                                let data, success = false;
+                                let lastErrorMsg = ""; // 🌟 เพิ่มตัวแปรไว้เก็บคำอธิบาย Error จาก Groq
 
-                            while (currentKeyIndex < GROQ_API_KEYS.length && !success) {
-                                try {
-                                    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                                        method: "POST",
-                                        headers: { "Authorization": `Bearer ${GROQ_API_KEYS[currentKeyIndex]}`, "Content-Type": "application/json" },
-                                        body: JSON.stringify({
-                                            model: "llama-3.1-8b-instant",
-                                            messages: [ { role: "system", content: finalSystemPrompt }, ...chatHistory ],
-                                            temperature: 0.3, 
-                                            max_tokens: 300
-                                        })
-                                    });
+                                while (currentKeyIndex < GROQ_API_KEYS.length && !success) {
+                                    try {
+                                        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                                            method: "POST",
+                                            headers: { "Authorization": `Bearer ${GROQ_API_KEYS[currentKeyIndex]}`, "Content-Type": "application/json" },
+                                            body: JSON.stringify({
+                                                // 💡 ถ้า Error ฟ้องว่า Model ไม่ถูกต้อง ให้ลองเปลี่ยนเป็น "llama3-8b-8192" ดูนะครับ
+                                                model: "llama-3.1-8b-instant", 
+                                                messages: [ { role: "system", content: finalSystemPrompt }, ...chatHistory ],
+                                                temperature: 0.3, 
+                                                max_tokens: 300
+                                            })
+                                        });
 
-                                    data = await response.json();
-                                    if (!response.ok || data.error) {
-                                        if ((data.error?.message || "").toLowerCase().includes("rate limit") || response.status === 429) {
-                                            currentKeyIndex++; continue;
-                                        } else break;
+                                        data = await response.json();
+                                        
+                                        // เช็คว่ายิงสำเร็จไหม ถ้าไม่สำเร็จ ให้เก็บ Error ไว้
+                                        if (!response.ok || data.error) {
+                                            lastErrorMsg = data.error?.message || `HTTP Status ${response.status}`;
+                                            console.warn(`[API Key ลำดับ ${currentKeyIndex + 1} พัง]:`, lastErrorMsg);
+                                            
+                                            // ไม่ว่าพังเพราะโควตาเต็ม หรือคีย์ผิด ให้สลับคีย์ไปลองอันถัดไปเสมอ
+                                            currentKeyIndex++; 
+                                            continue; 
+                                        }
+                                        success = true;
+                                    } catch (error) { 
+                                        console.error("เน็ตหลุดหรือขัดข้องที่เบราว์เซอร์:", error);
+                                        lastErrorMsg = error.message;
+                                        break; 
                                     }
-                                    success = true;
-                                } catch (error) { break; }
-                            }
+                                }
 
-                            chatMessages.removeChild(typingMsg);
+                                chatMessages.removeChild(typingMsg);
 
-                            if (!success) {
-                                if (currentKeyIndex >= GROQ_API_KEYS.length) currentKeyIndex = 0;
-                                chatHistory.pop();
-                                return appendMessage("⚠️ โควตา API เต็มหรือขัดข้อง กรุณาลองใหม่", 'ai-message');
-                            }
+                                if (!success) {
+                                    if (currentKeyIndex >= GROQ_API_KEYS.length) currentKeyIndex = 0;
+                                    chatHistory.pop(); // เอาข้อความที่ถามไปเมื่อกี้ออก ประวัติจะได้ไม่รวน
+                                    
+                                    // 🌟 ให้บอทโชว์ความจริงออกมาเลย ว่า Groq ด่ากลับมาว่าอะไร!
+                                    return appendMessage(`⚠️ AI ขัดข้อง: ${lastErrorMsg}`, 'ai-message');
+                                }
 
                             let aiResponse = data.choices[0].message.content.trim().replace(/```json/g, '').replace(/```/g, '').trim();
 
