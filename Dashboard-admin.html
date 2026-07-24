@@ -1280,52 +1280,102 @@
                             
                             const t = text.toLowerCase();
 
-                            // ========================================================
-                            // 🟢 1. FAST INTENT DETECTION (JS รับจบ งานปริ้น/อนุมัติทั้งหมด!)
-                            // ========================================================
-                            const localCommands = [
-                                // 1. คำสั่งทั่วไป
-                                { regex: /รีเฟรช|refresh|โหลดใหม่/i, action: () => document.getElementById('loadDataButton').click(), reply: "รีเฟรชข้อมูลให้แล้วครับ 🔄" },
-                                { regex: /รีเซ็ต|ล้างค่า|เริ่มใหม่/i, action: () => { document.getElementById('resetButton').click(); aiMemory.employee = null; aiMemory.leaveType = null; aiMemory.status = null; chatHistory.length = 0; }, reply: "ล้างค่าตัวกรองและล้างความจำให้เรียบร้อยครับ 🧹" },
-                                { regex: /^มีกี่คน|ทั้งหมดกี่คน|จำนวนพนักงาน/i, action: () => null, reply: `ตอนนี้มีข้อมูลในตารางทั้งหมด ${filteredAndSortedData.length} รายการครับ 📊` },
-                                { regex: /^ยกเลิก$/i, action: () => null, reply: "ยกเลิกคำสั่งให้เรียบร้อยครับ มีอะไรให้ผมช่วยอีกไหมครับ? 😊" },
+                          
+                                // ========================================================
+                                // 🟢 Step 2: FAST INTENT DETECTION (JS รับจบ ไม่กวน API)
+                                // ========================================================
+                                const localCommands = [
+                                    // 1. คำสั่งทั่วไป
+                                    { regex: /รีเฟรช|refresh|โหลดใหม่/, action: () => document.getElementById('loadDataButton').click(), reply: "รีเฟรชข้อมูลให้แล้วครับ 🔄" },
+                                    { 
+                                        regex: /รีเซ็ต|ล้างค่า|เริ่มใหม่/, 
+                                        action: () => { 
+                                            document.getElementById('resetButton').click(); 
+                                            aiMemory.employee = null; aiMemory.leaveType = null; aiMemory.status = null; 
+                                            chatHistory.length = 0; 
+                                        }, 
+                                        reply: "ล้างค่าตัวกรองและล้างความจำให้เรียบร้อยครับ 🧹" 
+                                    },
+                                    { regex: /^มีกี่คน|ทั้งหมดกี่คน|จำนวนพนักงาน/, action: () => null, reply: `ตอนนี้มีข้อมูลในตารางทั้งหมด ${filteredAndSortedData.length} รายการครับ 📊` },
+                                    
+                                    // 2. Flow เลือกเมนู (ปุ่มกดชั้นแรก)
+                                    { 
+                                        regex: /^ปริ้น$|^พิมพ์$|^ช่วยปริ้นหน่อย$/, action: () => null, reply: "ต้องการปริ้นสถานะ อนุมัติแล้ว หรือ รออนุมัติ ครับ?",
+                                        options: [{ label: "✅ อนุมัติแล้ว", value: "ปริ้นที่อนุมัติแล้ว" }, { label: "⏳ รออนุมัติ", value: "ปริ้นที่รออนุมัติ" }]
+                                    },
+                                    { 
+                                        regex: /^ปริ้นที่รออนุมัติ$/, action: () => null, reply: "ต้องการปริ้น ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง ครับ?",
+                                        options: [{ label: "📄 ทั้งหมด", value: "รออนุมัติ ทั้งหมด" }, { label: "💰 แบบรับค่าจ้าง", value: "รออนุมัติ แบบรับค่าจ้าง" }, { label: "🚫 แบบไม่รับค่าจ้าง", value: "รออนุมัติ แบบไม่รับค่าจ้าง" }]
+                                    },
+                                    { 
+                                        regex: /^(ปริ้นที่อนุมัติแล้ว|รออนุมัติ ทั้งหมด|รออนุมัติ แบบรับค่าจ้าง|รออนุมัติ แบบไม่รับค่าจ้าง)$/, action: () => null, reply: "พบรายการดังกล่าว ต้องการปริ้นทั้งหมด หรือ ระบุหน้า (หน้า 1, หน้า 2) ครับ?",
+                                        options: [{ label: "🖨️ ปริ้นทั้งหมด", value: `ปริ้นทั้งหมด (${text})` }, { label: "📄 หน้า 1", value: `หน้า 1 (${text})` }, { label: "📄 หน้า 2", value: `หน้า 2 (${text})` }, { label: "❌ ยกเลิก", value: "ยกเลิก" }]
+                                    },
+                                    { 
+                                        regex: /^อนุมัติ$|^ช่วยอนุมัติหน่อย$/, action: () => null, reply: "ต้องการอนุมัติ ทั้งหมด, อนุมัติ Paid ทั้งหมด หรือ อนุมัติ Unpaid ทั้งหมด ครับ?",
+                                        options: [{ label: "✅ อนุมัติทั้งหมด", value: "อนุมัติทั้งหมด" }, { label: "🟢 อนุมัติ Paid", value: "อนุมัติ Paid ทั้งหมด" }, { label: "⚪ อนุมัติ Unpaid", value: "อนุมัติ Unpaid ทั้งหมด" }, { label: "❌ ยกเลิก", value: "ยกเลิก" }]
+                                    },
+                                    { regex: /^ยกเลิก$/, action: () => null, reply: "ยกเลิกคำสั่งให้เรียบร้อยครับ มีอะไรให้ผมช่วยอีกไหมครับ? 😊" },
 
-                                // 2. Flow ปุ่มกดขั้นตอนแรก
-                                { regex: /^ปริ้น$|^พิมพ์$|^ช่วยปริ้นหน่อย$/i, action: () => null, reply: "ต้องการปริ้นสถานะ อนุมัติแล้ว หรือ รออนุมัติ ครับ?", options: [{ label: "✅ อนุมัติแล้ว", value: "ปริ้นที่อนุมัติแล้ว" }, { label: "⏳ รออนุมัติ", value: "ปริ้นที่รออนุมัติ" }] },
-                                { regex: /^ปริ้นที่รออนุมัติ$/i, action: () => null, reply: "ต้องการปริ้น ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง ครับ?", options: [{ label: "📄 ทั้งหมด", value: "รออนุมัติ ทั้งหมด" }, { label: "💰 แบบรับค่าจ้าง", value: "รออนุมัติ แบบรับค่าจ้าง" }, { label: "🚫 แบบไม่รับค่าจ้าง", value: "รออนุมัติ แบบไม่รับค่าจ้าง" }] },
-                                { regex: /^(ปริ้นที่อนุมัติแล้ว|รออนุมัติ ทั้งหมด|รออนุมัติ แบบรับค่าจ้าง|รออนุมัติ แบบไม่รับค่าจ้าง)$/i, action: () => null, reply: "พบรายการดังกล่าว ต้องการปริ้นทั้งหมด หรือ ระบุหน้า (หน้า 1, หน้า 2) ครับ?", options: [{ label: "🖨️ ปริ้นทั้งหมด", value: `ปริ้นทั้งหมด (${text})` }, { label: "📄 หน้า 1", value: `หน้า 1 (${text})` }, { label: "📄 หน้า 2", value: `หน้า 2 (${text})` }, { label: "❌ ยกเลิก", value: "ยกเลิก" }] },
-                                { regex: /^อนุมัติ$|^ช่วยอนุมัติหน่อย$/i, action: () => null, reply: "ต้องการอนุมัติ ทั้งหมด, อนุมัติ Paid ทั้งหมด หรือ อนุมัติ Unpaid ทั้งหมด ครับ?", options: [{ label: "✅ อนุมัติทั้งหมด", value: "อนุมัติทั้งหมด" }, { label: "🟢 อนุมัติ Paid", value: "อนุมัติ Paid ทั้งหมด" }, { label: "⚪ อนุมัติ Unpaid", value: "อนุมัติ Unpaid ทั้งหมด" }, { label: "❌ ยกเลิก", value: "ยกเลิก" }] },
+                                    // 🌟 3. Flow คำสั่งขั้นสุดท้าย (เช็คก่อนว่ามีข้อมูลไหม ค่อยโชว์ข้อความ)
+                                    // กลุ่มคำสั่งปริ้น: ลบข้อความแจ้งเตือนออก เพราะฟังก์ชัน executePrintByAI มีแจ้งเตือนของตัวเองอยู่แล้ว
+                                    { regex: /^ปริ้นทั้งหมด \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "all", null, "all") },
+                                    { regex: /^หน้า 1 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 1, "all") },
+                                    { regex: /^หน้า 2 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 2, "all") },
 
-                                // 🌟 3. Flow คำสั่งขั้นสุดท้าย (AI ไม่ต้องยุ่ง! JS สั่งรันฟังก์ชันให้เองทันที)
-                                { regex: /^ปริ้นทั้งหมด \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "all", null, "all"), reply: "กำลังเตรียมไฟล์ PDF ปริ้นทั้งหมดที่อนุมัติแล้วครับ 🖨️" },
-                                { regex: /^หน้า 1 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 1, "all"), reply: "กำลังเตรียมไฟล์ PDF หน้า 1 (อนุมัติแล้ว) ครับ 🖨️" },
-                                { regex: /^หน้า 2 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 2, "all"), reply: "กำลังเตรียมไฟล์ PDF หน้า 2 (อนุมัติแล้ว) ครับ 🖨️" },
+                                    { regex: /^ปริ้นทั้งหมด \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "all", null, "all") },
+                                    { regex: /^หน้า 1 \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "page", 1, "all") },
+                                    { regex: /^หน้า 2 \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "page", 2, "all") },
 
-                                { regex: /^ปริ้นทั้งหมด \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "all", null, "all"), reply: "กำลังเตรียมไฟล์ PDF ปริ้นทั้งหมดที่รออนุมัติครับ 🖨️" },
-                                { regex: /^หน้า 1 \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "page", 1, "all"), reply: "กำลังเตรียมไฟล์ PDF หน้า 1 (รออนุมัติทั้งหมด) ครับ 🖨️" },
-                                { regex: /^หน้า 2 \(รออนุมัติ ทั้งหมด\)$/i, action: () => executePrintByAI("pending", "page", 2, "all"), reply: "กำลังเตรียมไฟล์ PDF หน้า 2 (รออนุมัติทั้งหมด) ครับ 🖨️" },
+                                    { regex: /^ปริ้นทั้งหมด \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "all", null, "paid") },
+                                    { regex: /^หน้า 1 \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 1, "paid") },
+                                    { regex: /^หน้า 2 \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 2, "paid") },
 
-                                { regex: /^ปริ้นทั้งหมด \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "all", null, "paid"), reply: "กำลังเตรียมไฟล์ PDF ปริ้นทั้งหมดที่รออนุมัติ (แบบรับค่าจ้าง) ครับ 🖨️" },
-                                { regex: /^หน้า 1 \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 1, "paid"), reply: "กำลังเตรียมไฟล์ PDF หน้า 1 (รออนุมัติ แบบรับค่าจ้าง) ครับ 🖨️" },
-                                { regex: /^หน้า 2 \(รออนุมัติ แบบรับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 2, "paid"), reply: "กำลังเตรียมไฟล์ PDF หน้า 2 (รออนุมัติ แบบรับค่าจ้าง) ครับ 🖨️" },
+                                    { regex: /^ปริ้นทั้งหมด \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "all", null, "unpaid") },
+                                    { regex: /^หน้า 1 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 1, "unpaid") },
+                                    { regex: /^หน้า 2 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 2, "unpaid") },
 
-                                { regex: /^ปริ้นทั้งหมด \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "all", null, "unpaid"), reply: "กำลังเตรียมไฟล์ PDF ปริ้นทั้งหมดที่รออนุมัติ (แบบไม่รับค่าจ้าง) ครับ 🖨️" },
-                                { regex: /^หน้า 1 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 1, "unpaid"), reply: "กำลังเตรียมไฟล์ PDF หน้า 1 (รออนุมัติ แบบไม่รับค่าจ้าง) ครับ 🖨️" },
-                                { regex: /^หน้า 2 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 2, "unpaid"), reply: "กำลังเตรียมไฟล์ PDF หน้า 2 (รออนุมัติ แบบไม่รับค่าจ้าง) ครับ 🖨️" },
+                                    // กลุ่มคำสั่งอนุมัติ: ใช้ JS กรองข้อมูลดูก่อน ถ้า "มีข้อมูล" ถึงจะพิมพ์คำว่ากำลังดำเนินการ
+                                    { 
+                                        regex: /^อนุมัติทั้งหมด$/i, 
+                                        action: () => {
+                                            let pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
+                                            if (pendingItems.length > 0) appendMessage("กำลังดำเนินการอนุมัติทั้งหมดครับ ✅", "ai-message");
+                                            executeApproveAllByAI("all");
+                                        }
+                                    },
+                                    { 
+                                        regex: /^อนุมัติ paid ทั้งหมด$/i, 
+                                        action: () => {
+                                            let pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
+                                            let hasItems = pendingItems.some(row => row[4] === 'AL1' || row[4] === 'AL' || row[14] === 'มี');
+                                            if (hasItems) appendMessage("กำลังดำเนินการอนุมัติเฉพาะรายการ Paid ครับ 🟢", "ai-message");
+                                            executeApproveAllByAI("paid");
+                                        }
+                                    },
+                                    { 
+                                        regex: /^อนุมัติ unpaid ทั้งหมด$/i, 
+                                        action: () => {
+                                            let pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
+                                            let hasItems = pendingItems.some(row => !(row[4] === 'AL1' || row[4] === 'AL' || row[14] === 'มี'));
+                                            if (hasItems) appendMessage("กำลังดำเนินการอนุมัติเฉพาะรายการ Unpaid ครับ ⚪", "ai-message");
+                                            executeApproveAllByAI("unpaid");
+                                        }
+                                    }
+                                ];
 
-                                { regex: /^อนุมัติทั้งหมด$/i, action: () => executeApproveAllByAI("all"), reply: "กำลังดำเนินการอนุมัติทั้งหมดครับ ✅" },
-                                { regex: /^อนุมัติ paid ทั้งหมด$/i, action: () => executeApproveAllByAI("paid"), reply: "กำลังดำเนินการอนุมัติเฉพาะรายการ Paid ครับ 🟢" },
-                                { regex: /^อนุมัติ unpaid ทั้งหมด$/i, action: () => executeApproveAllByAI("unpaid"), reply: "กำลังดำเนินการอนุมัติเฉพาะรายการ Unpaid ครับ ⚪" }
-                            ];
-
-                            for (const cmd of localCommands) {
-                                if (cmd.regex.test(t)) {
-                                    if (cmd.action) cmd.action();
-                                    chatMessages.removeChild(typingMsg);
-                                    return appendMessage(cmd.reply, 'ai-message', cmd.options || []);
+                                for (const cmd of localCommands) {
+                                    if (cmd.regex.test(t)) {
+                                        if (cmd.action) cmd.action();
+                                        chatMessages.removeChild(typingMsg);
+                                        
+                                        // 🌟 แก้บั๊กกล่องข้อความเปล่า: ถ้าฟังก์ชันไหนไม่มีข้อความ reply ให้ข้ามไปเลย ไม่ต้องพิมพ์ช่องว่าง
+                                        if (cmd.reply) {
+                                            appendMessage(cmd.reply, 'ai-message', cmd.options || []);
+                                        }
+                                        return;
+                                    }
                                 }
-                            }
-
                             // ========================================================
                             // 🧠 2. UPDATE MEMORY STATE (วิเคราะห์ชื่อและบริบท)
                             // ========================================================
