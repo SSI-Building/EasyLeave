@@ -336,7 +336,7 @@
             <input type="date" id="startDate">
             <label for="endDate"><i class="fas fa-calendar-alt"></i> วันที่สิ้นสุด:</label>
             <input type="date" id="endDate">
-            <button id="loadDataButton"><i class="fas fa-sync-alt"></i>Refresh</button>
+            <button id="loadDataButton"><i class="fas fa-sync-alt"></i>Load Data</button>
             <button id="resetButton"><i class="fas fa-undo"></i>Default</button>
             <button class="action-button" id="summaryButton" title="ตารางสรุปทั้งหมด และปริ้นตาราง"><i class="fa fa-table"></i></button>
             <button class="action-button" id="summaryButton2" title="ข้อมูลรายบุคคล"><i class="fa-solid fa-id-card-clip"></i></button>
@@ -542,35 +542,50 @@
                     alert('เกิดข้อผิดพลาดในการอัปเดตสถานะ');
                 }
             }
-
             window.filterAndSortData = function() {
-                let currentData = [...allData]; 
-                const searchText = searchNameInput.value.toLowerCase();
-                if (searchText) {
-                    currentData = currentData.filter(row => (row[1] || '').toLowerCase().includes(searchText));
-                }
-                const filterType = filterTypeSelect.value;
-                if (filterType) {
-                    currentData = currentData.filter(row => (row[4] || '') === filterType);
-                }
-                const filterStatus = filterStatusSelect.value;
-                if (filterStatus) {
-                    currentData = currentData.filter(row => (row[10] || '') === filterStatus);
-                }
+    let currentData = [...allData];
+    
+    // --- ส่วนที่แก้ไข: ระบบค้นหาชื่อ ---
+    // 1. ดึงข้อความมาตัดช่องว่างหัวท้าย (trim)
+    const rawSearchText = searchNameInput.value.trim(); 
+    
+    if (rawSearchText) {
+        // 2. แปลงเป็นตัวเล็กและ "ตัดเว้นวรรคทั้งหมดทิ้ง" เพื่อแก้ปัญหาเว้นวรรคไม่ตรงกัน
+        const searchText = rawSearchText.toLowerCase().replace(/\s+/g, '');
+        
+        currentData = currentData.filter(row => {
+            // 3. แปลงข้อมูลในตาราง (row[1]) ให้เป็น String ก่อนเสมอ ป้องกัน Error ถ้าเจอข้อมูลที่เป็นตัวเลข
+            // และตัดเว้นวรรคทิ้งเช่นเดียวกันเพื่อนำมาเปรียบเทียบ
+            const fullName = String(row[1] || '').toLowerCase().replace(/\s+/g, '');
+            
+            // 4. ใช้ .includes() เพื่อหาคำบางส่วน (พิมพ์ "ป" ก็เจอรายชื่อที่มี "ป")
+            return fullName.includes(searchText);
+        });
+    }
+    // ------------------------------------
 
-                currentData.sort((a, b) => {
-                    const dateA = new Date(a[11]);
-                    const dateB = new Date(b[11]);
-                    if (isNaN(dateA)) return 1; 
-                    if (isNaN(dateB)) return -1;
-                    return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
-                });
-                
-                filteredAndSortedData = currentData;
-                currentPage = 1; 
-                displayTableData();
-            };
+    const filterType = filterTypeSelect.value;
+    if (filterType) {
+        currentData = currentData.filter(row => (row[4] || '') === filterType);
+    }
+    
+    const filterStatus = filterStatusSelect.value;
+    if (filterStatus) {
+        currentData = currentData.filter(row => (row[10] || '') === filterStatus);
+    }
 
+    currentData.sort((a, b) => {
+        const dateA = new Date(a[11]);
+        const dateB = new Date(b[11]);
+        if (isNaN(dateA)) return 1; 
+        if (isNaN(dateB)) return -1;
+        return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+    
+    filteredAndSortedData = currentData;
+    currentPage = 1; 
+    displayTableData();
+};
             async function fetchData(startDate, endDate) {
                 showLoading();
                 try {
