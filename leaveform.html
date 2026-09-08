@@ -604,10 +604,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const leaveMinutes = calculateLeaveMinutes(startDate.value, startTime.value, endDate.value, endTime.value);
 
         if (leaveMinutes === 0) {
-        alert("เวลาไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง เช่น ลาตั้งแต่ วันที่ dd/mm/yy 08:00 ถึงวันที่ dd/mm/yy 17:00");
-        return;
+            alert("เวลาไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง เช่น ลาตั้งแต่ วันที่ dd/mm/yy 08:00 ถึงวันที่ dd/mm/yy 17:00");
+            return;
         }
-        
+
+        // --- เพิ่มเงื่อนไขใหม่ ป้องกันการลาเกิน 1 วัน (480 นาที) ---
+        if (leaveMinutes > 480) {
+            alert("ไม่อนุญาตให้ลาเกิน 1 วันต่อครั้ง หากต้องการลาหลายวัน กรุณากรอกแบบฟอร์มแยกทีละวันครับ");
+            return;
+        }
+        // --------------------------------------------------
+
         const leaveType = leaveTypeEl.value;
         let maxMinutes = 0;
         switch(leaveType){
