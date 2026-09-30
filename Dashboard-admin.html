@@ -864,6 +864,7 @@
                                 document.querySelector(".loading-text").textContent = "ดาวน์โหลดเสร็จสิ้น!";
                                 setTimeout(() => {
                                     document.getElementById("loading-overlay").classList.remove("visible");
+									 window.open("http://192.168.3.31/leave", "_blank");
                                 }, 1500);
 
                             } catch (error) {
