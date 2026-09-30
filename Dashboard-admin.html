@@ -407,6 +407,8 @@
         </div>
     </div>
 
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> 
 
@@ -782,38 +784,95 @@
                 filterAndSortData();
             });
         });
+                        // ==================== 4. Export History Function ====================
+                        document.getElementById("exportHistoryButton").addEventListener("click", exportHistory);
 
-        // ==================== 4. Export History Function ====================
-        document.getElementById("exportHistoryButton").addEventListener("click", exportHistory);
-        async function exportHistory() {
-            document.getElementById("loading-overlay").classList.add("visible");
-            document.querySelector(".loading-text").textContent = "Export Excel & Link to Upload...";
-            try {
-                const response = await fetch(EXPORT_URL);
-                const result = await response.json();
-                const fileResponse = await fetch(`data:${result.mimeType};base64,${result.data}`);
-                const blob = await fileResponse.blob();
+                        async function exportHistory() {
+                            // 1. เช็คว่ามีข้อมูลบนตารางไหม
+                            if (!filteredAndSortedData || filteredAndSortedData.length === 0) {
+                                Swal.fire('แจ้งเตือน', 'ไม่มีข้อมูลบนตารางให้ดาวน์โหลดครับ', 'warning');
+                                return;
+                            }
 
-                const now = new Date();
-                const fileName = `BUS-LeaveSystem-Update-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.xlsx`;
+                            // 2. คำนวณว่าข้อมูลปัจจุบันแบ่งได้กี่หน้า
+                            const totalPages = Math.ceil(filteredAndSortedData.length / rowsPerPage);
+                            
+                            // 3. สร้าง Dropdown ให้เลือกหน้า
+                            let optionsHtml = '<select id="pageSelect" class="swal2-input" style="width: 85%; font-family: Kanit; font-size: 1em;">';
+                            optionsHtml += '<option value="all">ดาวน์โหลดทั้งหมดที่แสดงอยู่ (ทุกหน้า)</option>';
+                            for (let i = 1; i <= totalPages; i++) {
+                                optionsHtml += `<option value="${i}">ดาวน์โหลดเฉพาะหน้า ${i}</option>`;
+                            }
+                            optionsHtml += '</select>';
 
-                const downloadUrl = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.style.display = "none"; a.href = downloadUrl; a.download = fileName;
-                document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                URL.revokeObjectURL(downloadUrl);
+                            // 4. โชว์ Popup
+                            const { value: selectedOption } = await Swal.fire({
+                                title: 'เลือกข้อมูลที่จะดาวน์โหลด',
+                                html: optionsHtml,
+                                focusConfirm: false,
+                                showCancelButton: true,
+                                confirmButtonText: '<i class="fas fa-file-excel"></i> ตกลง',
+                                cancelButtonText: 'ยกเลิก',
+                                confirmButtonColor: '#1D6F42',
+                                preConfirm: () => document.getElementById('pageSelect').value
+                            });
 
-                document.querySelector(".loading-text").textContent = "กำลังโหลดข้อมูล...";
-                setTimeout(() => {
-                    document.getElementById("loading-overlay").classList.remove("visible");
-                    window.open("http://192.168.3.31/leave", "_blank");
-                }, 2000);
-            } catch (error) {
-                console.error("Export error:", error);
-                alert("เกิดข้อผิดพลาดในการดาวน์โหลด กรุณาลองใหม่อีกครั้ง");
-                document.getElementById("loading-overlay").classList.remove("visible");
-            }
-        }
+                            if (!selectedOption) return; // ถ้ายกเลิกการโหลด
+
+                            // 5. ตัดข้อมูลเอาเฉพาะหน้าที่เลือก
+                            let dataToExport = [];
+                            if (selectedOption === "all") {
+                                dataToExport = filteredAndSortedData;
+                            } else {
+                                const pageNum = parseInt(selectedOption);
+                                const start = (pageNum - 1) * rowsPerPage;
+                                dataToExport = filteredAndSortedData.slice(start, start + rowsPerPage);
+                            }
+
+                            // 6. เริ่มโหลด
+                            document.getElementById("loading-overlay").classList.add("visible");
+                            document.querySelector(".loading-text").textContent = "กำลังสร้างไฟล์ Excel กรุณารอสักครู่...";
+
+                            try {
+                                // ลบพารามิเตอร์เก่าๆ ทิ้งให้เหลือแค่ URL เพียวๆ
+                                const cleanUrl = EXPORT_URL.split('?')[0]; 
+
+                                // ส่งข้อมูลที่ตัดแล้วไปหา Apps Script ด้วยวิธี POST
+                                const response = await fetch(cleanUrl, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                                    body: JSON.stringify({
+                                        action: "exportHistory",
+                                        data: dataToExport
+                                    })
+                                });
+
+                                const result = await response.json();
+                                if (result.error) throw new Error(result.error);
+
+                                // ดาวน์โหลดไฟล์ที่ได้กลับมา
+                                const fileResponse = await fetch(`data:${result.mimeType};base64,${result.data}`);
+                                const blob = await fileResponse.blob();
+                                
+                                const fileName = `BUS-LeaveSystem-${selectedOption === 'all' ? 'All' : 'Page'+selectedOption}.xlsx`;
+                                const downloadUrl = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.style.display = "none"; a.href = downloadUrl; a.download = fileName;
+                                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                                URL.revokeObjectURL(downloadUrl);
+
+                                document.querySelector(".loading-text").textContent = "ดาวน์โหลดเสร็จสิ้น!";
+                                setTimeout(() => {
+                                    document.getElementById("loading-overlay").classList.remove("visible");
+                                }, 1500);
+
+                            } catch (error) {
+                                console.error("Export error:", error);
+                                document.getElementById("loading-overlay").classList.remove("visible");
+                                Swal.fire('ข้อผิดพลาด', 'ดาวน์โหลดไม่สำเร็จ: ' + error.message, 'error');
+                            }
+                        }
+
 
                         function getLeaveTypeDisplay(leaveType) {
                             // คืนค่าฟังก์ชันนี้ให้กลับมาโชว์แค่ชื่อประเภทการลาเหมือนเดิม
