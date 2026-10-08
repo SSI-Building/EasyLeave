@@ -1108,20 +1108,14 @@
                 filterAndSortData();
             });
         });
-					// ==================== 4. Export History Function ====================
 
-document.getElementById("exportHistoryButton")
-    .addEventListener("click", exportHistory);
 
+                // ==================== 4. Export History Function ====================
+document.getElementById("exportHistoryButton").addEventListener("click", exportHistory);
 
 async function exportHistory() {
-
-    // =========================================================
-    // 1. CHECK DATA
-    // =========================================================
-
+    // 1. เช็คข้อมูล
     if (!filteredAndSortedData || filteredAndSortedData.length === 0) {
-
         Swal.fire({
             icon: 'warning',
             title: 'ไม่มีข้อมูล',
@@ -1129,461 +1123,174 @@ async function exportHistory() {
             confirmButtonText: 'ตกลง',
             confirmButtonColor: '#1D6F42'
         });
-
         return;
     }
 
+    const totalPages = Math.ceil(filteredAndSortedData.length / rowsPerPage);
 
-    const totalPages = Math.ceil(
-        filteredAndSortedData.length / rowsPerPage
-    );
-
-
-    // =========================================================
-    // 2. CREATE MODERN CHECKBOX UI
-    // =========================================================
-
+    // 2. สร้าง HTML สำหรับกล่องเลือกหน้า
     let optionsHtml = `
         <div class="export-swal-subtitle">
             เลือกหน้าของข้อมูลที่ต้องการส่งออกเป็น Excel
         </div>
-
-        <div style="
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            margin-bottom:8px;
-            padding:0 2px;
-        ">
-            <div style="
-                font-family:'Kanit',sans-serif;
-                font-size:.82rem;
-                color:#64748b;
-            ">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; padding:0 2px;">
+            <div style="font-family:'Kanit',sans-serif; font-size:.82rem; color:#64748b;">
                 ทั้งหมด ${totalPages} หน้า
             </div>
-
-            <div id="selectedPageBadge"
-                 class="export-selected-count">
+            <div id="selectedPageBadge" class="export-selected-count">
                 0 หน้า
             </div>
         </div>
-
-        <div class="export-options-container">
+        <div class="export-options-container" id="exportOptionsList">
     `;
 
-
-    // =========================================================
-    // SELECT ALL
-    // =========================================================
-
     optionsHtml += `
-        <label class="export-option-label">
-
-            <input
-                type="checkbox"
-                id="checkAllPages"
-            >
-
+        <label class="export-option-label" id="checkAllLabel" style="background: #e2e8f0; border-color:#cbd5e1;">
+            <input type="checkbox" id="checkAllPages">
             <div class="checkbox-custom"></div>
-
-            <div>
-                <span style="font-size:1rem;">📥</span>
-                เลือก/ยกเลิกทั้งหมด
-            </div>
-
+            <div><span style="font-size:1rem;">📥</span> เลือก/ยกเลิกทั้งหมด</div>
         </label>
     `;
 
-
-    // =========================================================
-    // PAGE CHECKBOXES
-    // =========================================================
-
     for (let i = 1; i <= totalPages; i++) {
-
         optionsHtml += `
-            <label class="export-option-label">
-
-                <input
-                    type="checkbox"
-                    class="page-checkbox"
-                    value="${i}"
-                >
-
+            <label class="export-option-label page-label">
+                <input type="checkbox" class="page-checkbox" value="${i}">
                 <div class="checkbox-custom"></div>
-
-                <div>
-                    <span style="font-size:.95rem;">📄</span>
-                    ข้อมูลหน้า ${i}
-                </div>
-
+                <div><span style="font-size:.95rem;">📄</span> ข้อมูลหน้า ${i}</div>
             </label>
         `;
     }
 
+    optionsHtml += `</div>`;
 
-    optionsHtml += `
-        </div>
-    `;
-
-
-    // =========================================================
-    // 3. SHOW POPUP
-    // =========================================================
-
+    // 3. โชว์ Popup ดาวน์โหลด
     const { value: selectedPages } = await Swal.fire({
-
         title: 'ส่งออกประวัติเป็น Excel',
-
         html: optionsHtml,
-
         focusConfirm: false,
-
         showCancelButton: true,
-
-        confirmButtonText:
-            '<i class="fas fa-file-excel"></i>&nbsp; ดาวน์โหลด Excel',
-
-        cancelButtonText:
-            'ยกเลิก',
-
-        confirmButtonColor:
-            '#1D6F42',
-
-        cancelButtonColor:
-            '#64748b',
-
+        confirmButtonText: '<i class="fas fa-file-excel"></i>&nbsp; ดาวน์โหลด Excel',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#1D6F42',
+        cancelButtonColor: '#64748b',
         reverseButtons: true,
-
         customClass: {
-
             popup: 'export-swal-popup',
-
             title: 'export-swal-title'
-
         },
-
         buttonsStyling: true,
-
         didOpen: () => {
-
-            const checkAll =
-                document.getElementById('checkAllPages');
-
-            const pageChecks =
-                document.querySelectorAll('.page-checkbox');
-
-            const selectedBadge =
-                document.getElementById('selectedPageBadge');
-
-
-            // =====================================================
-            // UPDATE UI
-            // =====================================================
+            const checkAll = document.getElementById('checkAllPages');
+            const pageChecks = document.querySelectorAll('.page-checkbox');
+            const selectedBadge = document.getElementById('selectedPageBadge');
+            const pageLabels = document.querySelectorAll('.page-label');
 
             const updateSelectedUI = () => {
-
-                const checked =
-                    document.querySelectorAll(
-                        '.page-checkbox:checked'
-                    );
-
+                const checked = document.querySelectorAll('.page-checkbox:checked');
                 const count = checked.length;
+                selectedBadge.textContent = `${count} หน้า`;
 
-
-                // Badge
-                selectedBadge.textContent =
-                    `${count} หน้า`;
-
-
-                // Selected card
-                pageChecks.forEach(cb => {
-
-                    const label = cb.closest(
-                        '.export-option-label'
-                    );
-
+                // เปลี่ยนสีกรอบเมื่อถูกเลือก (ไม่พึ่งพา CSS :has)
+                pageChecks.forEach((cb, index) => {
                     if (cb.checked) {
-                        label.classList.add('selected');
+                        pageLabels[index].style.borderColor = '#1D6F42';
+                        pageLabels[index].style.background = '#eafbf0';
                     } else {
-                        label.classList.remove('selected');
+                        pageLabels[index].style.borderColor = '#cbd5e1';
+                        pageLabels[index].style.background = '#ffffff';
                     }
-
                 });
 
-
-                // Select all state
-                checkAll.checked =
-                    count === pageChecks.length;
-
-                checkAll.indeterminate =
-                    count > 0 &&
-                    count < pageChecks.length;
+                checkAll.checked = (count === pageChecks.length && count > 0);
+                checkAll.indeterminate = count > 0 && count < pageChecks.length;
             };
 
-
-            // =====================================================
-            // SELECT ALL
-            // =====================================================
-
             checkAll.addEventListener('change', (e) => {
-
-                pageChecks.forEach(cb => {
-                    cb.checked = e.target.checked;
-                });
-
+                pageChecks.forEach(cb => { cb.checked = e.target.checked; });
                 updateSelectedUI();
             });
 
-
-            // =====================================================
-            // INDIVIDUAL PAGE
-            // =====================================================
-
             pageChecks.forEach(cb => {
-
-                cb.addEventListener('change', () => {
-
-                    updateSelectedUI();
-
-                });
-
+                cb.addEventListener('change', updateSelectedUI);
             });
 
-
-            // Initial state
-            updateSelectedUI();
+            updateSelectedUI(); // รันค่าเริ่มต้น
         },
-
-
-        // =========================================================
-        // VALIDATE
-        // =========================================================
-
         preConfirm: () => {
-
-            const checkedBoxes =
-                document.querySelectorAll(
-                    '.page-checkbox:checked'
-                );
-
-
+            const checkedBoxes = document.querySelectorAll('.page-checkbox:checked');
             if (checkedBoxes.length === 0) {
-
-                Swal.showValidationMessage(
-                    '⚠️ กรุณาเลือกอย่างน้อย 1 หน้าครับ'
-                );
-
+                Swal.showValidationMessage('⚠️ กรุณาเลือกอย่างน้อย 1 หน้าครับ');
                 return false;
             }
-
-
-            return Array.from(checkedBoxes)
-                .map(cb => parseInt(cb.value));
+            return Array.from(checkedBoxes).map(cb => parseInt(cb.value));
         }
-
     });
 
-
-    // =========================================================
-    // USER CANCEL
-    // =========================================================
-
+    // 4. ถ้ายกเลิก
     if (!selectedPages) return;
 
-
-    // =========================================================
-    // 4. COLLECT DATA
-    // =========================================================
-
+    // 5. ตัดข้อมูล
     let dataToExport = [];
-
-
     selectedPages.forEach(pageNum => {
-
-        const start =
-            (pageNum - 1) * rowsPerPage;
-
-        const pageData =
-            filteredAndSortedData.slice(
-                start,
-                start + rowsPerPage
-            );
-
-        dataToExport =
-            dataToExport.concat(pageData);
-
+        const start = (pageNum - 1) * rowsPerPage;
+        const pageData = filteredAndSortedData.slice(start, start + rowsPerPage);
+        dataToExport = dataToExport.concat(pageData);
     });
 
-
-    // =========================================================
-    // 5. SHOW LOADING
-    // =========================================================
-
-    document
-        .getElementById("loading-overlay")
-        .classList.add("visible");
-
-
-    document
-        .querySelector(".loading-text")
-        .textContent =
-        `กำลังรวมข้อมูล ${selectedPages.length} หน้า และสร้างไฟล์ Excel...`;
-
-
-    // =========================================================
-    // 6. EXPORT
-    // =========================================================
+    // 6. ดำเนินการโหลด
+    document.getElementById("loading-overlay").classList.add("visible");
+    document.querySelector(".loading-text").textContent = `กำลังรวมข้อมูล ${selectedPages.length} หน้า และสร้างไฟล์ Excel...`;
 
     try {
-
-        const cleanUrl =
-            EXPORT_URL.split('?')[0];
-
+        const cleanUrl = EXPORT_URL.split('?')[0];
 
         const response = await fetch(cleanUrl, {
-
             method: "POST",
-
-            headers: {
-                "Content-Type":
-                    "text/plain;charset=utf-8"
-            },
-
-            body: JSON.stringify({
-
-                action: "exportHistory",
-
-                data: dataToExport
-
-            })
-
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "exportHistory", data: dataToExport })
         });
 
-
-        const result =
-            await response.json();
-
-
-        if (result.error) {
-            throw new Error(result.error);
+        // รองรับกรณี Server พังแล้วตอบกลับมาเป็น HTML (แก้บั๊กเก่าของคุณ)
+        const responseText = await response.text();
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (err) {
+            throw new Error("เซิร์ฟเวอร์ตอบสนองขัดข้อง (ข้อมูลที่เลือกอาจมีขนาดใหญ่เกินไป กรุณาลดจำนวนหน้าลงครับ)");
         }
 
+        if (result.error) throw new Error(result.error);
 
-        // =====================================================
-        // CONVERT BASE64 → BLOB
-        // =====================================================
+        const fileResponse = await fetch(`data:${result.mimeType};base64,${result.data}`);
+        const blob = await fileResponse.blob();
 
-        const fileResponse =
-            await fetch(
-                `data:${result.mimeType};base64,${result.data}`
-            );
+        const isAllSelected = selectedPages.length === totalPages;
+        const pageLabel = isAllSelected ? 'All' : `Pages-${selectedPages.join('-')}`;
+        const fileName = `BUS-LeaveSystem-${pageLabel}.xlsx`;
 
-
-        const blob =
-            await fileResponse.blob();
-
-
-        // =====================================================
-        // FILE NAME
-        // =====================================================
-
-        const isAllSelected =
-            selectedPages.length === totalPages;
-
-
-        const pageLabel =
-            isAllSelected
-                ? 'All'
-                : `Pages-${selectedPages.join('-')}`;
-
-
-        const fileName =
-            `BUS-LeaveSystem-${pageLabel}.xlsx`;
-
-
-        // =====================================================
-        // DOWNLOAD
-        // =====================================================
-
-        const downloadUrl =
-            URL.createObjectURL(blob);
-
-
-        const a =
-            document.createElement("a");
-
-
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
         a.style.display = "none";
-
         a.href = downloadUrl;
-
         a.download = fileName;
 
-
         document.body.appendChild(a);
-
         a.click();
-
         document.body.removeChild(a);
-
-
         URL.revokeObjectURL(downloadUrl);
 
-
-        // =====================================================
-        // COMPLETE
-        // =====================================================
-
-        document
-            .querySelector(".loading-text")
-            .textContent =
-            "ดาวน์โหลดเสร็จสิ้น! กำลังเปิดหน้าอัปโหลด...";
-
+        document.querySelector(".loading-text").textContent = "ดาวน์โหลดเสร็จสิ้น! กำลังเปิดหน้าอัปโหลด...";
 
         setTimeout(() => {
-
-            document
-                .getElementById("loading-overlay")
-                .classList.remove("visible");
-
-
-            window.open(
-                "http://192.168.3.31/leave",
-                "_blank"
-            );
-
+            document.getElementById("loading-overlay").classList.remove("visible");
+            window.open("http://192.168.3.31/leave", "_blank");
         }, 1500);
 
-
     } catch (error) {
-
-        console.error(
-            "Export error:",
-            error
-        );
-
-
-        document
-            .getElementById("loading-overlay")
-            .classList.remove("visible");
-
-
-        Swal.fire({
-
-            icon: 'error',
-
-            title: 'ดาวน์โหลดไม่สำเร็จ',
-
-            text: error.message,
-
-            confirmButtonText: 'ตกลง',
-
-            confirmButtonColor: '#1D6F42'
-
-        });
-
+        console.error("Export error:", error);
+        document.getElementById("loading-overlay").classList.remove("visible");
+        Swal.fire({ icon: 'error', title: 'ดาวน์โหลดไม่สำเร็จ', text: error.message, confirmButtonText: 'ตกลง', confirmButtonColor: '#1D6F42' });
     }
 }
 
