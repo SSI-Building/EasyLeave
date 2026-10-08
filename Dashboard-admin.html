@@ -318,69 +318,330 @@
             color: #383d41; /* ตัวหนังสือสีเทาเข้ม */
             border: 1px solid #d6d8db;
         }
-		/* ==================== สไตล์ใหม่สำหรับ Popup เลือกหน้า (List Style) ==================== */
-        .export-options-container {
-            max-height: 250px; /* จำกัดความสูงไม่ให้ทะลุจอ */
-            overflow-y: auto;  /* ให้เลื่อนขึ้นลงได้ */
-            text-align: left;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 5px;
-            background: #f8fafc;
-        }
+
         
-        .export-option-label {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            margin-bottom: 5px;
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: 'Kanit', sans-serif;
-            font-size: 0.95em;
-            color: #334155;
-        }
-        
-        .export-option-label:last-child { margin-bottom: 0; }
-        .export-option-label:hover { background: #f1f5f9; border-color: #94a3b8; }
-        
-        /* ซ่อน Radio button ตัวจริง */
-        .export-option-label input[type="radio"] { display: none; }
-        
-        /* สร้างวงกลม Radio ปลอมให้สวยๆ */
-        .radio-custom {
-            width: 20px; height: 20px;
-            border: 2px solid #cbd5e1;
-            border-radius: 50%;
-            margin-right: 15px;
-            display: flex; justify-content: center; align-items: center;
-            transition: all 0.2s ease;
-        }
-        
-        /* เมื่อถูกเลือก ให้เปลี่ยนสีวงกลมและกรอบ */
-        .export-option-label input[type="radio"]:checked + .radio-custom {
-            border-color: #1D6F42;
-        }
-        .export-option-label input[type="radio"]:checked + .radio-custom::after {
-            content: '';
-            width: 10px; height: 10px;
-            background: #1D6F42;
-            border-radius: 50%;
-        }
-        .export-option-label:has(input[type="radio"]:checked) {
-            border-color: #1D6F42;
-            background: #eafbf0;
-            font-weight: 500;
-        }
-        
-        /* ปรับแต่ง Scrollbar ให้ดูเนียนตา */
-        .export-options-container::-webkit-scrollbar { width: 6px; }
-        .export-options-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 8px; }
-        .export-options-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
-        .export-options-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+/* =========================================================
+   MODERN EXPORT HISTORY - PAGE SELECTOR
+   ========================================================= */
+
+.export-options-container {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 6px;
+    margin-top: 12px;
+
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+
+    text-align: left;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+/* Scrollbar */
+.export-options-container::-webkit-scrollbar {
+    width: 7px;
+}
+
+.export-options-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.export-options-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.export-options-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+
+/* =========================================================
+   OPTION CARD
+   ========================================================= */
+
+.export-option-label {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    min-height: 52px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+
+    cursor: pointer;
+    user-select: none;
+
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.94rem;
+    font-weight: 400;
+    color: #334155;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.12s ease;
+}
+
+.export-option-label:last-child {
+    margin-bottom: 0;
+}
+
+
+/* Hover */
+.export-option-label:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+
+/* Click */
+.export-option-label:active {
+    transform: scale(0.992);
+}
+
+
+/* =========================================================
+   "SELECT ALL" SPECIAL CARD
+   ========================================================= */
+
+.export-option-label:first-child {
+    background: linear-gradient(
+        135deg,
+        #f1f5f9 0%,
+        #e2e8f0 100%
+    );
+
+    border-color: #cbd5e1;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.export-option-label:first-child:hover {
+    background: linear-gradient(
+        135deg,
+        #e2e8f0 0%,
+        #cbd5e1 100%
+    );
+
+    border-color: #94a3b8;
+}
+
+
+/* =========================================================
+   HIDE NATIVE CHECKBOX
+   ========================================================= */
+
+.export-option-label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   CUSTOM CHECKBOX
+   ========================================================= */
+
+.checkbox-custom {
+    position: relative;
+    flex: 0 0 21px;
+
+    width: 21px;
+    height: 21px;
+
+    margin-right: 13px;
+
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: transparent;
+
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+
+/* Checked */
+.export-option-label input[type="checkbox"]:checked + .checkbox-custom {
+    background: #1D6F42;
+    border-color: #1D6F42;
+    color: #ffffff;
+
+    box-shadow: 0 3px 8px rgba(29, 111, 66, 0.25);
+
+    transform: scale(1.03);
+}
+
+
+/* Check icon */
+.export-option-label input[type="checkbox"]:checked
++ .checkbox-custom::after {
+
+    content: "✓";
+
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+
+    color: #ffffff;
+
+    animation: checkPop 0.18s ease-out;
+}
+
+@keyframes checkPop {
+    0% {
+        transform: scale(0.4);
+        opacity: 0;
+    }
+
+    70% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* =========================================================
+   SELECTED CARD
+   ========================================================= */
+
+.export-option-label.selected {
+    background: #f0fdf4;
+    border-color: #86efac;
+
+    color: #166534;
+
+    box-shadow:
+        0 2px 8px rgba(22, 101, 52, 0.06);
+}
+
+
+/* =========================================================
+   TEXT
+   ========================================================= */
+
+.export-option-label > div:last-child {
+    flex: 1;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   SWAL CUSTOM HEADER
+   ========================================================= */
+
+.export-swal-popup {
+    border-radius: 20px !important;
+    padding: 22px !important;
+}
+
+.export-swal-title {
+    margin-bottom: 4px !important;
+
+    font-family: 'Kanit', sans-serif !important;
+    font-size: 1.35rem !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+}
+
+.export-swal-subtitle {
+    margin-top: 2px;
+    margin-bottom: 4px;
+
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.86rem;
+    color: #64748b;
+}
+
+
+/* =========================================================
+   SELECTED COUNT BADGE
+   ========================================================= */
+
+.export-selected-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 28px;
+    height: 26px;
+
+    padding: 0 9px;
+    margin-left: 5px;
+
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+    border-radius: 999px;
+
+    color: #166534;
+
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 576px) {
+
+    .export-options-container {
+        max-height: 270px;
+        padding: 5px;
+        border-radius: 12px;
+    }
+
+    .export-option-label {
+        min-height: 50px;
+        padding: 9px 12px;
+
+        font-size: 0.9rem;
+        border-radius: 10px;
+    }
+
+    .checkbox-custom {
+        width: 20px;
+        height: 20px;
+        flex-basis: 20px;
+        margin-right: 11px;
+    }
+
+    .export-swal-popup {
+        width: calc(100% - 24px) !important;
+        padding: 18px !important;
+        border-radius: 18px !important;
+    }
+}
 
     </style>
 </head>
@@ -847,112 +1108,484 @@
                 filterAndSortData();
             });
         });
-						// ==================== 4. Export History Function (แบบใหม่ แบบ List เลื่อนได้) ====================
-						document.getElementById("exportHistoryButton").addEventListener("click", exportHistory);
-						
-						async function exportHistory() {
-						    // 1. เช็คข้อมูลบนตาราง
-						    if (!filteredAndSortedData || filteredAndSortedData.length === 0) {
-						        Swal.fire('แจ้งเตือน', 'ไม่มีข้อมูลบนตารางให้ดาวน์โหลดครับ', 'warning');
-						        return;
-						    }
-						
-						    const totalPages = Math.ceil(filteredAndSortedData.length / rowsPerPage);
-						    
-						    // 2. สร้าง HTML สำหรับ List (ใช้ Radio Buttons สไตล์ Custom)
-						    let optionsHtml = '<div class="export-options-container">';
-						    
-						    // ตัวเลือกที่ 1: โหลดทั้งหมด
-						    optionsHtml += `
-						        <label class="export-option-label">
-						            <input type="radio" name="exportPage" value="all" checked>
-						            <div class="radio-custom"></div>
-						            <div>📥 ดาวน์โหลดทั้งหมดที่แสดงอยู่ (ทุกหน้า)</div>
-						        </label>
-						    `;
-						    
-						    // ตัวเลือกหน้าต่างๆ
-						    for (let i = 1; i <= totalPages; i++) {
-						        optionsHtml += `
-						            <label class="export-option-label">
-						                <input type="radio" name="exportPage" value="${i}">
-						                <div class="radio-custom"></div>
-						                <div>📄 ดาวน์โหลดเฉพาะหน้า ${i}</div>
-						            </label>
-						        `;
-						    }
-						    optionsHtml += '</div>';
-						
-						    // 3. โชว์ Popup
-						    const { value: isConfirmed } = await Swal.fire({
-						        title: 'เลือกข้อมูลที่จะดาวน์โหลด',
-						        html: optionsHtml,
-						        focusConfirm: false,
-						        showCancelButton: true,
-						        confirmButtonText: '<i class="fas fa-file-excel"></i> ดาวน์โหลดเลย',
-						        cancelButtonText: 'ยกเลิก',
-						        confirmButtonColor: '#1D6F42',
-						        customClass: { title: 'custom-swal-title' },
-						        // เมื่อกดยืนยัน ให้ไปดึงค่า Value จาก Radio ที่ถูกเลือกอยู่
-						        preConfirm: () => {
-						            const selected = document.querySelector('input[name="exportPage"]:checked');
-						            return selected ? selected.value : null;
-						        }
-						    });
-						
-						    if (!isConfirmed) return; // ถ้ายกเลิก
-						    const selectedOption = document.querySelector('input[name="exportPage"]:checked').value;
-						
-						    // 4. ตัดข้อมูล
-						    let dataToExport = [];
-						    if (selectedOption === "all") {
-						        dataToExport = filteredAndSortedData;
-						    } else {
-						        const pageNum = parseInt(selectedOption);
-						        const start = (pageNum - 1) * rowsPerPage;
-						        dataToExport = filteredAndSortedData.slice(start, start + rowsPerPage);
-						    }
-						
-						    // 5. เริ่มโหลด
-						    document.getElementById("loading-overlay").classList.add("visible");
-						    document.querySelector(".loading-text").textContent = "กำลังสร้างไฟล์ Excel กรุณารอสักครู่...";
-						
-						    try {
-						        const cleanUrl = EXPORT_URL.split('?')[0]; 
-						        const response = await fetch(cleanUrl, {
-						            method: "POST",
-						            headers: { "Content-Type": "text/plain;charset=utf-8" },
-						            body: JSON.stringify({
-						                action: "exportHistory",
-						                data: dataToExport
-						            })
-						        });
-						
-						        const result = await response.json();
-						        if (result.error) throw new Error(result.error);
-						
-						        const fileResponse = await fetch(`data:${result.mimeType};base64,${result.data}`);
-						        const blob = await fileResponse.blob();
-						        
-						        const fileName = `BUS-LeaveSystem-${selectedOption === 'all' ? 'All' : 'Page'+selectedOption}.xlsx`;
-						        const downloadUrl = URL.createObjectURL(blob);
-						        const a = document.createElement("a");
-						        a.style.display = "none"; a.href = downloadUrl; a.download = fileName;
-						        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-						        URL.revokeObjectURL(downloadUrl);
-						
-						        document.querySelector(".loading-text").textContent = "ดาวน์โหลดเสร็จสิ้น! กำลังเปิดหน้าอัปโหลด...";
-						        setTimeout(() => {
-						            document.getElementById("loading-overlay").classList.remove("visible");
-						            window.open("http://192.168.3.31/leave", "_blank"); 
-						        }, 1500);
-						
-						    } catch (error) {
-						        console.error("Export error:", error);
-						        document.getElementById("loading-overlay").classList.remove("visible");
-						        Swal.fire('ข้อผิดพลาด', 'ดาวน์โหลดไม่สำเร็จ: ' + error.message, 'error');
-						    }
-						}
+					// ==================== 4. Export History Function ====================
+
+document.getElementById("exportHistoryButton")
+    .addEventListener("click", exportHistory);
+
+
+async function exportHistory() {
+
+    // =========================================================
+    // 1. CHECK DATA
+    // =========================================================
+
+    if (!filteredAndSortedData || filteredAndSortedData.length === 0) {
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'ไม่มีข้อมูล',
+            text: 'ไม่มีข้อมูลบนตารางให้ดาวน์โหลดครับ',
+            confirmButtonText: 'ตกลง',
+            confirmButtonColor: '#1D6F42'
+        });
+
+        return;
+    }
+
+
+    const totalPages = Math.ceil(
+        filteredAndSortedData.length / rowsPerPage
+    );
+
+
+    // =========================================================
+    // 2. CREATE MODERN CHECKBOX UI
+    // =========================================================
+
+    let optionsHtml = `
+        <div class="export-swal-subtitle">
+            เลือกหน้าของข้อมูลที่ต้องการส่งออกเป็น Excel
+        </div>
+
+        <div style="
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            margin-bottom:8px;
+            padding:0 2px;
+        ">
+            <div style="
+                font-family:'Kanit',sans-serif;
+                font-size:.82rem;
+                color:#64748b;
+            ">
+                ทั้งหมด ${totalPages} หน้า
+            </div>
+
+            <div id="selectedPageBadge"
+                 class="export-selected-count">
+                0 หน้า
+            </div>
+        </div>
+
+        <div class="export-options-container">
+    `;
+
+
+    // =========================================================
+    // SELECT ALL
+    // =========================================================
+
+    optionsHtml += `
+        <label class="export-option-label">
+
+            <input
+                type="checkbox"
+                id="checkAllPages"
+            >
+
+            <div class="checkbox-custom"></div>
+
+            <div>
+                <span style="font-size:1rem;">📥</span>
+                เลือก/ยกเลิกทั้งหมด
+            </div>
+
+        </label>
+    `;
+
+
+    // =========================================================
+    // PAGE CHECKBOXES
+    // =========================================================
+
+    for (let i = 1; i <= totalPages; i++) {
+
+        optionsHtml += `
+            <label class="export-option-label">
+
+                <input
+                    type="checkbox"
+                    class="page-checkbox"
+                    value="${i}"
+                >
+
+                <div class="checkbox-custom"></div>
+
+                <div>
+                    <span style="font-size:.95rem;">📄</span>
+                    ข้อมูลหน้า ${i}
+                </div>
+
+            </label>
+        `;
+    }
+
+
+    optionsHtml += `
+        </div>
+    `;
+
+
+    // =========================================================
+    // 3. SHOW POPUP
+    // =========================================================
+
+    const { value: selectedPages } = await Swal.fire({
+
+        title: 'ส่งออกประวัติเป็น Excel',
+
+        html: optionsHtml,
+
+        focusConfirm: false,
+
+        showCancelButton: true,
+
+        confirmButtonText:
+            '<i class="fas fa-file-excel"></i>&nbsp; ดาวน์โหลด Excel',
+
+        cancelButtonText:
+            'ยกเลิก',
+
+        confirmButtonColor:
+            '#1D6F42',
+
+        cancelButtonColor:
+            '#64748b',
+
+        reverseButtons: true,
+
+        customClass: {
+
+            popup: 'export-swal-popup',
+
+            title: 'export-swal-title'
+
+        },
+
+        buttonsStyling: true,
+
+        didOpen: () => {
+
+            const checkAll =
+                document.getElementById('checkAllPages');
+
+            const pageChecks =
+                document.querySelectorAll('.page-checkbox');
+
+            const selectedBadge =
+                document.getElementById('selectedPageBadge');
+
+
+            // =====================================================
+            // UPDATE UI
+            // =====================================================
+
+            const updateSelectedUI = () => {
+
+                const checked =
+                    document.querySelectorAll(
+                        '.page-checkbox:checked'
+                    );
+
+                const count = checked.length;
+
+
+                // Badge
+                selectedBadge.textContent =
+                    `${count} หน้า`;
+
+
+                // Selected card
+                pageChecks.forEach(cb => {
+
+                    const label = cb.closest(
+                        '.export-option-label'
+                    );
+
+                    if (cb.checked) {
+                        label.classList.add('selected');
+                    } else {
+                        label.classList.remove('selected');
+                    }
+
+                });
+
+
+                // Select all state
+                checkAll.checked =
+                    count === pageChecks.length;
+
+                checkAll.indeterminate =
+                    count > 0 &&
+                    count < pageChecks.length;
+            };
+
+
+            // =====================================================
+            // SELECT ALL
+            // =====================================================
+
+            checkAll.addEventListener('change', (e) => {
+
+                pageChecks.forEach(cb => {
+                    cb.checked = e.target.checked;
+                });
+
+                updateSelectedUI();
+            });
+
+
+            // =====================================================
+            // INDIVIDUAL PAGE
+            // =====================================================
+
+            pageChecks.forEach(cb => {
+
+                cb.addEventListener('change', () => {
+
+                    updateSelectedUI();
+
+                });
+
+            });
+
+
+            // Initial state
+            updateSelectedUI();
+        },
+
+
+        // =========================================================
+        // VALIDATE
+        // =========================================================
+
+        preConfirm: () => {
+
+            const checkedBoxes =
+                document.querySelectorAll(
+                    '.page-checkbox:checked'
+                );
+
+
+            if (checkedBoxes.length === 0) {
+
+                Swal.showValidationMessage(
+                    '⚠️ กรุณาเลือกอย่างน้อย 1 หน้าครับ'
+                );
+
+                return false;
+            }
+
+
+            return Array.from(checkedBoxes)
+                .map(cb => parseInt(cb.value));
+        }
+
+    });
+
+
+    // =========================================================
+    // USER CANCEL
+    // =========================================================
+
+    if (!selectedPages) return;
+
+
+    // =========================================================
+    // 4. COLLECT DATA
+    // =========================================================
+
+    let dataToExport = [];
+
+
+    selectedPages.forEach(pageNum => {
+
+        const start =
+            (pageNum - 1) * rowsPerPage;
+
+        const pageData =
+            filteredAndSortedData.slice(
+                start,
+                start + rowsPerPage
+            );
+
+        dataToExport =
+            dataToExport.concat(pageData);
+
+    });
+
+
+    // =========================================================
+    // 5. SHOW LOADING
+    // =========================================================
+
+    document
+        .getElementById("loading-overlay")
+        .classList.add("visible");
+
+
+    document
+        .querySelector(".loading-text")
+        .textContent =
+        `กำลังรวมข้อมูล ${selectedPages.length} หน้า และสร้างไฟล์ Excel...`;
+
+
+    // =========================================================
+    // 6. EXPORT
+    // =========================================================
+
+    try {
+
+        const cleanUrl =
+            EXPORT_URL.split('?')[0];
+
+
+        const response = await fetch(cleanUrl, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "text/plain;charset=utf-8"
+            },
+
+            body: JSON.stringify({
+
+                action: "exportHistory",
+
+                data: dataToExport
+
+            })
+
+        });
+
+
+        const result =
+            await response.json();
+
+
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+
+        // =====================================================
+        // CONVERT BASE64 → BLOB
+        // =====================================================
+
+        const fileResponse =
+            await fetch(
+                `data:${result.mimeType};base64,${result.data}`
+            );
+
+
+        const blob =
+            await fileResponse.blob();
+
+
+        // =====================================================
+        // FILE NAME
+        // =====================================================
+
+        const isAllSelected =
+            selectedPages.length === totalPages;
+
+
+        const pageLabel =
+            isAllSelected
+                ? 'All'
+                : `Pages-${selectedPages.join('-')}`;
+
+
+        const fileName =
+            `BUS-LeaveSystem-${pageLabel}.xlsx`;
+
+
+        // =====================================================
+        // DOWNLOAD
+        // =====================================================
+
+        const downloadUrl =
+            URL.createObjectURL(blob);
+
+
+        const a =
+            document.createElement("a");
+
+
+        a.style.display = "none";
+
+        a.href = downloadUrl;
+
+        a.download = fileName;
+
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        document.body.removeChild(a);
+
+
+        URL.revokeObjectURL(downloadUrl);
+
+
+        // =====================================================
+        // COMPLETE
+        // =====================================================
+
+        document
+            .querySelector(".loading-text")
+            .textContent =
+            "ดาวน์โหลดเสร็จสิ้น! กำลังเปิดหน้าอัปโหลด...";
+
+
+        setTimeout(() => {
+
+            document
+                .getElementById("loading-overlay")
+                .classList.remove("visible");
+
+
+            window.open(
+                "http://192.168.3.31/leave",
+                "_blank"
+            );
+
+        }, 1500);
+
+
+    } catch (error) {
+
+        console.error(
+            "Export error:",
+            error
+        );
+
+
+        document
+            .getElementById("loading-overlay")
+            .classList.remove("visible");
+
+
+        Swal.fire({
+
+            icon: 'error',
+
+            title: 'ดาวน์โหลดไม่สำเร็จ',
+
+            text: error.message,
+
+            confirmButtonText: 'ตกลง',
+
+            confirmButtonColor: '#1D6F42'
+
+        });
+
+    }
+}
 
                         function getLeaveTypeDisplay(leaveType) {
                             // คืนค่าฟังก์ชันนี้ให้กลับมาโชว์แค่ชื่อประเภทการลาเหมือนเดิม
