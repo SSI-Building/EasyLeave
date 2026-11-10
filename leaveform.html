@@ -42,7 +42,6 @@
         body.theme-teal-navy { --primary-color-start: #2b5876; --primary-color-end: #4e4376; }
         body.theme-monochrome { --primary-color-start: #555; --primary-color-end: #999; }
 
-
         /* ===== Base Styles ===== */
         body {
             font-family: 'Prompt', sans-serif;
@@ -66,7 +65,7 @@
             border-radius: 20px;
             box-shadow: var(--shadow-light);
             box-sizing: border-box;
-            opacity: 0; /* ซ่อนไว้ก่อน */
+            opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.5s ease, transform 0.5s ease;
         }
@@ -132,7 +131,7 @@
         .date-time-group {
             display: flex;
             gap: 10px;
-            align-items: flex-end; /* จัดให้ label และ input อยู่ในแนวเดียวกัน */
+            align-items: flex-end;
         }
         
         .date-time-group .form-group {
@@ -272,6 +271,25 @@
             margin-right: 3px;
             width: auto;
         }
+
+        /* ===== สไตล์สำหรับส่วนแนบไฟล์เอกสารประกอบ ===== */
+        #documentUploadSection {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            border: 1px dashed var(--border-color);
+            border-radius: 10px;
+            background: var(--card-background);
+        }
+        #docPreview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 8px;
+            display: none;
+            object-fit: contain;
+            border: 1px solid var(--border-color);
+        }
         
         @media(min-width: 480px) {
             .buttons {
@@ -363,15 +381,22 @@
                     <option value="BL">ลากิจ</option>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 15px;">
                 <label for="reason">เหตุผลการลา</label>
                 <textarea id="reason" placeholder="กรุณากรอกเหตุผล"></textarea>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 15px;">
                 <label>เอกสารประกอบ</label>
                 <div class="radio-group">
                     <label><input type="radio" name="hasDocument" value="มี"> มี</label>
                     <label><input type="radio" name="hasDocument" value="ไม่มี"> ไม่มี</label>
+                </div>
+
+                <!-- ส่วนอัปโหลดรูปภาพเอกสารประกอบ (แสดงเมื่อเลือก "มี") -->
+                <div id="documentUploadSection">
+                    <label for="documentFile"><i class="fas fa-paperclip"></i> แนบรูปเอกสารประกอบ (เฉพาะไฟล์รูปภาพ) <span style="color:red;">*</span></label>
+                    <input type="file" id="documentFile" accept="image/*">
+                    <img id="docPreview" alt="ตัวอย่างเอกสารประกอบ">
                 </div>
             </div>
         </section>
@@ -409,7 +434,7 @@
             <h3 class="form-section-title"><i class="fas fa-signature"></i> ลายเซ็นอิเล็กทรอนิกส์</h3>
             <div class="form-group signature-pad-container">
                 <canvas id="signaturePad" class="signature-pad"></canvas>
-               <button type="button" id="clearBtn" class="btn-clear"><i class="fas fa-eraser"></i> ล้าง</button>
+                <button type="button" id="clearBtn" class="btn-clear"><i class="fas fa-eraser"></i> ล้าง</button>
             </div>
         </section>
 
@@ -420,8 +445,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-   <script>
-
+    <script>
 document.addEventListener("DOMContentLoaded", () => {
     const loadingScreen = document.getElementById('loadingScreen');
     const mainContainer = document.getElementById('mainContainer');
@@ -491,6 +515,74 @@ document.addEventListener("DOMContentLoaded", () => {
     leaveTypeEl.addEventListener("change", updateLeaveBalance);
     updateLeaveBalance();
 
+    // ===== จัดการการแสดงผลและแปลงไฟล์รูปเอกสารประกอบ =====
+    const docRadios = document.getElementsByName("hasDocument");
+    const documentUploadSection = document.getElementById("documentUploadSection");
+    const documentFileInput = document.getElementById("documentFile");
+    const docPreview = document.getElementById("docPreview");
+    let attachedDocumentBase64 = ""; // เก็บข้อมูลรูป Base64
+
+    docRadios.forEach(radio => {
+        radio.addEventListener("change", () => {
+            if (radio.value === "มี" && radio.checked) {
+                documentUploadSection.style.display = "block";
+            } else if (radio.value === "ไม่มี" && radio.checked) {
+                documentUploadSection.style.display = "none";
+                documentFileInput.value = "";
+                attachedDocumentBase64 = "";
+                docPreview.style.display = "none";
+                docPreview.src = "";
+                documentFileInput.style.borderColor = "var(--border-color)";
+            }
+        });
+    });
+
+    // เมื่อผู้ใช้เลือกไฟล์รูปภาพ (พร้อมย่อขนาดเพื่อไม่ให้เกินขีดจำกัด localStorage)
+    documentFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) {
+            attachedDocumentBase64 = "";
+            docPreview.style.display = "none";
+            docPreview.src = "";
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            alert("กรุณาแนบเฉพาะไฟล์รูปภาพเท่านั้น (เช่น .jpg, .png)");
+            documentFileInput.value = "";
+            attachedDocumentBase64 = "";
+            docPreview.style.display = "none";
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                // ย่อขนาดรูปหากกว้างเกิน 1200px เพื่อป้องกัน localStorage เต็ม
+                const maxWidth = 1200;
+                let width = img.width;
+                let height = img.height;
+                if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                }
+                const tempCanvas = document.createElement("canvas");
+                tempCanvas.width = width;
+                tempCanvas.height = height;
+                const ctx = tempCanvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                attachedDocumentBase64 = tempCanvas.toDataURL("image/jpeg", 0.8);
+                docPreview.src = attachedDocumentBase64;
+                docPreview.style.display = "block";
+                documentFileInput.style.borderColor = "var(--border-color)";
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
     // ตัวแปร input ระยะเวลาลา
     const startDate = document.getElementById("startDate");
     const startTime = document.getElementById("startTime");
@@ -554,28 +646,28 @@ document.addEventListener("DOMContentLoaded", () => {
     endTime.addEventListener("change", updateLeaveDisplay);
     updateLeaveDisplay();
     
-        //ฟังชั่นลายเซ็น
-        const canvas = document.getElementById('signaturePad');
-        const signaturePad = new SignaturePad(canvas, {
-            backgroundColor: 'rgba(0,0,0,0)',
-            penColor: 'black',
-            minWidth: 0.5,
-            maxWidth: 2.5,
-            velocityFilterWeight: 0.7
-        });
+    // ฟังก์ชันลายเซ็น
+    const canvas = document.getElementById('signaturePad');
+    const signaturePad = new SignaturePad(canvas, {
+        backgroundColor: 'rgba(0,0,0,0)',
+        penColor: 'black',
+        minWidth: 0.5,
+        maxWidth: 2.5,
+        velocityFilterWeight: 0.7
+    });
 
-        document.getElementById("clearBtn").addEventListener("click", () => {
-            signaturePad.clear();
-        });
-        function resizeCanvas() {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
-            signaturePad.clear();
-        }
-        window.addEventListener("resize", resizeCanvas);
-        resizeCanvas();
+    document.getElementById("clearBtn").addEventListener("click", () => {
+        signaturePad.clear();
+    });
+    function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        signaturePad.clear();
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
 
     // Submit
     document.getElementById("submitBtn").addEventListener("click", () => {
@@ -595,8 +687,19 @@ document.addEventListener("DOMContentLoaded", () => {
         fields.forEach(f => f.style.borderColor = 'var(--border-color)');
         fields.forEach(f => { if(!f.value.trim()){ f.style.borderColor='red'; hasEmpty=true; }});
 
-        const docRadios = document.getElementsByName("hasDocument");
-        if(!Array.from(docRadios).some(r=>r.checked)){ alert("กรุณาเลือกว่ามีเอกสารประกอบหรือไม่"); return; }
+        const selectedDocRadio = Array.from(docRadios).find(r => r.checked);
+        if (!selectedDocRadio) {
+            alert("กรุณาเลือกว่ามีเอกสารประกอบหรือไม่");
+            return;
+        }
+
+        // ตรวจสอบว่าถ้าเลือก "มี" เอกสารประกอบ ต้องแนบไฟล์รูปด้วย
+        if (selectedDocRadio.value === "มี" && !attachedDocumentBase64) {
+            documentFileInput.style.borderColor = "red";
+            alert("คุณเลือก 'มีเอกสารประกอบ' กรุณาแนบรูปเอกสารประกอบก่อนส่งคำขอครับ");
+            return;
+        }
+
         if(hasEmpty){ alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (กรอบสีแดงคือช่องที่ว่าง)"); return; }
         if(signaturePad.isEmpty()){ alert("กรุณาเซ็นชื่อก่อนส่ง"); return; }
 
@@ -608,12 +711,11 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // --- เพิ่มเงื่อนไขใหม่ ป้องกันการลาเกิน 1 วัน (480 นาที) ---
+        // --- ป้องกันการลาเกิน 1 วัน (480 นาที) ---
         if (leaveMinutes > 480) {
             alert("ไม่อนุญาตให้ลาเกิน 1 วันต่อครั้ง หากต้องการลาหลายวัน กรุณากรอกแบบฟอร์มแยกทีละวันครับ");
             return;
         }
-        // --------------------------------------------------
 
         const leaveType = leaveTypeEl.value;
         let maxMinutes = 0;
@@ -634,7 +736,8 @@ document.addEventListener("DOMContentLoaded", () => {
             department: document.getElementById("department").value,
             leaveType: leaveType,
             reason: document.getElementById("reason").value,
-            hasDocument: Array.from(docRadios).find(r=>r.checked).value,
+            hasDocument: selectedDocRadio.value,
+            documentData: selectedDocRadio.value === "มี" ? attachedDocumentBase64 : "", // เพิ่มข้อมูลรูปเอกสาร
             startDate: startDate.value,
             startTime: startTime.value,
             endDate: endDate.value,
@@ -646,6 +749,6 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "preview.html";
     });
 });
-</script>
+    </script>
 </body>
 </html>
