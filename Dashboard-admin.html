@@ -288,35 +288,47 @@
         .chat-footer input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
         .chat-footer button { background: var(--primary-color); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; margin-left: 10px; cursor: pointer; }
 
-        /* ==================== สไตล์สำหรับ Pay Status Badge ==================== */
-        .pay-status-cell {
+        /* ==================== สไตล์สำหรับปุ่มเอกสารประกอบใหม่ ==================== */
+        .doc-attach-cell {
             display: flex;
             justify-content: center;
             align-items: center;
         }
-        .badge-paid, .badge-unpaid {
-            padding: 6px 12px;
+        .btn-view-doc {
+            padding: 6px 14px;
             border-radius: 12px;
             font-size: 0.85em;
             font-weight: 600;
-            letter-spacing: 0.5px;
-            
-            /* 🌟 เพิ่ม 4 บรรทัดนี้ เพื่อให้ขนาดเท่ากันเป๊ะ และจัดไอคอนให้อยู่ตรงกลาง */
-            width: 95px; 
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px; /* ระยะห่างระหว่างไอคอนกับตัวอักษร */
+            gap: 6px;
+            width: 105px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            box-sizing: border-box;
         }
-        .badge-paid {
-            background-color: #d4edda; /* พื้นสีเขียวอ่อน */
-            color: #155724; /* ตัวหนังสือสีเขียวเข้ม */
-            border: 1px solid #c3e6cb;
+        /* กรณีมีเอกสารแนบมา (คลิกเปิดดูได้) */
+        .btn-view-doc.has-file {
+            background-color: #e8f4fd;
+            color: #1d8cf8;
+            border: 1px solid #b3d7ff;
         }
-        .badge-unpaid {
-            background-color: #e2e3e5; /* พื้นสีเทาอ่อน */
-            color: #383d41; /* ตัวหนังสือสีเทาเข้ม */
-            border: 1px solid #d6d8db;
+        .btn-view-doc.has-file:hover {
+            background-color: #1d8cf8;
+            color: #ffffff;
+            border-color: #1d8cf8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(29, 140, 248, 0.2);
+        }
+        /* กรณีไม่มีเอกสารประกอบ */
+        .btn-view-doc.no-file {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #e2e8f0;
+            cursor: not-allowed;
+            pointer-events: none; /* ห้ามคลิก */
         }
 
         
@@ -698,7 +710,7 @@
                         <th><i class="fas fa-id-card-alt"></i> รหัสพนักงาน</th>
                         <th><i class="fas fa-user"></i> ชื่อ-สกุล</th>
                         <th><i class="fas fa-clipboard"></i> ประเภทการลา</th>
-                        <th><i class="fas fa-coins"></i> Pay Status</th>
+                        <th><i class="fas fa-paperclip"></i> เอกสารประกอบ</th> <!-- เปลี่ยนตรงนี้ -->
                         <th><i class="fas fa-calendar-day"></i> ตั้งแต่วันที่</th>
                         <th><i class="fas fa-clock"></i> เวลา(เริ่ม)</th>
                         <th><i class="fas fa-calendar-day"></i> ถึงวันที่</th>
@@ -952,21 +964,25 @@
                     return;
                 }
 
-                const start = (currentPage - 1) * rowsPerPage;
+                                const start = (currentPage - 1) * rowsPerPage;
                 const pageData = data.slice(start, start + rowsPerPage); 
-
                 pageData.forEach(rowData => {
                     const tr = document.createElement('tr');
-                    // 🌟 เพิ่ม "Pay Status" เข้าไปใน headers
-                    const headers = ["รหัสพนักงาน", "ชื่อ-สกุล", "ประเภทการลา", "Pay Status", "ลาตั้งแค่วันที่", "เวลา(เริ่ม)", "ถึงวันที่", "เวลา(สิ้นสุด)", "จำนวนวันลา", "สถานะ", "วันที่ยื่นคำร้อง", "ดำเนินการ"];
+                    
+                    // 1. ปรับหัวข้ออ้างอิงให้เปลี่ยนจาก Pay Status เป็น เอกสารประกอบ
+                    const headers = ["รหัสพนักงาน", "ชื่อ-สกุล", "ประเภทการลา", "เอกสารประกอบ", "ลาตั้งแค่วันที่", "เวลา(เริ่ม)", "ถึงวันที่", "เวลา(สิ้นสุด)", "จำนวนวันลา", "สถานะ", "วันที่ยื่นคำร้อง", "ดำเนินการ"];
+                    
+                    // 2. ดึงค่าลิงก์รูปภาพจากคอลัมน์ Y (Index 24) และค่าคำตอบ มี/ไม่มี จากคอลัมน์ O (Index 14)
+                    const docLink = rowData[24] || ''; 
+                    const hasDocValue = rowData[14] || 'ไม่มี';
 
                     const displayData = [
                         rowData[0] || '',
                         rowData[1] || '',
                         getLeaveTypeDisplay(rowData[4]),
                         
-                        // 🌟 เรียกใช้ฟังก์ชันดึงค่า Paid / Unpaid 
-                        getPayStatus(rowData[4], rowData[14]), 
+                        // คอลัมน์เอกสารประกอบ: ส่งออบเจกต์เช็คสถานะและลิงก์รูปภาพไปทำงานต่อ
+                        { hasDoc: hasDocValue, link: docLink }, 
                         
                         formatDateForDisplay(rowData[5]) || '',
                         rowData[6] || '',
@@ -977,7 +993,7 @@
                         formatDateForDisplay(rowData[11]) || ''
                     ];
 
-                        displayData.forEach((item, index) => {
+                    displayData.forEach((item, index) => {
                         const td = document.createElement('td');
                         td.setAttribute('data-label', headers[index]);
                         
@@ -993,28 +1009,36 @@
                             statusContent.appendChild(statusSpan);
                             td.appendChild(statusContent);
                             
-                            } else if (headers[index] === "Pay Status") {
-                            const payContent = document.createElement('div');
-                            payContent.classList.add('pay-status-cell');
-                            const badge = document.createElement('span');
+                        } else if (headers[index] === "เอกสารประกอบ") {
+                            // 3. ระบบสร้างปุ่มแสดงเอกสารแบบใหม่ (แทนที่สไตล์ของ Pay Status เดิมทั้งหมด)
+                            const docContent = document.createElement('div');
+                            docContent.classList.add('doc-attach-cell');
                             
-                            // 🌟 ตรวจสอบเงื่อนไขเพื่อใส่คลาสสี และไอคอน SVG
-                            if (item === 'Paid') {
-                                badge.classList.add('badge-paid');
-                                badge.innerHTML = `<i class="fas fa-coins"></i> Paid`; 
+                            const btnDoc = document.createElement('a');
+                            btnDoc.classList.add('btn-view-doc');
+                            
+                            // ถ้าพนักงานเลือก "มี" เอกสารประกอบ และ Apps Script ส่งลิงก์มาสำเร็จ (ขึ้นต้นด้วย http)
+                            if (item.hasDoc === 'มี' && item.link && item.link.startsWith('http')) {
+                                btnDoc.classList.add('has-file');
+                                btnDoc.href = item.link;
+                                btnDoc.target = '_blank'; // สั่งเปิดหน้าใหม่เมื่อกด
+                                btnDoc.title = "คลิกเพื่อตรวจสอบรูปภาพเอกสารแนบ";
+                                btnDoc.innerHTML = `<i class="fas fa-paperclip"></i> ดูรูปภาพ`;
                             } else {
-                                badge.classList.add('badge-unpaid');
-                                badge.innerHTML = `<i class="fas fa-ban"></i> Unpaid`;
+                                // กรณีไม่มีไฟล์แนบ
+                                btnDoc.classList.add('no-file');
+                                btnDoc.innerHTML = `<i class="fas fa-ban"></i> ไม่มี`;
                             }
                             
-                            payContent.appendChild(badge);
-                            td.appendChild(payContent);
+                            docContent.appendChild(btnDoc);
+                            td.appendChild(docContent);
                             
-                            } else {
+                        } else {
                             td.textContent = item;
                         }
                         tr.appendChild(td);
-                        });
+                    });
+
 
                     // Action Column
                     const actionTd = document.createElement('td');
@@ -1712,12 +1736,66 @@ async function exportHistory() {
                                 console.error("โหลดลายเซ็นไม่ได้:", err);
                             }
                         }
+                                // =========================================================================
+                                // 🌟 ส่วนที่เพิ่มใหม่: สร้างแผ่นที่ 2 สำหรับรูปเอกสารแนบ (กรณีเลือก "มี" และมีลิงก์ใน Column Y)
+                                // =========================================================================
+                                const docUrl = rowData[24] || ''; // ดึงลิงก์รูปเอกสารแนบจาก Column Y (Index 24)
+                                if (Parper === "มี" && docUrl) {
+                                    const docMatch = docUrl.match(/[-\w]{25,}/); // ดึงเฉพาะ File ID จากลิงก์ Google Drive
+                                    if (docMatch) {
+                                        const docFileId = docMatch[0];
+                                        const docApiUrl = `https://script.google.com/macros/s/AKfycbzfMQdmiwDMNo34oa5UPzo8vZRw_d3t3rcuwS_HnxBIfxutlgo9jCOpBW4JN5di3YObgQ/exec?id=${docFileId}`;
+                                        
+                                        try {
+                                            const resDoc = await fetch(docApiUrl);
+                                            const base64Doc = await resDoc.text();
 
-                    } catch (e) {
-                        console.error("เกิดข้อผิดพลาดในการวาดหน้ากระดาษ:", e);
-                    } finally {
-                        resolve(); // 💡 สำคัญที่สุด: สั่งปลดล็อคลูปเสมอ ไม่ว่าจะสำเร็จหรือพัง เพื่อไม่ให้ระบบค้าง
-                    }
+                                            // ตรวจสอบว่าได้ข้อมูลรูปภาพกลับมาจริง
+                                            if (base64Doc && base64Doc.startsWith("data:image")) {
+                                                // 1. เพิ่มหน้ากระดาษแผ่นที่ 2
+                                                doc.addPage();
+
+                                                // 2. เขียนหัวกระดาษแผ่นที่ 2
+                                                doc.setFontSize(16);
+                                                doc.text(`เอกสารประกอบการลา - ${fullName} (${empId})`, pageWidth / 2, 18, { align: 'center' });
+                                                doc.setFontSize(12);
+                                                doc.text(`วันที่ลา: ${formattedStartDate} ถึง ${formattedendDate}`, pageWidth / 2, 25, { align: 'center' });
+
+                                                // 3. คำนวณสัดส่วนรูปภาพอัตโนมัติ чтобыไม่ให้ภาพเบี้ยวและพอดีหน้า A4
+                                                const imgProps = doc.getImageProperties(base64Doc);
+                                                const maxW = 180; // ความกว้างสูงสุดบนหน้า A4 (เว้นขอบซ้าย-ขวาข้างละ 15 มม.)
+                                                const maxH = 245; // ความสูงสูงสุดบนหน้า A4
+                                                const imgRatio = imgProps.width / imgProps.height;
+
+                                                let finalW = maxW;
+                                                let finalH = finalW / imgRatio;
+
+                                                // ถ้ารูปเป็นแนวตั้งยาวเกินหน้ากระดาษ ให้ยึดความสูงเป็นหลักแทน
+                                                if (finalH > maxH) {
+                                                    finalH = maxH;
+                                                    finalW = finalH * imgRatio;
+                                                }
+
+                                                // จัดกึ่งกลางหน้ากระดาษแนวนอน
+                                                const xPos = (pageWidth - finalW) / 2;
+                                                const yPos = 32;
+
+                                                // 4. วางรูปภาพเอกสารแนบลงในแผ่นที่ 2
+                                                const imgFormat = base64Doc.includes("image/png") ? "PNG" : "JPEG";
+                                                doc.addImage(base64Doc, imgFormat, xPos, yPos, finalW, finalH);
+                                            }
+                                        } catch (err) {
+                                            console.error("โหลดรูปเอกสารแนบไม่ได้:", err);
+                                        }
+                                    }
+                                }
+                                // =========================================================================
+
+                            } catch (e) {
+                                console.error("เกิดข้อผิดพลาดในการวาดหน้ากระดาษ:", e);
+                            } finally {
+                                resolve();
+                            }
                 });
             }
 
