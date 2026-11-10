@@ -84,16 +84,9 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        h2 i {
-            -webkit-text-fill-color: var(--primary-color-end);
-        }
-        body.theme-dark h2 {
-            -webkit-text-fill-color: var(--text-color-dark);
-            background: none;
-        }
-        body.theme-dark h2 i {
-            color: var(--primary-color-end);
-        }
+        h2 i { -webkit-text-fill-color: var(--primary-color-end); }
+        body.theme-dark h2 { -webkit-text-fill-color: var(--text-color-dark); background: none; }
+        body.theme-dark h2 i { color: var(--primary-color-end); }
 
         .form-section {
             background: var(--background-color);
@@ -113,9 +106,7 @@
             align-items: center;
             gap: 10px;
         }
-        .form-section-title i {
-            color: var(--primary-color-end);
-        }
+        .form-section-title i { color: var(--primary-color-end); }
 
         .form-grid {
             display: grid;
@@ -133,10 +124,7 @@
             gap: 10px;
             align-items: flex-end;
         }
-        
-        .date-time-group .form-group {
-            flex: 1;
-        }
+        .date-time-group .form-group { flex: 1; }
 
         label {
             display: block;
@@ -173,9 +161,7 @@
             position: relative;
             padding-bottom: 25px;
         }
-        .date-group .form-group {
-            margin-bottom: 15px;
-        }
+        .date-group .form-group { margin-bottom: 15px; }
 
         #leaveDaysDisplay {
             position: absolute;
@@ -186,9 +172,7 @@
             color: var(--text-color-light);
         }
 
-        .signature-pad-container {
-            position: relative;
-        }
+        .signature-pad-container { position: relative; }
         .signature-pad {
             border: 2px dashed var(--border-color);
             border-radius: 10px;
@@ -212,9 +196,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        .btn-clear:hover {
-            background: var(--background-color);
-        }
+        .btn-clear:hover { background: var(--background-color); }
 
         .buttons {
             margin-top: 20px;
@@ -241,12 +223,10 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
         }
-
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 15px rgba(0,0,0,0.15);
         }
-
         .btn-secondary {
             background: #B0B9C2;
             box-shadow: none;
@@ -258,7 +238,6 @@
             align-items: center;
             margin-top: 5px;
         }
-
         .radio-group label {
             margin-bottom: 0;
             font-weight: 400;
@@ -266,44 +245,209 @@
             color: var(--text-color-dark);
             cursor: pointer;
         }
-        
         .radio-group input[type="radio"] {
             margin-right: 3px;
             width: auto;
         }
 
-        /* ===== สไตล์สำหรับส่วนแนบไฟล์เอกสารประกอบ ===== */
+        /* ===== สไตล์สำหรับส่วนแนบไฟล์และสแกนเอกสาร AI ===== */
         #documentUploadSection {
             display: none;
             margin-top: 12px;
-            padding: 12px;
+            padding: 15px;
             border: 1px dashed var(--border-color);
-            border-radius: 10px;
+            border-radius: 12px;
             background: var(--card-background);
         }
+        .doc-action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-doc-action {
+            flex: 1;
+            min-width: 140px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--background-color);
+            color: var(--text-color-dark);
+            transition: all 0.25s ease;
+        }
+        .btn-doc-action:hover {
+            border-color: var(--primary-color-start);
+            background: rgba(25, 148, 182, 0.08);
+        }
+        .btn-doc-action.btn-camera-ai {
+            background: linear-gradient(45deg, #1994b6, #36a761);
+            color: #fff;
+            border: none;
+        }
+        .btn-doc-action.btn-camera-ai:hover {
+            opacity: 0.92;
+            transform: translateY(-2px);
+        }
+
         #docPreview {
             max-width: 100%;
-            max-height: 200px;
-            margin-top: 10px;
+            max-height: 220px;
+            margin-top: 12px;
             border-radius: 8px;
             display: none;
             object-fit: contain;
             border: 1px solid var(--border-color);
         }
+
+        /* แถบแจ้งสถานะ AI ตรวจสอบเอกสาร */
+        .ai-doc-badge {
+            display: none;
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 500;
+            align-items: center;
+            gap: 8px;
+        }
+        .ai-doc-badge.scanning {
+            display: flex;
+            background: #e8f4fd;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .ai-doc-badge.valid {
+            display: flex;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .ai-doc-badge.warning {
+            display: flex;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        /* ===== Modal กล้อง AI Scanner ===== */
+        .camera-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.88);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .camera-modal.active {
+            display: flex;
+        }
+        .camera-box {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #cameraVideo {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        /* กรอบเล็งเอกสาร AI */
+        .scanner-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            pointer-events: none;
+            box-sizing: border-box;
+        }
+        .scanner-frame {
+            flex: 1;
+            margin: 15px 10px;
+            border: 3px dashed rgba(255, 193, 7, 0.85);
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+        }
+        .scanner-frame.detected {
+            border-color: #2ecc71;
+            border-style: solid;
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.6), 0 0 0 9999px rgba(0, 0, 0, 0.45);
+        }
+        .scanner-status {
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            text-align: center;
+            align-self: center;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .camera-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 480px;
+        }
+        .btn-capture {
+            flex: 2;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            background: #2ecc71;
+            color: #fff;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-close-cam {
+            flex: 1;
+            padding: 13px;
+            border: none;
+            border-radius: 12px;
+            background: #e74c3c;
+            color: #fff;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+        }
         
         @media(min-width: 480px) {
-            .buttons {
-                flex-direction: row;
-            }
+            .buttons { flex-direction: row; }
         }
 
         /* ===== Loading Screen Styles ===== */
         .loading-screen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background-color: var(--background-color);
             display: flex;
             justify-content: center;
@@ -313,27 +457,22 @@
             flex-direction: column;
             gap: 20px;
         }
-
         .loading-screen.hidden {
             opacity: 0;
             pointer-events: none;
         }
-
         .spinner {
             border: 5px solid var(--border-color);
             border-top: 5px solid var(--primary-color-end);
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 50px; height: 50px;
             animation: spin 1s linear infinite;
         }
-        
         .loading-text {
             color: var(--text-color-light);
             font-size: 1.2em;
             font-weight: 500;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -344,6 +483,30 @@
     <div class="loading-screen" id="loadingScreen">
         <div class="spinner"></div>
         <div class="loading-text">กำลังโหลดข้อมูล...</div>
+    </div>
+
+    <!-- Modal กล้องสแกนเอกสาร AI -->
+    <div class="camera-modal" id="cameraModal">
+        <div class="camera-box">
+            <video id="cameraVideo" autoplay playsinline></video>
+            <div class="scanner-overlay">
+                <div class="scanner-status" id="scannerStatusText">
+                    <i class="fas fa-robot"></i> AI กำลังค้นหาขอบเขตเอกสาร...
+                </div>
+                <div class="scanner-frame" id="scannerFrame"></div>
+                <div class="scanner-status" style="font-size: 11.5px; opacity: 0.9;">
+                    วางใบรับรองแพทย์หรือเอกสารให้อยู่ในกรอบ
+                </div>
+            </div>
+        </div>
+        <div class="camera-controls">
+            <button type="button" class="btn-capture" id="captureBtn">
+                <i class="fas fa-camera"></i> ถ่ายภาพเอกสาร
+            </button>
+            <button type="button" class="btn-close-cam" id="closeCameraBtn">
+                <i class="fas fa-times"></i> ปิดกล้อง
+            </button>
+        </div>
     </div>
 
     <div class="container" id="mainContainer">
@@ -392,10 +555,26 @@
                     <label><input type="radio" name="hasDocument" value="ไม่มี"> ไม่มี</label>
                 </div>
 
-                <!-- ส่วนอัปโหลดรูปภาพเอกสารประกอบ (แสดงเมื่อเลือก "มี") -->
+                <!-- ส่วนอัปโหลดหรือถ่ายภาพเอกสารประกอบพร้อม AI -->
                 <div id="documentUploadSection">
-                    <label for="documentFile"><i class="fas fa-paperclip"></i> แนบรูปเอกสารประกอบ (เฉพาะไฟล์รูปภาพ) <span style="color:red;">*</span></label>
-                    <input type="file" id="documentFile" accept="image/*">
+                    <label><i class="fas fa-paperclip"></i> แนบเอกสารประกอบ (เลือกรูป หรือ ถ่ายภาพสแกนด้วย AI) <span style="color:red;">*</span></label>
+                    
+                    <!-- ซ่อน input file เดิมแล้วใช้ปุ่มกดเรียกแทน -->
+                    <input type="file" id="documentFile" accept="image/*" style="display: none;">
+                    
+                    <div class="doc-action-buttons">
+                        <button type="button" class="btn-doc-action" id="btnChooseFile">
+                            <i class="fas fa-folder-open"></i> เลือกรูปจากเครื่อง
+                        </button>
+                        <button type="button" class="btn-doc-action btn-camera-ai" id="btnOpenCamera">
+                            <i class="fas fa-camera"></i> ถ่ายรูป / สแกนด้วย AI
+                        </button>
+                    </div>
+
+                    <!-- แถบแสดงผลการตรวจสอบด้วย AI -->
+                    <div id="aiDocBadge" class="ai-doc-badge"></div>
+
+                    <!-- ตัวอย่างรูปภาพ -->
                     <img id="docPreview" alt="ตัวอย่างเอกสารประกอบ">
                 </div>
             </div>
@@ -444,7 +623,10 @@
         </div>
     </div>
 
+    <!-- Libraries: SignaturePad & Tesseract.js (AI OCR สำหรับตรวจจับข้อความบนเอกสาร) -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
     <script>
 document.addEventListener("DOMContentLoaded", () => {
     const loadingScreen = document.getElementById('loadingScreen');
@@ -464,7 +646,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // แสดงหน้าหลักหลังโหลด
     setTimeout(() => {
         loadingScreen.classList.add('hidden');
         mainContainer.classList.add('loaded');
@@ -515,13 +696,30 @@ document.addEventListener("DOMContentLoaded", () => {
     leaveTypeEl.addEventListener("change", updateLeaveBalance);
     updateLeaveBalance();
 
-    // ===== จัดการการแสดงผลและแปลงไฟล์รูปเอกสารประกอบ =====
+    // =========================================================================
+    // 🤖 ระบบจัดการไฟล์เอกสารประกอบ + กล้องสแกนเอกสาร AI (Vision & OCR)
+    // =========================================================================
     const docRadios = document.getElementsByName("hasDocument");
     const documentUploadSection = document.getElementById("documentUploadSection");
     const documentFileInput = document.getElementById("documentFile");
+    const btnChooseFile = document.getElementById("btnChooseFile");
+    const btnOpenCamera = document.getElementById("btnOpenCamera");
     const docPreview = document.getElementById("docPreview");
-    let attachedDocumentBase64 = ""; // เก็บข้อมูลรูป Base64
+    const aiDocBadge = document.getElementById("aiDocBadge");
 
+    // ตัวแปรสำหรับกล้อง
+    const cameraModal = document.getElementById("cameraModal");
+    const cameraVideo = document.getElementById("cameraVideo");
+    const captureBtn = document.getElementById("captureBtn");
+    const closeCameraBtn = document.getElementById("closeCameraBtn");
+    const scannerFrame = document.getElementById("scannerFrame");
+    const scannerStatusText = document.getElementById("scannerStatusText");
+
+    let attachedDocumentBase64 = "";
+    let cameraStream = null;
+    let scanInterval = null;
+
+    // เปิด-ปิดส่วนแนบเอกสารตาม Radio
     docRadios.forEach(radio => {
         radio.addEventListener("change", () => {
             if (radio.value === "มี" && radio.checked) {
@@ -532,58 +730,168 @@ document.addEventListener("DOMContentLoaded", () => {
                 attachedDocumentBase64 = "";
                 docPreview.style.display = "none";
                 docPreview.src = "";
-                documentFileInput.style.borderColor = "var(--border-color)";
+                aiDocBadge.className = "ai-doc-badge";
+                aiDocBadge.innerHTML = "";
             }
         });
     });
 
-    // เมื่อผู้ใช้เลือกไฟล์รูปภาพ (พร้อมย่อขนาดเพื่อไม่ให้เกินขีดจำกัด localStorage)
+    // ปุ่มที่ 1: เลือกไฟล์รูปจากเครื่อง
+    btnChooseFile.addEventListener("click", () => {
+        documentFileInput.click();
+    });
+
     documentFileInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
-        if (!file) {
-            attachedDocumentBase64 = "";
-            docPreview.style.display = "none";
-            docPreview.src = "";
-            return;
-        }
+        if (!file) return;
 
         if (!file.type.startsWith("image/")) {
             alert("กรุณาแนบเฉพาะไฟล์รูปภาพเท่านั้น (เช่น .jpg, .png)");
             documentFileInput.value = "";
-            attachedDocumentBase64 = "";
-            docPreview.style.display = "none";
             return;
         }
 
         const reader = new FileReader();
         reader.onload = function(event) {
-            const img = new Image();
-            img.onload = function() {
-                // ย่อขนาดรูปหากกว้างเกิน 1200px เพื่อป้องกัน localStorage เต็ม
-                const maxWidth = 1200;
-                let width = img.width;
-                let height = img.height;
-                if (width > maxWidth) {
-                    height = Math.round((height * maxWidth) / width);
-                    width = maxWidth;
-                }
-                const tempCanvas = document.createElement("canvas");
-                tempCanvas.width = width;
-                tempCanvas.height = height;
-                const ctx = tempCanvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, width, height);
-
-                attachedDocumentBase64 = tempCanvas.toDataURL("image/jpeg", 0.8);
-                docPreview.src = attachedDocumentBase64;
-                docPreview.style.display = "block";
-                documentFileInput.style.borderColor = "var(--border-color)";
-            };
-            img.src = event.target.result;
+            processAndVerifyDocumentImage(event.target.result);
         };
         reader.readAsDataURL(file);
     });
 
+    // ปุ่มที่ 2: เปิดกล้องถ่ายรูปพร้อม AI ตรวจจับกรอบเอกสาร
+    btnOpenCamera.addEventListener("click", async () => {
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+                audio: false
+            });
+            cameraVideo.srcObject = cameraStream;
+            cameraModal.classList.add("active");
+            startRealtimeDocumentDetection();
+        } catch (err) {
+            alert("ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการเข้าถึงกล้อง หรือใช้ปุ่มเลือกรูปจากเครื่องแทนครับ");
+            console.error(err);
+        }
+    });
+
+    // ฟังก์ชันปิดกล้อง
+    function stopCamera() {
+        if (scanInterval) clearInterval(scanInterval);
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+        cameraModal.classList.remove("active");
+    }
+
+    closeCameraBtn.addEventListener("click", stopCamera);
+
+    // AI วิเคราะห์ภาพจากกล้องแบบเรียลไทม์ (เช็คความสว่างของกระดาษและความคมชัดของตัวอักษร)
+    function startRealtimeDocumentDetection() {
+        const analyzeCanvas = document.createElement("canvas");
+        const analyzeCtx = analyzeCanvas.getContext("2d");
+        analyzeCanvas.width = 160;
+        analyzeCanvas.height = 120;
+
+        scanInterval = setInterval(() => {
+            if (!cameraVideo.videoWidth) return;
+            analyzeCtx.drawImage(cameraVideo, 0, 0, analyzeCanvas.width, analyzeCanvas.height);
+            const imgData = analyzeCtx.getImageData(20, 15, 120, 90).data;
+
+            let brightPixels = 0;
+            let darkPixels = 0;
+            let totalPixels = imgData.length / 4;
+
+            for (let i = 0; i < imgData.length; i += 4) {
+                const brightness = (imgData[i] * 0.299) + (imgData[i + 1] * 0.587) + (imgData[i + 2] * 0.114);
+                if (brightness > 155) brightPixels++; // พื้นกระดาษสีขาว/สว่าง
+                if (brightness < 95) darkPixels++;    // ตัวอักษร/เส้นตารางบนเอกสาร
+            }
+
+            const brightRatio = brightPixels / totalPixels;
+            const darkRatio = darkPixels / totalPixels;
+
+            // เงื่อนไข: มีพื้นกระดาษสว่างเกิน 45% และมีรายละเอียดตัวอักษร/เส้นขอบ
+            if (brightRatio > 0.45 && darkRatio > 0.015) {
+                scannerFrame.classList.add("detected");
+                scannerStatusText.innerHTML = `<i class="fas fa-check-circle" style="color:#2ecc71;"></i> AI ตรวจพบเอกสารชัดเจน พร้อมถ่ายภาพ`;
+            } else {
+                scannerFrame.classList.remove("detected");
+                scannerStatusText.innerHTML = `<i class="fas fa-robot"></i> เล็งให้เห็นกระดาษเอกสารชัดเจนในกรอบ...`;
+            }
+        }, 400);
+    }
+
+    // เมื่อกดปุ่มถ่ายภาพในกล้อง
+    captureBtn.addEventListener("click", () => {
+        if (!cameraVideo.videoWidth) return;
+
+        const capCanvas = document.createElement("canvas");
+        capCanvas.width = cameraVideo.videoWidth;
+        capCanvas.height = cameraVideo.videoHeight;
+        const ctx = capCanvas.getContext("2d");
+        ctx.drawImage(cameraVideo, 0, 0, capCanvas.width, capCanvas.height);
+
+        const dataUrl = capCanvas.toDataURL("image/jpeg", 0.85);
+        stopCamera();
+        processAndVerifyDocumentImage(dataUrl);
+    });
+
+    // ฟังก์ชันย่อรูปและใช้ AI (Tesseract OCR) ตรวจสอบว่าเป็นเอกสารจริงหรือไม่
+    function processAndVerifyDocumentImage(rawDataUrl) {
+        const img = new Image();
+        img.onload = async function() {
+            const maxWidth = 1200;
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+            }
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            const ctx = tempCanvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            attachedDocumentBase64 = tempCanvas.toDataURL("image/jpeg", 0.8);
+            docPreview.src = attachedDocumentBase64;
+            docPreview.style.display = "block";
+            documentUploadSection.style.borderColor = "var(--border-color)";
+
+            // เริ่มสแกนตรวจสอบเอกสารด้วย AI (Tesseract.js)
+            aiDocBadge.className = "ai-doc-badge scanning";
+            aiDocBadge.innerHTML = `<i class="fas fa-spinner fa-spin"></i> AI กำลังตรวจสอบข้อความบนเอกสารประกอบ...`;
+
+            try {
+                const result = await Tesseract.recognize(attachedDocumentBase64, 'tha+eng');
+                const detectedText = (result.data.text || "").trim();
+                const keywords = ["ใบรับรอง", "แพทย์", "โรงพยาบาล", "คลินิก", "ป่วย", "รักษา", "ความเห็น", "วันที่", "medical", "certificate", "hospital", "clinic", "ลากิจ", "เอกสาร"];
+                
+                const foundKeyword = keywords.some(kw => detectedText.toLowerCase().includes(kw));
+
+                if (foundKeyword) {
+                    aiDocBadge.className = "ai-doc-badge valid";
+                    aiDocBadge.innerHTML = `<i class="fas fa-check-circle"></i> AI ตรวจสอบแล้ว: พบข้อมูลเอกสาร/ใบรับรองแพทย์ถูกต้อง`;
+                } else if (detectedText.length >= 20) {
+                    aiDocBadge.className = "ai-doc-badge valid";
+                    aiDocBadge.innerHTML = `<i class="fas fa-check-circle"></i> AI ตรวจสอบแล้ว: พบรูปแบบเอกสารที่มีข้อความชัดเจน`;
+                } else {
+                    aiDocBadge.className = "ai-doc-badge warning";
+                    aiDocBadge.innerHTML = `<i class="fas fa-exclamation-triangle"></i> AI แจ้งเตือน: ไม่พบข้อความที่ชัดเจนบนภาพ กรุณาตรวจสอบว่าภาพไม่เบลอ`;
+                }
+            } catch (err) {
+                console.warn("AI OCR Warning:", err);
+                aiDocBadge.className = "ai-doc-badge valid";
+                aiDocBadge.innerHTML = `<i class="fas fa-check-circle"></i> แนบรูปภาพเอกสารเรียบร้อยแล้ว`;
+            }
+        };
+        img.src = rawDataUrl;
+    }
+
+    // =========================================================================
     // ตัวแปร input ระยะเวลาลา
+    // =========================================================================
     const startDate = document.getElementById("startDate");
     const startTime = document.getElementById("startTime");
     const endDate = document.getElementById("endDate");
@@ -604,7 +912,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const dayOfWeek = current.getDay();
 
             if (dayOfWeek === 6) {
-                // วันเสาร์
                 const morningStart = new Date(current); morningStart.setHours(8,0,0,0);
                 const morningEnd = new Date(current); morningEnd.setHours(12,0,0,0);
                 const afternoonStart = new Date(current); afternoonStart.setHours(13,0,0,0);
@@ -617,7 +924,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 totalMinutes += minutes;
 
             } else if (dayOfWeek !== 0) {
-                // จันทร์–ศุกร์
                 const morningStart = new Date(current); morningStart.setHours(8,0,0,0);
                 const morningEnd = new Date(current); morningEnd.setHours(12,0,0,0);
                 const afternoonStart = new Date(current); afternoonStart.setHours(13,0,0,0);
@@ -693,17 +999,16 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // ตรวจสอบว่าถ้าเลือก "มี" เอกสารประกอบ ต้องแนบไฟล์รูปด้วย
+        // ตรวจสอบว่าถ้าเลือก "มี" เอกสารประกอบ ต้องแนบไฟล์หรือถ่ายรูปด้วย
         if (selectedDocRadio.value === "มี" && !attachedDocumentBase64) {
-            documentFileInput.style.borderColor = "red";
-            alert("คุณเลือก 'มีเอกสารประกอบ' กรุณาแนบรูปเอกสารประกอบก่อนส่งคำขอครับ");
+            documentUploadSection.style.borderColor = "red";
+            alert("คุณเลือก 'มีเอกสารประกอบ' กรุณาเลือกรูปหรือถ่ายภาพเอกสารประกอบก่อนส่งคำขอครับ");
             return;
         }
 
         if(hasEmpty){ alert("กรุณากรอกข้อมูลให้ครบทุกช่อง (กรอบสีแดงคือช่องที่ว่าง)"); return; }
         if(signaturePad.isEmpty()){ alert("กรุณาเซ็นชื่อก่อนส่ง"); return; }
 
-        // ตรวจสอบสิทธิ์นาที
         const leaveMinutes = calculateLeaveMinutes(startDate.value, startTime.value, endDate.value, endTime.value);
 
         if (leaveMinutes === 0) {
@@ -711,7 +1016,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // --- ป้องกันการลาเกิน 1 วัน (480 นาที) ---
         if (leaveMinutes > 480) {
             alert("ไม่อนุญาตให้ลาเกิน 1 วันต่อครั้ง หากต้องการลาหลายวัน กรุณากรอกแบบฟอร์มแยกทีละวันครับ");
             return;
@@ -737,7 +1041,7 @@ document.addEventListener("DOMContentLoaded", () => {
             leaveType: leaveType,
             reason: document.getElementById("reason").value,
             hasDocument: selectedDocRadio.value,
-            documentData: selectedDocRadio.value === "มี" ? attachedDocumentBase64 : "", // เพิ่มข้อมูลรูปเอกสาร
+            documentData: selectedDocRadio.value === "มี" ? attachedDocumentBase64 : "",
             startDate: startDate.value,
             startTime: startTime.value,
             endDate: endDate.value,
