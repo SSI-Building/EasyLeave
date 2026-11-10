@@ -102,13 +102,39 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-message { animation: pulse 1.5s infinite ease-in-out; font-size: 1em; color: var(--text-color-light); }
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+
+        /* ===== CSS เพิ่มเติมสำหรับแสดงรูปภาพเอกสารประกอบ ===== */
+        .doc-preview-container {
+            display: none;
+            margin-top: 15px;
+            text-align: center;
+            border: 1px dashed var(--border-color);
+            padding: 10px;
+            border-radius: 12px;
+            background: var(--card-background);
+        }
+        .doc-preview-title {
+            font-size: 0.85rem;
+            color: var(--text-color-light);
+            margin-bottom: 8px;
+            font-weight: 500;
+            text-align: left;
+        }
+        #documentPreviewImage {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 8px;
+            object-fit: contain;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
         @media(min-width: 480px) { .buttons { flex-direction: row; } }
     </style>
 </head>
 <body>
 <div class="container">
     <h2>Preview การลา <i class="fas fa-search"></i></h2>
-
     <div class="section">
         <div class="section-title"><i class="fas fa-user-circle"></i> ข้อมูลพนักงาน</div>
         <div class="data-item"><span class="label">ชื่อ-สกุล:</span><span class="value" id="empName"></span></div>
@@ -116,7 +142,6 @@
         <div class="data-item"><span class="label">ตำแหน่ง:</span><span class="value" id="position"></span></div>
         <div class="data-item"><span class="label">ฝ่าย:</span><span class="value" id="department"></span></div>
     </div>
-
     <div class="section">
         <div class="section-title"><i class="fas fa-file-alt"></i> รายละเอียดการลา</div>
         <div class="data-item"><span class="label">ประเภทการลา:</span><span class="value" id="leaveTypeDisplay"></span></div>
@@ -125,31 +150,32 @@
         <div class="data-item"><span class="label">เอกสารประกอบ:</span><span class="value" id="hasDocumentDisplay"></span></div>
         <div class="data-item"><span class="label">ตั้งแต่:</span><span class="value" id="startDisplay"></span></div>
         <div class="data-item"><span class="label">ถึง:</span><span class="value" id="endDisplay"></span></div>
+        
+        <!-- แทรกกล่องแสดงรูปภาพเอกสารประกอบการลาในส่วนนี้ -->
+        <div class="doc-preview-container" id="docPreviewBox">
+            <div class="doc-preview-title"><i class="fas fa-paperclip"></i> รูปภาพเอกสารประกอบที่แนบ:</div>
+            <img id="documentPreviewImage" alt="เอกสารประกอบการลา">
+        </div>
     </div>
-
     <div class="section">
         <div class="section-title"><i class="fas fa-signature"></i> ลายเซ็น</div>
         <div class="canvas-container"><canvas id="signaturePreview"></canvas></div>
     </div>
-
     <div class="buttons">
         <button class="btn btn-secondary" id="btnEdit"><i class="fas fa-edit"></i> แก้ไข</button>
         <button class="btn btn-primary" id="btnSubmit"><i class="fas fa-paper-plane"></i> ยืนยันและส่ง</button>
     </div>
-
     <div id="loadingOverlay">
         <div class="spinner"></div>
         <div class="loading-message">กำลังส่งคำขอ... กรุณารอสักครู่</div>
     </div>
 </div>
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     // โหลดธีมจาก localStorage
     const savedTheme = localStorage.getItem('selectedTheme');
     if (savedTheme) {
         document.body.className = savedTheme;
-        // เพิ่มส่วนนี้: สำหรับธีมที่กำหนดเอง
         if (savedTheme === 'theme-custom') {
             const savedColorStart = localStorage.getItem('customColorStart');
             const savedColorEnd = localStorage.getItem('customColorEnd');
@@ -159,7 +185,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     }
-
     let leaveData = localStorage.getItem("leavePreviewData");
     if (!leaveData) {
         alert("ไม่พบข้อมูลการลา กรุณากรอกข้อมูลก่อน");
@@ -167,14 +192,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
     leaveData = JSON.parse(leaveData);
-    //จัดรูปแบบการนำเสนอวันลา
-        function formatMinutes(totalMinutes) {
+
+    // จัดรูปแบบการนำเสนอวันลา
+    function formatMinutes(totalMinutes) {
         const workDayMinutes = 8 * 60;
         const days = Math.floor(totalMinutes / workDayMinutes);
         const remainingMinutes = totalMinutes % workDayMinutes;
         const hours = Math.floor(remainingMinutes / 60);
         const minutes = remainingMinutes % 60;
-
         let result = "";
         if (days > 0) result += `${days} วัน `;
         if (hours > 0) result += `${hours} ชั่วโมง `;
@@ -182,8 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return result.trim();
     }
 
-
-    // แสดงข้อมูล
+    // แสดงข้อมูลพื้นฐาน
     document.getElementById("empName").textContent = leaveData.empName || "";
     document.getElementById("empId").textContent = leaveData.empId || "";
     document.getElementById("position").textContent = leaveData.position || "";
@@ -193,6 +217,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("reasonDisplay").textContent = leaveData.reason || "";
     document.getElementById("hasDocumentDisplay").textContent = leaveData.hasDocument || "";
     document.getElementById("leaveDaysDisplay").textContent = formatMinutes(leaveData.leaveMinutes || 0);
+
+    // ตรวจสอบและแสดงรูปภาพเอกสารประกอบถ้าพนักงานเลือก "มี" และแนบข้อมูลมา
+    const docPreviewBox = document.getElementById("docPreviewBox");
+    const docPreviewImage = document.getElementById("documentPreviewImage");
+    if (leaveData.hasDocument === "มี" && leaveData.documentData) {
+        docPreviewImage.src = leaveData.documentData;
+        docPreviewBox.style.display = "block";
+    } else {
+        docPreviewBox.style.display = "none";
+    }
 
     const startDateTime = new Date(`${leaveData.startDate}T${leaveData.startTime}`);
     const endDateTime = new Date(`${leaveData.endDate}T${leaveData.endTime}`);
@@ -233,109 +267,109 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnSubmit = document.getElementById("btnSubmit");
     const loadingOverlay = document.getElementById("loadingOverlay");
     let isSubmitting = false;
-
     
-        function compressDataUrl(dataUrl, maxWidth = 600) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const ratio = img.width / img.height;
-            const newW = Math.min(img.width, maxWidth);
-            const newH = newW / ratio;
-            canvas.width = newW;
-            canvas.height = newH;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, newW, newH);
-            // แปลงเป็น PNG (หรือ JPEG เพื่อขนาดที่เล็กลง)
-            resolve(canvas.toDataURL("image/png"));
-        };
-        img.onerror = reject;
-        img.src = dataUrl;
-    });
-}
-
-// --- ส่วนการกดปุ่มยืนยันและส่ง (แก้ไขจุดโหมดการส่ง) ---
-btnSubmit.addEventListener("click", async () => {
-    if (isSubmitting) return;
-    isSubmitting = true;
-    btnSubmit.disabled = true;
-    loadingOverlay.classList.add("visible");
-
-    try {
-        // 1. จัดการลายเซ็น
-        const signatureCanvas = document.getElementById("signaturePreview");
-        const originalSig = signatureCanvas.toDataURL();
-        leaveData.signature = await compressDataUrl(originalSig, 600);
-
-        // 2. คำนวณสิทธิการลาล่าสุด
-        let set1 = JSON.parse(localStorage.getItem("leaveSet1")) || [0,0,0,0,0,0];
-        let set2 = JSON.parse(localStorage.getItem("leaveSet2")) || [0,0,0,0,0,0];
-        
-        const leaveMinutes = parseFloat(leaveData.leaveMinutes) || 0;
-        const leaveType = leaveData.leaveType;
-
-        if (leaveType === "AL") { 
-            set2[3] = (parseFloat(set2[3]) || 0) + leaveMinutes; 
-            set1[3] = (parseFloat(set1[3]) || 0) - leaveMinutes; 
-        } else if (leaveType === "SL") { 
-            set2[4] = (parseFloat(set2[4]) || 0) + leaveMinutes; 
-            set1[4] = (parseFloat(set1[4]) || 0) - leaveMinutes; 
-        } else if (leaveType === "BL") { 
-            set2[5] = (parseFloat(set2[5]) || 0) + leaveMinutes; 
-            set1[5] = (parseFloat(set1[5]) || 0) - leaveMinutes; 
-        }
-
-        const usedTotal = (parseFloat(set2[3]) || 0) + (parseFloat(set2[4]) || 0) + (parseFloat(set2[5]) || 0);
-        const balanceTotal = (parseFloat(set1[3]) || 0) + (parseFloat(set1[4]) || 0) + (parseFloat(set1[5]) || 0);
-
-        // 3. เตรียม Data Object
-        // 3. เตรียม Data Object
-        const leaveDataToSend = {
-            ...leaveData,
-            leaveType: 
-            leaveData.leaveType === "AL" ? "AL1" : 
-            leaveData.leaveType === "BL" ? (leaveData.hasDocument === "มี" ? "BL1" : "BL2") : 
-            leaveData.leaveType === "SL" ? (leaveData.hasDocument === "มี" ? "SL1" : "SL2") : leaveData.leaveType,
-            startDate: leaveData.startDateFormatted,
-            startTime: leaveData.startTimeFormatted,
-            endDate: leaveData.endDateFormatted,
-            endTime: leaveData.endTimeFormatted,
-            set1,
-            set2,
-            usedTotal,
-            balanceTotal
-        };
-
-        const url = "https://script.google.com/macros/s/AKfycbwj2fJuuzgQWJH8O4Rff1tVW9X1J52BwllGrbSBiL9DJXG3Nq-L1qynAS3PzjIaTmqaNQ/exec";
-
-        // 4. ส่งข้อมูล (จุดสำคัญ: ใช้ mode 'cors' และ Content-Type 'text/plain')
-        await fetch(url, {
-            method: "POST",
-            mode: "cors", 
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8"
-            },
-            body: JSON.stringify(leaveDataToSend)
+    function compressDataUrl(dataUrl, maxWidth = 600) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const ratio = img.width / img.height;
+                const newW = Math.min(img.width, maxWidth);
+                const newH = newW / ratio;
+                canvas.width = newW;
+                canvas.height = newH;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, newW, newH);
+                resolve(canvas.toDataURL("image/png"));
+            };
+            img.onerror = reject;
+            img.src = dataUrl;
         });
-
-        // 5. เมื่อสำเร็จ: อัปเดต Storage และไปหน้าถัดไป
-        localStorage.setItem("leaveSet1", JSON.stringify(set1));
-        localStorage.setItem("leaveSet2", JSON.stringify(set2));
-        
-        alert("ส่งคำขอเรียบร้อยแล้ว");
-        localStorage.removeItem("leavePreviewData");
-        window.location.href = "Dashboard.html";
-
-    } catch (err) {
-        console.error("Fetch Error:", err);
-        alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง");
-        isSubmitting = false;
-        btnSubmit.disabled = false;
-        loadingOverlay.classList.remove("visible");
     }
-});
 
+    // --- ส่วนการกดปุ่มยืนยันและส่ง ---
+    btnSubmit.addEventListener("click", async () => {
+        if (isSubmitting) return;
+        isSubmitting = true;
+        btnSubmit.disabled = true;
+        loadingOverlay.classList.add("visible");
+        try {
+            // 1. จัดการย่อขนาดไฟล์ลายเซ็นก่อนส่ง
+            const signatureCanvas = document.getElementById("signaturePreview");
+            const originalSig = signatureCanvas.toDataURL();
+            leaveData.signature = await compressDataUrl(originalSig, 600);
+
+            // 2. จัดการย่อขนาดภาพเอกสารประกอบเพิ่มเติมเพื่อความชัวร์ (ถ้ามี)
+            let finalDocumentData = "";
+            if (leaveData.hasDocument === "มี" && leaveData.documentData) {
+                // ย่อภาพเอกสารประกอบให้หน้ากว้างสูงสุดไม่เกิน 1000px เพื่อให้ทำงานได้เร็วบนระบบคลาวด์
+                finalDocumentData = await compressDataUrl(leaveData.documentData, 1000);
+            }
+
+            // 3. คำนวณสิทธิการลาล่าสุด
+            let set1 = JSON.parse(localStorage.getItem("leaveSet1")) || [0,0,0,0,0,0];
+            let set2 = JSON.parse(localStorage.getItem("leaveSet2")) || [0,0,0,0,0,0];
+            
+            const leaveMinutes = parseFloat(leaveData.leaveMinutes) || 0;
+            const leaveType = leaveData.leaveType;
+            if (leaveType === "AL") { 
+                set2[3] = (parseFloat(set2[3]) || 0) + leaveMinutes; 
+                set1[3] = (parseFloat(set1[3]) || 0) - leaveMinutes; 
+            } else if (leaveType === "SL") { 
+                set2[4] = (parseFloat(set2[4]) || 0) + leaveMinutes; 
+                set1[4] = (parseFloat(set1[4]) || 0) - leaveMinutes; 
+            } else if (leaveType === "BL") { 
+                set2[5] = (parseFloat(set2[5]) || 0) + leaveMinutes; 
+                set1[5] = (parseFloat(set1[5]) || 0) - leaveMinutes; 
+            }
+            const usedTotal = (parseFloat(set2[3]) || 0) + (parseFloat(set2[4]) || 0) + (parseFloat(set2[5]) || 0);
+            const balanceTotal = (parseFloat(set1[3]) || 0) + (parseFloat(set1[4]) || 0) + (parseFloat(set1[5]) || 0);
+
+            // 4. เตรียม Data Object ส่งให้ Google Apps Script
+            const leaveDataToSend = {
+                ...leaveData,
+                leaveType: 
+                    leaveData.leaveType === "AL" ? "AL1" : 
+                    leaveData.leaveType === "BL" ? (leaveData.hasDocument === "มี" ? "BL1" : "BL2") : 
+                    leaveData.leaveType === "SL" ? (leaveData.hasDocument === "มี" ? "SL1" : "SL2") : leaveData.leaveType,
+                startDate: leaveData.startDateFormatted,
+                startTime: leaveData.startTimeFormatted,
+                endDate: leaveData.endDateFormatted,
+                endTime: leaveData.endTimeFormatted,
+                documentData: finalDocumentData, // ส่งภาพเอกสารประกอบ Base64
+                set1,
+                set2,
+                usedTotal,
+                balanceTotal
+            };
+
+            const url = "https://script.google.com/macros/s/AKfycbwj2fJuuzgQWJH8O4Rff1tVW9X1J52BwllGrbSBiL9DJXG3Nq-L1qynAS3PzjIaTmqaNQ/exec";
+            
+            // 5. ส่งข้อมูลด้วย fetch (mode: 'cors')
+            await fetch(url, {
+                method: "POST",
+                mode: "cors", 
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify(leaveDataToSend)
+            });
+
+            // 6. บันทึกค่าล่าสุดลง storage และกลับไปหน้าแรกเมื่อส่งสำเร็จ
+            localStorage.setItem("leaveSet1", JSON.stringify(set1));
+            localStorage.setItem("leaveSet2", JSON.stringify(set2));
+            
+            alert("ส่งคำขอเรียบร้อยแล้ว");
+            localStorage.removeItem("leavePreviewData");
+            window.location.href = "Dashboard.html";
+        } catch (err) {
+            console.error("Fetch Error:", err);
+            alert("เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง");
+            isSubmitting = false;
+            btnSubmit.disabled = false;
+            loadingOverlay.classList.remove("visible");
+        }
+    });
 });
 </script>
 </body>
