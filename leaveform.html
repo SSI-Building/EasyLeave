@@ -250,7 +250,7 @@
             width: auto;
         }
 
-        /* ===== สไตล์สำหรับส่วนแนบไฟล์และสแกนเอกสาร AI ===== */
+        /* ===== สไตล์สำหรับส่วนแนบไฟล์และสแกนเอกสาร ===== */
         #documentUploadSection {
             display: none;
             margin-top: 12px;
@@ -324,12 +324,12 @@
             border: 1px solid #c3e6cb;
         }
 
-        /* ===== Modal กล้อง AI Auto-Scanner & Auto-Crop ===== */
+        /* ===== Modal กล้อง Auto-Scanner & Auto-Crop ===== */
         .camera-modal {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.92);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 10000;
             display: none;
             flex-direction: column;
@@ -477,14 +477,14 @@
         <div class="loading-text">กำลังโหลดข้อมูล...</div>
     </div>
 
-    <!-- Modal กล้อง AI จับมุมกระดาษ + ถ่ายเอง + Crop อัตโนมัติ -->
+    <!-- Modal กล้องจับมุมกระดาษ + ถ่ายเอง + Crop อัตโนมัติ (Classical OpenCV.js ลื่นไหล) -->
     <div class="camera-modal" id="cameraModal">
         <div class="camera-box">
             <video id="cameraVideo" autoplay playsinline muted></video>
             <canvas id="overlayCanvas"></canvas>
             <div class="scanner-top-bar">
                 <div class="scanner-status" id="scannerStatusText">
-                    <i class="fas fa-robot"></i> ถือกล้องให้นิ่งเหนือกระดาษ AI กำลังโฟกัสและสแกนอัตโนมัติ...
+                    <i class="fas fa-expand"></i> วางเอกสารบนพื้นผิวสีต่างกัน ถือกล้องนิ่งๆ ระบบจะถ่ายและสแกนให้อัตโนมัติ
                 </div>
                 <div class="auto-progress-wrap">
                     <div class="auto-progress-bar" id="autoCaptureBar"></div>
@@ -493,7 +493,7 @@
         </div>
         <div class="camera-controls">
             <button type="button" class="btn-capture" id="manualCaptureBtn">
-                <i class="fas fa-camera"></i> กดถ่ายด้วยตัวเอง (กรณีฉุกเฉิน)
+                <i class="fas fa-camera"></i> กดถ่ายด้วยตนเอง
             </button>
             <button type="button" class="btn-close-cam" id="closeCameraBtn">
                 <i class="fas fa-times"></i> ปิดกล้อง
@@ -547,9 +547,9 @@
                     <label><input type="radio" name="hasDocument" value="ไม่มี"> ไม่มี</label>
                 </div>
 
-                <!-- ส่วนอัปโหลดหรือสแกนเอกสารด้วย AI -->
+                <!-- ส่วนอัปโหลดหรือสแกนเอกสารด้วย OpenCV -->
                 <div id="documentUploadSection">
-                    <label><i class="fas fa-paperclip"></i> แนบเอกสารประกอบ (AI จับมุมกระดาษและ Crop อัตโนมัติ) <span style="color:red;">*</span></label>
+                    <label><i class="fas fa-paperclip"></i> แนบเอกสารประกอบ (ตัดขอบและปรับตรงอัตโนมัติ) <span style="color:red;">*</span></label>
                     
                     <input type="file" id="documentFile" accept="image/*" style="display: none;">
                     
@@ -558,12 +558,12 @@
                             <i class="fas fa-folder-open"></i> เลือกรูปจากเครื่อง
                         </button>
                         <button type="button" class="btn-doc-action btn-camera-ai" id="btnOpenCamera">
-                            <i class="fas fa-expand"></i> สแกนเอกสารอัตโนมัติ (AI Crop)
+                            <i class="fas fa-camera"></i> สแกนเอกสารอัตโนมัติ
                         </button>
                     </div>
 
                     <div id="aiDocBadge" class="ai-doc-badge"></div>
-                    <img id="docPreview" alt="ตัวอย่างเอกสารประกอบที่ถูกตัดขอบแล้ว">
+                    <img id="docPreview" alt="ตัวอย่างเอกสารประกอบ">
                 </div>
             </div>
         </section>
@@ -611,7 +611,7 @@
         </div>
     </div>
 
-    <!-- Libraries: SignaturePad & OpenCV.js สำหรับ AI จับมุมกระดาษ 4 มุมและ Perspective Crop -->
+    <!-- Libraries: SignaturePad & OpenCV.js สำหรับสแกนกระดาษ 4 มุมรวดเร็ว -->
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script async src="https://docs.opencv.org/4.8.0/opencv.js"></script>
 
@@ -685,7 +685,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateLeaveBalance();
 
     // =========================================================================
-    // 🤖 ระบบ AI จับมุมกระดาษ 4 มุม + ถ่ายภาพเองอัตโนมัติ + Perspective Crop (ปรับปรุงความคมชัด)
+    // 🤖 ระบบสแกนเอกสารด้วย OpenCV.js ต้นฉบับ - เร็ว เบา ลื่นไหลที่สุด
     // =========================================================================
     const docRadios = document.getElementsByName("hasDocument");
     const documentUploadSection = document.getElementById("documentUploadSection");
@@ -708,10 +708,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let cameraStream = null;
     let detectLoopId = null;
     let stableFramesCount = 0;
-    const REQUIRED_STABLE_FRAMES = 8; // ถือค้างประมาณ 1 วินาทีแล้วถ่ายเองทันที
+    const REQUIRED_STABLE_FRAMES = 8; // ถือค้างประมาณ 1 วินาทีเพื่อบันทึกทันที
     let lastDetectedCorners = null;
 
-    // เปิด-ปิดกล่องแนบเอกสาร
+    // แสดง/ซ่อนกล่องอัปโหลด
     docRadios.forEach(radio => {
         radio.addEventListener("change", () => {
             if (radio.value === "มี" && radio.checked) {
@@ -727,7 +727,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // ปุ่มเลือกไฟล์จากเครื่อง
     btnChooseFile.addEventListener("click", () => documentFileInput.click());
 
     documentFileInput.addEventListener("change", (e) => {
@@ -751,9 +750,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const corners = detectDocumentCorners(tempCanvas);
                 if (corners) {
                     const croppedUrl = warpAndCropDocument(tempCanvas, corners);
-                    saveCroppedResult(croppedUrl, "AI ตัดขอบเอกสารจากไฟล์ภาพให้อัตโนมัติเรียบร้อยแล้ว");
+                    saveCroppedResult(croppedUrl, "ตัดขอบและจัดตรงเอกสารเรียบร้อยแล้ว");
                 } else {
-                    saveCroppedResult(tempCanvas.toDataURL("image/jpeg", 0.85), "แนบรูปภาพเอกสารเรียบร้อยแล้ว");
+                    saveCroppedResult(tempCanvas.toDataURL("image/jpeg", 0.85), "แนบเอกสารสำเร็จ");
                 }
             };
             img.src = ev.target.result;
@@ -761,21 +760,14 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsDataURL(file);
     });
 
-    // เปิดกล้องสแกนเนอร์ AI พร้อมคำสั่งโฟกัสต่อเนื่องความละเอียดสูง
     btnOpenCamera.addEventListener("click", async () => {
         try {
             stableFramesCount = 0;
             lastDetectedCorners = null;
             autoCaptureBar.style.width = "0%";
 
-            // 🌟 จุดสำคัญที่แก้ไข: สั่งเปิดกล้องแบบ Ideal Resolution 1080p พร้อมบังคับ Continuous Autofocus
             cameraStream = await navigator.mediaDevices.getUserMedia({
-                video: { 
-                    facingMode: "environment", 
-                    width: { ideal: 1920, min: 1280 }, 
-                    height: { ideal: 1080, min: 720 },
-                    focusMode: "continuous" // พยายามสั่งกล้องมือถือให้ Autofocus ตลอดเวลา
-                },
+                video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
                 audio: false
             });
             cameraVideo.srcObject = cameraStream;
@@ -787,7 +779,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 startLiveCornerDetection();
             };
         } catch (err) {
-            alert("ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตการเข้าถึงกล้องบนเบราว์เซอร์ครับ");
+            alert("ไม่สามารถเปิดกล้องได้ กรุณาอนุญาตให้เข้าถึงกล้องครับ");
             console.error(err);
         }
     });
@@ -810,7 +802,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return [top[0], top[1], bottom[1], bottom[0]];
     }
 
-    // ฟังก์ชัน AI ตรวจหามุมกระดาษ 4 มุมด้วย OpenCV.js
     function detectDocumentCorners(sourceCanvas) {
         if (typeof cv !== "undefined" && cv.Mat) {
             try {
@@ -821,7 +812,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0);
                 cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
-                cv.Canny(blurred, edged, 50, 150);
+                cv.Canny(blurred, edged, 60, 160);
 
                 let kernel = cv.Mat.ones(3, 3, cv.CV_8U);
                 cv.dilate(edged, edged, kernel);
@@ -832,7 +823,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 let maxArea = 0;
                 let bestPts = null;
-                const minRequiredArea = (sourceCanvas.width * sourceCanvas.height) * 0.15;
+                const minRequiredArea = (sourceCanvas.width * sourceCanvas.height) * 0.18;
 
                 for (let i = 0; i < contours.size(); i++) {
                     let cnt = contours.get(i);
@@ -840,7 +831,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (area > minRequiredArea) {
                         let peri = cv.arcLength(cnt, true);
                         let approx = new cv.Mat();
-                        cv.approxPolyDP(cnt, approx, 0.02 * peri, true);
+                        cv.approxPolyDP(cnt, approx, 0.025 * peri, true);
 
                         if (approx.rows === 4 && area > maxArea && cv.isContourConvex(approx)) {
                             maxArea = area;
@@ -856,10 +847,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     cnt.delete();
                 }
 
-                // Fallback แบบจับ Threshold สว่าง
                 if (!bestPts) {
                     let thresh = new cv.Mat();
-                    cv.threshold(blurred, thresh, 140, 255, cv.THRESH_BINARY);
+                    cv.threshold(blurred, thresh, 150, 255, cv.THRESH_BINARY);
                     let contours2 = new cv.MatVector();
                     let hierarchy2 = new cv.Mat();
                     cv.findContours(thresh, contours2, hierarchy2, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
@@ -867,7 +857,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     for (let i = 0; i < contours2.size(); i++) {
                         let cnt = contours2.get(i);
                         let area = cv.contourArea(cnt);
-                        if (area > minRequiredArea && area > maxArea && area < (sourceCanvas.width * sourceCanvas.height * 0.95)) {
+                        if (area > minRequiredArea && area > maxArea && area < (sourceCanvas.width * sourceCanvas.height * 0.92)) {
                             let rect = cv.boundingRect(cnt);
                             maxArea = area;
                             bestPts = [
@@ -887,13 +877,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (bestPts) return orderCornerPoints(bestPts);
             } catch (e) {
-                console.warn("OpenCV scan error:", e);
+                console.warn("OpenCV error:", e);
             }
         }
         return null;
     }
 
-    // ฟังก์ชันตัดภาพตาม 4 มุมกระดาษและปรับปรุงคุณภาพความคมชัดของภาพ
     function warpAndCropDocument(sourceCanvas, corners) {
         const [tl, tr, br, bl] = corners;
 
@@ -912,46 +901,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 let dsize = new cv.Size(maxWidth, maxHeight);
 
                 let srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, [
-                    tl.x, tl.y,
-                    tr.x, tr.y,
-                    br.x, br.y,
-                    bl.x, bl.y
+                    tl.x, tl.y, tr.x, tr.y, br.x, br.y, bl.x, bl.y
                 ]);
                 let dstTri = cv.matFromArray(4, 1, cv.CV_32FC2, [
-                    0, 0,
-                    maxWidth, 0,
-                    maxWidth, maxHeight,
-                    0, maxHeight
+                    0, 0, maxWidth, 0, maxWidth, maxHeight, 0, maxHeight
                 ]);
 
                 let M = cv.getPerspectiveTransform(srcTri, dstTri);
                 cv.warpPerspective(src, dst, M, dsize, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
 
-                // 🌟 ปรับปรุงเพิ่มความคมชัด Contrast (ดึงรายละเอียดตัวหนังสือให้เด่นชัด)
-                let tempDst = new cv.Mat();
-                cv.cvtColor(dst, tempDst, cv.COLOR_RGBA2RGB); // แปลงสีเพื่อล้างค่าอัลฟา
-                
-                // แยกแชนเนลสีเพื่อทำการปรับแสง (Equalize Contrast)
-                let channels = new cv.MatVector();
-                cv.split(tempDst, channels);
-                
-                // ปรับ Equalization ให้ตัวหนังสือมีความเด่นคมชัดขึ้น
-                let clahe = new cv.createCLAHE(2.0, new cv.Size(8, 8));
-                clahe.apply(channels.get(0), channels.get(0));
-                clahe.apply(channels.get(1), channels.get(1));
-                clahe.apply(channels.get(2), channels.get(2));
-                
-                cv.merge(channels, tempDst);
-
                 const outCanvas = document.createElement("canvas");
-                cv.imshow(outCanvas, tempDst);
+                cv.imshow(outCanvas, dst);
 
                 src.delete(); dst.delete(); srcTri.delete(); dstTri.delete(); M.delete();
-                tempDst.delete(); channels.delete(); clahe.delete();
-                
                 return outCanvas.toDataURL("image/jpeg", 0.85);
             } catch (err) {
-                console.warn("Perspective warp fallback:", err);
+                console.warn("Perspective fallback:", err);
             }
         }
 
@@ -961,13 +926,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const cropH = Math.min(sourceCanvas.height - minY, maxHeight);
 
         const outCanvas = document.createElement("canvas");
-        outCanvas.width = cropW;
-        outCanvas.height = cropH;
+        outCanvas.width = cropW; outCanvas.height = cropH;
         outCanvas.getContext("2d").drawImage(sourceCanvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
         return outCanvas.toDataURL("image/jpeg", 0.85);
     }
 
-    // ลูปตรวจจับมุมกระดาษและสั่งนับถอยหลังลั่นชัตเตอร์
     function startLiveCornerDetection() {
         const workCanvas = document.createElement("canvas");
         const workCtx = workCanvas.getContext("2d");
@@ -1016,7 +979,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const progressPercent = Math.min(100, Math.round((stableFramesCount / REQUIRED_STABLE_FRAMES) * 100));
                 autoCaptureBar.style.width = `${progressPercent}%`;
-                scannerStatusText.innerHTML = `<i class="fas fa-crosshairs" style="color:#2ecc71;"></i> AI ล็อกเป้าหมายสำเร็จ! ถือกล้องนิ่ง ๆ เพื่อบันทึก (${progressPercent}%)`;
+                scannerStatusText.innerHTML = `<i class="fas fa-crosshairs" style="color:#2ecc71;"></i> จับมุมเอกสารได้แล้ว! ถือค้างไว้เพื่อถ่ายรูป (${progressPercent}%)`;
 
                 if (stableFramesCount >= REQUIRED_STABLE_FRAMES) {
                     triggerAutoCaptureAndCrop(fullCorners);
@@ -1024,21 +987,18 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 stableFramesCount = Math.max(0, stableFramesCount - 1);
                 autoCaptureBar.style.width = `${Math.round((stableFramesCount / REQUIRED_STABLE_FRAMES) * 100)}%`;
-                scannerStatusText.innerHTML = `<i class="fas fa-robot"></i> ถือกล้องให้นิ่งเหนือกระดาษ AI กำลังสแกนอัตโนมัติ...`;
+                scannerStatusText.innerHTML = `<i class="fas fa-expand"></i> วางเอกสารบนพื้นผิวสีต่างกัน ถือกล้องนิ่งๆ...`;
             }
-        }, 130);
+        }, 140);
     }
 
-    // ลั่นชัตเตอร์โดยดึงพิกเซลเต็มประสิทธิภาพ (High-Res Frame Capture)
     function triggerAutoCaptureAndCrop(corners) {
         if (!cameraVideo.videoWidth) return;
 
-        // 🌟 ดึงภาพความละเอียดเต็มจาก Stream วิดีโอสด ไม่ผ่านการย่อขนาดหน้าจอแสดงผล
         const fullCanvas = document.createElement("canvas");
         fullCanvas.width = cameraVideo.videoWidth;
         fullCanvas.height = cameraVideo.videoHeight;
-        const fullCtx = fullCanvas.getContext("2d");
-        fullCtx.drawImage(cameraVideo, 0, 0, fullCanvas.width, fullCanvas.height);
+        fullCanvas.getContext("2d").drawImage(cameraVideo, 0, 0);
 
         stopCamera();
 
@@ -1056,7 +1016,7 @@ document.addEventListener("DOMContentLoaded", () => {
             croppedDataUrl = warpAndCropDocument(fullCanvas, defaultCorners);
         }
 
-        saveCroppedResult(croppedDataUrl, "AI สแกนภาพความละเอียดสูงและตัดขอบเอกสารเรียบร้อยแล้ว");
+        saveCroppedResult(croppedDataUrl, "สแกนและจัดตรงเอกสารเรียบร้อยแล้ว");
     }
 
     manualCaptureBtn.addEventListener("click", () => {
@@ -1068,10 +1028,7 @@ document.addEventListener("DOMContentLoaded", () => {
         img.onload = () => {
             const maxW = 1000;
             let w = img.width, h = img.height;
-            if (w > maxW) {
-                h = Math.round((h * maxW) / w);
-                w = maxW;
-            }
+            if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
             const c = document.createElement("canvas");
             c.width = w; c.height = h;
             c.getContext("2d").drawImage(img, 0, 0, w, h);
@@ -1088,7 +1045,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =========================================================================
-    // ตัวแปร input ระยะเวลาลา
+    // คำนวณวันลา
     // =========================================================================
     const startDate = document.getElementById("startDate");
     const startTime = document.getElementById("startTime");
@@ -1150,7 +1107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     endTime.addEventListener("change", updateLeaveDisplay);
     updateLeaveDisplay();
     
-    // ฟังก์ชันลายเซ็น
+    // ลายเซ็น
     const canvas = document.getElementById('signaturePad');
     const signaturePad = new SignaturePad(canvas, {
         backgroundColor: 'rgba(0,0,0,0)',
