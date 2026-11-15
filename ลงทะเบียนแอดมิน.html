@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลงทะเบียนผู้ดูแลระบบ (Admin Registration)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(45deg, #1994b6, #36a761);
+            --card-bg: #ffffff;
+            --text-dark: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #e2e8f0;
+        }
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .register-card {
+            background: var(--card-bg);
+            max-width: 420px;
+            width: 100%;
+            padding: 35px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            box-sizing: border-box;
+        }
+        h2 {
+            font-size: 1.6em;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        h2 i {
+            color: #36a761;
+        }
+        .subtitle {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+        .profile-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 14px;
+            border: 1px dashed var(--border-color);
+        }
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #06C755;
+            margin-bottom: 8px;
+        }
+        .profile-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.95em;
+        }
+        .profile-uid {
+            font-size: 0.75em;
+            color: var(--text-muted);
+            word-break: break-all;
+            margin-top: 4px;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-size: 0.88em;
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-family: 'Kanit', sans-serif;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        input[type="text"]:focus {
+            border-color: #1994b6;
+            box-shadow: 0 0 0 3px rgba(25, 148, 182, 0.15);
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary-gradient);
+            color: white;
+            font-size: 1em;
+            font-weight: 600;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(25, 148, 182, 0.25);
+        }
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(25, 148, 182, 0.35);
+        }
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .btn-back {
+            margin-top: 10px;
+            width: 100%;
+            padding: 11px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: #ffffff;
+            color: var(--text-muted);
+            font-size: 0.9em;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-back:hover {
+            background: #f1f5f9;
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+
+<div class="register-card">
+    <h2><i class="fas fa-user-shield"></i> ลงทะเบียนแอดมิน</h2>
+    <div class="subtitle">ผูกบัญชี LINE กับสิทธิ์ผู้ดูแลระบบในชีต AdminID</div>
+
+    <div class="profile-preview">
+        <img id="userAvatar" class="profile-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar">
+        <div id="userDisplayName" class="profile-name">กำลังโหลดข้อมูล LINE...</div>
+        <div id="userLineUid" class="profile-uid">-</div>
+    </div>
+
+    <div class="form-group">
+        <label for="empId"><i class="fas fa-id-card"></i> รหัสพนักงาน (Employee ID)</label>
+        <input type="text" id="empId" placeholder="เช่น S3309, S2727, S2867" autofocus>
+    </div>
+
+    <button type="button" id="submitBtn" class="btn-submit">
+        <i class="fas fa-link"></i> ยืนยันผูกบัญชีแอดมิน
+    </button>
+    <button type="button" class="btn-back" onclick="window.location.href='Dashboard-admin.html'">
+        <i class="fas fa-arrow-left"></i> กลับหน้าแผงควบคุม
+    </button>
+</div>
+
+<script>
+    // ตั้งค่า LIFF ID และ Web App URL เดียวกันกับหน้า Dashboard-admin
+    const LIFF_ID = "2007956727-rbZz9a0z";
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbzrlyHMYpfKgexpfB_r3o0MYpw8OijpyR3kYoHY3WAXaUPKDg1Dytaxwy7JTyzmhufypw/exec";
+
+    let lineProfile = null;
+
+    async function initLiff() {
+        try {
+            await liff.init({ liffId: LIFF_ID });
+            if (!liff.isLoggedIn()) {
+                liff.login({ redirectUri: window.location.href });
+                return;
+            }
+            lineProfile = await liff.getProfile();
+            document.getElementById("userAvatar").src = lineProfile.pictureUrl || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+            document.getElementById("userDisplayName").textContent = lineProfile.displayName;
+            document.getElementById("userLineUid").textContent = `UID: ${lineProfile.userId}`;
+        } catch (err) {
+            console.error("LIFF Error:", err);
+            Swal.fire({
+                icon: "error",
+                title: "เกิดข้อผิดพลาด",
+                text: "ไม่สามารถเชื่อมต่อ LINE LIFF ได้ กรุณาลองใหม่อีกครั้ง"
+            });
+        }
+    }
+
+    document.getElementById("submitBtn").addEventListener("click", async () => {
+        const empIdInput = document.getElementById("empId");
+        const empId = empIdInput.value.trim().toUpperCase();
+        const submitBtn = document.getElementById("submitBtn");
+
+        if (!lineProfile || !lineProfile.userId) {
+            Swal.fire({ icon: "warning", title: "ไม่พบข้อมูล LINE", text: "กรุณารอสักครู่หรือโหลดหน้าเว็บใหม่" });
+            return;
+        }
+
+        if (!empId) {
+            Swal.fire({ icon: "warning", title: "กรุณากรอกข้อมูล", text: "กรุณากรอกรหัสพนักงาน เช่น S3309, S2867" });
+            empIdInput.focus();
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> กำลังตรวจสอบสิทธิ์...`;
+
+        try {
+            // เรียกผ่าน doGet action=checkAdmin ซึ่งใน Code.gs มีคำสั่งบันทึก LINE UID ให้อัตโนมัติเมื่อพบรหัสพนักงาน
+            const requestUrl = `${webAppUrl}?action=checkAdmin&lineUserId=${encodeURIComponent(lineProfile.userId)}&empId=${encodeURIComponent(empId)}`;
+            const response = await fetch(requestUrl);
+            const data = await response.json();
+
+            if (data && data.status === "success") {
+                // บันทึกรหัสพนักงานไว้ในเครื่องด้วยเพื่อความรวดเร็ว
+                localStorage.setItem("linkedAdminEmpId", data.empId);
+
+                Swal.fire({
+                    icon: "success",
+                    title: "ลงทะเบียนสำเร็จ!",
+                    html: `ยินดีต้อนรับคุณ <b>${data.name}</b><br>รหัส: ${data.empId} | ระดับสิทธิ์: <span style="color:#1994b6; font-weight:700;">${data.role}</span>`,
+                    confirmButtonText: "ไปที่หน้าจัดการข้อมูล",
+                    confirmButtonColor: "#1994b6"
+                }).then(() => {
+                    window.location.href = "Dashboard-admin.html";
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "ไม่พบสิทธิ์แอดมิน",
+                    text: data.message || "ไม่พบรหัสพนักงานนี้ในตาราง AdminID กรุณาติดต่อผู้ดูแลระบบสูงสุดเพื่อเพิ่มสิทธิ์ครับ"
+                });
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fas fa-link"></i> ยืนยันผูกบัญชีแอดมิน`;
+            }
+        } catch (error) {
+            console.error("Register Error:", error);
+            Swal.fire({
+                icon: "error",
+                title: "การเชื่อมต่อขัดข้อง",
+                text: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง"
+            });
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class="fas fa-link"></i> ยืนยันผูกบัญชีแอดมิน`;
+        }
+    });
+
+    window.addEventListener("DOMContentLoaded", initLiff);
+</script>
+
+</body>
+</html>
