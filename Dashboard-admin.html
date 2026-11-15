@@ -671,11 +671,12 @@
             <button type="button" id="btnLineLogout" class="btn-line-logout" style="display:none;" onclick="logoutFromLine()">
                 <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
             </button>
-            
-            <!-- ปุ่มลงทะเบียนแอดมินที่เพิ่มใหม่ใน Dashboard-admin.html -->
-            <button type="button" class="btn-line-login" style="background: linear-gradient(45deg, #1994b6, #3498db);" onclick="window.location.href='ลงทะเบียนแอดมิน.html'">
+
+            <!-- ค้นหาปุ่มนี้แล้วใส่ id="btnAdminRegister" เข้าไปครับ -->
+            <button type="button" id="btnAdminRegister" class="btn-line-login" style="background: linear-gradient(45deg, #1994b6, #3498db);" onclick="window.location.href='ลงทะเบียนแอดมิน.html'">
                 <i class="fas fa-user-plus"></i> ลงทะเบียนแอดมิน
             </button>
+
 
             
         </div>
@@ -2326,27 +2327,34 @@ ${adminStateText}
                 }
             }
 
-            const avatarEl = document.getElementById("adminAvatar");
-            const nameEl = document.getElementById("adminDisplayName");
-            const badgeEl = document.getElementById("adminRoleBadge");
-            const subTextEl = document.getElementById("adminSubText");
-            const btnLogin = document.getElementById("btnLineLogin");
-            const btnLogout = document.getElementById("btnLineLogout");
-            const filterEl = document.getElementById("roleQueueFilter");
+                // ค้นหาโค้ดส่วนนี้ในฟังก์ชัน matchAdminPermission(profile)
+                    const avatarEl = document.getElementById("adminAvatar");
+                    const nameEl = document.getElementById("adminDisplayName");
+                    const badgeEl = document.getElementById("adminRoleBadge");
+                    const subTextEl = document.getElementById("adminSubText");
+                    const btnLogin = document.getElementById("btnLineLogin");
+                    const btnLogout = document.getElementById("btnLineLogout");
+                    const filterEl = document.getElementById("roleQueueFilter");
 
-            if (avatarEl && profile.pictureUrl) avatarEl.src = profile.pictureUrl;
-            if (btnLogin) btnLogin.style.display = "none";
-            if (btnLogout) btnLogout.style.display = "inline-block";
+                    // 🌟 1. ดึงปุ่มลงทะเบียนแอดมินที่เราเพิ่งตั้ง ID ไว้ในจุดที่ 1
+                    const btnRegister = document.getElementById("btnAdminRegister");
 
-            if (adminInfo) {
-                currentAdminUser = {
-                    isLoggedIn: true,
-                    empId: adminInfo.empId,
-                    name: adminInfo.name,
-                    lineUid: lineUid,
-                    role: adminInfo.role.toUpperCase(),
-                    pictureUrl: profile.pictureUrl || ""
-                };
+                    if (avatarEl && profile.pictureUrl) avatarEl.src = profile.pictureUrl;
+                    if (btnLogin) btnLogin.style.display = "none";
+                    if (btnLogout) btnLogout.style.display = "inline-block";
+
+                    // 🌟 2. เพิ่มคำสั่งตรงนี้: ถ้าล็อกอินสำเร็จ (ตรวจพบสิทธิ์แอดมิน) ให้ซ่อนปุ่มลงทะเบียนทันที!
+                    if (adminInfo) {
+                        if (btnRegister) btnRegister.style.display = "none"; // 🚫 ซ่อนปุ่มลงทะเบียนแอดมิน
+
+                        currentAdminUser = {
+                            isLoggedIn: true,
+                            empId: adminInfo.empId,
+                            name: adminInfo.name,
+                            lineUid: lineUid,
+                            role: adminInfo.role.toUpperCase(),
+                            pictureUrl: profile.pictureUrl || ""
+                        };
                 if (nameEl) nameEl.textContent = `${currentAdminUser.name} (${currentAdminUser.empId})`;
                 if (badgeEl) {
                     badgeEl.textContent = `ระดับ ${currentAdminUser.role}`;
