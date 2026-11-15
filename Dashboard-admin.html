@@ -1737,7 +1737,7 @@
             if (!win) { doc.save(`ใบลา_${rowData[1]}.pdf`); }
         }
 
-        // ==================== 6. AI Chat Bot & Commands ====================
+        // ==================== 6. AI Chat Bot & Commands (ปรับปรุงระบบคิวงาน N1-N3-VIP) ====================
         const chatToggleBtn = document.getElementById('chat-toggle-btn');
         const chatWindow = document.getElementById('ai-chat-window');
         const closeChatBtn = document.getElementById('close-chat-btn');
@@ -1761,8 +1761,9 @@
             const typingMsg = appendMessage('กำลังประมวลผล...', 'ai-message');
             const t = text.toLowerCase();
 
+            // 🟢 FAST INTENT DETECTION (ประมวลผลในฝั่งเครื่องผู้ใช้งาน ไม่ต้องกวน API ของคีย์หลัก)
             const localCommands = [
-                { regex: /รีเฟรช|refresh|โหลดใหม่/, action: () => document.getElementById('loadDataButton').click(), reply: "รีเฟรชข้อมูลให้แล้วครับ 🔄" },
+                { regex: /รีเฟรช|refresh|โหลดใหม่/, action: () => document.getElementById('loadDataButton').click(), reply: "รีเฟรชข้อมูลล่าสุดจากชีตให้เรียบร้อยแล้วครับ 🔄" },
                 { 
                     regex: /รีเซ็ต|ล้างค่า|เริ่มใหม่/, 
                     action: () => { 
@@ -1770,20 +1771,63 @@
                         aiMemory.employee = null; aiMemory.leaveType = null; aiMemory.status = null; 
                         chatHistory.length = 0; 
                     }, 
-                    reply: "ล้างค่าตัวกรองและล้างความจำให้เรียบร้อยครับ 🧹" 
+                    reply: "ล้างค่าตัวกรอง ประวัติแชท และสถิติให้กลับไปเป็นค่าเริ่มต้นเรียบร้อยครับ 🧹" 
                 },
-                { regex: /^มีกี่คน|ทั้งหมดกี่คน|จำนวนพนักงาน/, action: () => null, reply: `ตอนนี้มีข้อมูลในตารางทั้งหมด ${filteredAndSortedData.length} รายการครับ 📊` },
+                { regex: /^มีกี่คน|ทั้งหมดกี่คน|จำนวนพนักงาน/, action: () => null, reply: `ขณะนี้มีประวัติคำขอลาที่ถูกกรองบนตารางทั้งหมด ${filteredAndSortedData.length} รายการครับ 📊` },
+                
+                // --- เพิ่มคิวกรองงานด่วนตามระดับสิทธิ์ ---
+                {
+                    regex: /ขอดูงานของฉัน|รอฉันอนุมัติ|งานของฉัน|คิวของฉัน|กรองงานฉัน/,
+                    action: () => {
+                        const filterSelect = document.getElementById('roleQueueFilter');
+                        if (filterSelect) {
+                            filterSelect.value = 'MY_TURN';
+                            applyRoleQueueFilter();
+                        }
+                    },
+                    reply: `กรองตารางแสดงเฉพาะใบลาในคิวระดับ [${currentAdminUser.role}] ที่รอคุณอนุมัติเรียบร้อยแล้วครับ ⚡`
+                },
+                {
+                    regex: /ขอดูงานรอ\s*n1|งานค้าง\s*n1|รอ\s*n1/,
+                    action: () => {
+                        const filterSelect = document.getElementById('roleQueueFilter');
+                        if (filterSelect) { filterSelect.value = 'WAIT_N1'; applyRoleQueueFilter(); }
+                    },
+                    reply: "กรองตารางแสดงเฉพาะใบลาคิวยื่นเริ่มต้น (รอ N1 อนุมัติ) เรียบร้อยครับ ⏳"
+                },
+                {
+                    regex: /ขอดูงานรอ\s*n2|งานค้าง\s*n2|รอ\s*n2/,
+                    action: () => {
+                        const filterSelect = document.getElementById('roleQueueFilter');
+                        if (filterSelect) { filterSelect.value = 'WAIT_N2'; applyRoleQueueFilter(); }
+                    },
+                    reply: "กรองตารางแสดงเฉพาะใบลาคิวระดับ 2 (รอ N2 อนุมัติเห็นสมควร) เรียบร้อยครับ ⏳"
+                },
+                {
+                    regex: /ขอดูงานรอ\s*n3|งานค้าง\s*n3|รอ\s*n3/,
+                    action: () => {
+                        const filterSelect = document.getElementById('roleQueueFilter');
+                        if (filterSelect) { filterSelect.value = 'WAIT_N3'; applyRoleQueueFilter(); }
+                    },
+                    reply: "กรองตารางแสดงเฉพาะใบลาคิวระดับสุดท้าย (รอ N3 อนุมัติขั้นสุดท้าย) เรียบร้อยครับ ⏳"
+                },
+
+                // --- Flow ปริ้นเอกสาร PDF ---
                 { 
-                    regex: /^ปริ้น$|^พิมพ์$|^ช่วยปริ้นหน่อย$/, action: () => null, reply: "ต้องการปริ้นสถานะ อนุมัติแล้ว หรือ รออนุมัติ ครับ?",
+                    regex: /^ปริ้น$|^พิมพ์$|^ช่วยปริ้นหน่อย$/, action: () => null, reply: "ต้องการพิมพ์ใบลาของกลุ่มที่มีสถานะ อนุมัติสมบูรณ์แล้ว หรือกลุ่มที่ยัง รออนุมัติ ครับ?",
                     options: [{ label: "✅ อนุมัติแล้ว", value: "ปริ้นที่อนุมัติแล้ว" }, { label: "⏳ รออนุมัติ", value: "ปริ้นที่รออนุมัติ" }]
                 },
                 { 
-                    regex: /^ปริ้นที่รออนุมัติ$/, action: () => null, reply: "ต้องการปริ้น ทั้งหมด, แบบไม่รับค่าจ้าง หรือ แบบรับค่าจ้าง ครับ?",
-                    options: [{ label: "📄 ทั้งหมด", value: "รออนุมัติ ทั้งหมด" }, { label: "💰 แบบรับค่าจ้าง", value: "รออนุมัติ แบบรับค่าจ้าง" }, { label: "🚫 แบบไม่รับค่าจ้าง", value: "รออนุมัติ แบบไม่รับค่าจ้าง" }]
+                    regex: /^ปริ้นที่รออนุมัติ$/, action: () => null, reply: "ต้องการพิมพ์เอกสารในรอบคิวใดเป็นพิเศษไหมครับ?",
+                    options: [
+                        { label: "📄 ทั้งหมด", value: "รออนุมัติ ทั้งหมด" }, 
+                        { label: "💰 แบบรับค่าจ้าง", value: "รออนุมัติ แบบรับค่าจ้าง" }, 
+                        { label: "🚫 แบบไม่รับค่าจ้าง", value: "รออนุมัติ แบบไม่รับค่าจ้าง" }
+                    ]
                 },
                 { 
                     regex: /^(ปริ้นที่อนุมัติแล้ว|รออนุมัติ ทั้งหมด|รออนุมัติ แบบรับค่าจ้าง|รออนุมัติ แบบไม่รับค่าจ้าง)$/, action: () => null, 
-                    reply: "พบรายการดังกล่าว กรุณาระบุหน้า (หน้า 1, หน้า 2, หน้า 3) ครับ?",
+                    reply: "พบรายการดังกล่าว ต้องการระบุขอบเขตเอกสารของหน้าใดดีครับ?",
                     options: [
                         { label: "📄 หน้า 1", value: `หน้า 1 (${text})` }, 
                         { label: "📄 หน้า 2", value: `หน้า 2 (${text})` }, 
@@ -1791,11 +1835,9 @@
                         { label: "❌ ยกเลิก", value: "ยกเลิก" }
                     ]
                 },
-                { 
-                    regex: /^อนุมัติ$|^ช่วยอนุมัติหน่อย$/, action: () => null, reply: "ต้องการอนุมัติ ทั้งหมด, อนุมัติ Paid ทั้งหมด หรือ อนุมัติ Unpaid ทั้งหมด ครับ?",
-                    options: [{ label: "✅ อนุมัติทั้งหมด", value: "อนุมัติทั้งหมด" }, { label: "🟢 อนุมัติ Paid", value: "อนุมัติ Paid ทั้งหมด" }, { label: "⚪ อนุมัติ Unpaid", value: "อนุมัติ Unpaid ทั้งหมด" }, { label: "❌ ยกเลิก", value: "ยกเลิก" }]
-                },
-                { regex: /^ยกเลิก$/, action: () => null, reply: "ยกเลิกคำสั่งให้เรียบร้อยครับ มีอะไรให้ผมช่วยอีกไหมครับ? 😊" },
+                { regex: /^ยกเลิก$/, action: () => null, reply: "ยกเลิกคำสั่งให้เรียบร้อยครับ มีขั้นตอนไหนให้ช่วยเพิ่มเติมอีกไหมครับ? 😊" },
+                
+                // คำสั่งลั่นพิมพ์ PDF แผ่นที่ระบุ
                 { regex: /^หน้า 1 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 1, "all") },
                 { regex: /^หน้า 2 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 2, "all") },
                 { regex: /^หน้า 3 \(ปริ้นที่อนุมัติแล้ว\)$/i, action: () => executePrintByAI("Approved", "page", 3, "all") },
@@ -1808,32 +1850,76 @@
                 { regex: /^หน้า 1 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 1, "unpaid") },
                 { regex: /^หน้า 2 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 2, "unpaid") },
                 { regex: /^หน้า 3 \(รออนุมัติ แบบไม่รับค่าจ้าง\)$/i, action: () => executePrintByAI("pending", "page", 3, "unpaid") },
+                
+                                // --- Flow สั่งงานอนุมัติอัตโนมัติ (ปรับปรุงเงื่อนไขใหม่ตามประเภทการลาและเอกสารแนบ) ---
                 { 
-                    regex: /^อนุมัติทั้งหมด$/i, 
+                    regex: /^อนุมัติ$|^ช่วยอนุมัติหน่อย$/, 
+                    action: () => null, 
+                    reply: "ต้องการอนุมัติกลุ่มเอกสารที่ค้างในคิวของคุณแบบใดดีครับ?",
+                    options: [
+                        { label: "✅ อนุมัติทั้งหมดทุกรายการ", value: "อนุมัติทั้งหมดทุกรายการ" }, 
+                        { label: "💼 อนุมัติลากิจทั้งหมด", value: "อนุมัติลากิจทั้งหมด" }, 
+                        { label: "🌴 อนุมัติลาพักร้อนทั้งหมด", value: "อนุมัติลาพักร้อนทั้งหมด" }, 
+                        { label: "🤒 อนุมัติลาป่วยรับเงินทั้งหมด", value: "อนุมัติลาป่วยรับเงินทั้งหมด" },
+                        { label: "🚫 อนุมัติลาป่วยไม่รับเงินทั้งหมด", value: "อนุมัติลาป่วยไม่รับเงินทั้งหมด" }
+                    ]
+                },
+                { 
+                    regex: /^อนุมัติทั้งหมดทุกรายการ$/i, 
                     action: () => {
-                        let pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
-                        if (pendingItems.length > 0) appendMessage("กำลังดำเนินการอนุมัติทั้งหมดครับ ✅", "ai-message");
+                        if (!currentAdminUser.isLoggedIn || currentAdminUser.role === "GUEST") {
+                            appendMessage("⚠️ กรุณาเข้าสู่ระบบ LINE เพื่อระบุสิทธิ์ก่อนอนุมัติครับ", "ai-message");
+                            return;
+                        }
+                        appendMessage(`รับทราบครับ กำลังอนุมัติรายการทั้งหมดที่อยู่ในคิวระดับ [${currentAdminUser.role}] ของคุณ... ⏳`, "ai-message");
                         executeApproveAllByAI("all");
                     }
                 },
                 { 
-                    regex: /^อนุมัติ paid ทั้งหมด$/i, 
+                    regex: /^อนุมัติลากิจทั้งหมด$/i, 
                     action: () => {
-                        let pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
-                        let hasItems = pendingItems.some(row => row[4] === 'AL1' || row[4] === 'AL' || row[14] === 'มี');
-                        if (hasItems) appendMessage("กำลังดำเนินการอนุมัติเฉพาะรายการ Paid ครับ 🟢", "ai-message");
-                        executeApproveAllByAI("paid");
+                        if (!currentAdminUser.isLoggedIn || currentAdminUser.role === "GUEST") {
+                            appendMessage("⚠️ กรุณาเข้าสู่ระบบ LINE ก่อนใช้งานคำสั่งอนุมัติครับ", "ai-message");
+                            return;
+                        }
+                        appendMessage(`รับทราบครับ กำลังอนุมัติ "ลากิจทั้งหมด" ที่อยู่ในคิวระดับ [${currentAdminUser.role}] ของคุณ... 💼`, "ai-message");
+                        executeApproveAllByAI("business");
                     }
                 },
                 { 
-                    regex: /^อนุมัติ unpaid ทั้งหมด$/i, 
+                    regex: /^อนุมัติลาพักร้อนทั้งหมด$/i, 
                     action: () => {
-                        let pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
-                        let hasItems = pendingItems.some(row => !(row[4] === 'AL1' || row[4] === 'AL' || row[14] === 'มี'));
-                        if (hasItems) appendMessage("กำลังดำเนินการอนุมัติเฉพาะรายการ Unpaid ครับ ⚪", "ai-message");
-                        executeApproveAllByAI("unpaid");
+                        if (!currentAdminUser.isLoggedIn || currentAdminUser.role === "GUEST") {
+                            appendMessage("⚠️ กรุณาเข้าสู่ระบบ LINE ก่อนใช้งานคำสั่งอนุมัติครับ", "ai-message");
+                            return;
+                        }
+                        appendMessage(`รับทราบครับ กำลังอนุมัติ "ลาพักร้อนทั้งหมด" ที่อยู่ในคิวระดับ [${currentAdminUser.role}] ของคุณ... 🌴`, "ai-message");
+                        executeApproveAllByAI("vacation");
+                    }
+                },
+                { 
+                    regex: /^อนุมัติลาป่วยรับเงินทั้งหมด$/i, 
+                    action: () => {
+                        if (!currentAdminUser.isLoggedIn || currentAdminUser.role === "GUEST") {
+                            appendMessage("⚠️ กรุณาเข้าสู่ระบบ LINE ก่อนใช้งานคำสั่งอนุมัติครับ", "ai-message");
+                            return;
+                        }
+                        appendMessage(`รับทราบครับ กำลังอนุมัติ "ลาป่วยแบบได้รับเงิน" (ต้องมีเอกสารแนบเท่านั้น) ในคิวระดับ [${currentAdminUser.role}] ของคุณ... 🤒💰`, "ai-message");
+                        executeApproveAllByAI("sick_paid");
+                    }
+                },
+                { 
+                    regex: /^อนุมัติลาป่วยไม่รับเงินทั้งหมด$/i, 
+                    action: () => {
+                        if (!currentAdminUser.isLoggedIn || currentAdminUser.role === "GUEST") {
+                            appendMessage("⚠️ กรุณาเข้าสู่ระบบ LINE ก่อนใช้งานคำสั่งอนุมัติครับ", "ai-message");
+                            return;
+                        }
+                        appendMessage(`รับทราบครับ กำลังอนุมัติ "ลาป่วยแบบไม่ได้เงิน" (กรณีไม่มีเอกสารแนบ) ในคิวระดับ [${currentAdminUser.role}] ของคุณ... 🤒🚫`, "ai-message");
+                        executeApproveAllByAI("sick_unpaid");
                     }
                 }
+
             ];
 
             for (const cmd of localCommands) {
@@ -1845,6 +1931,7 @@
                 }
             }
 
+            // 🧠 วิเคราะห์บริบทของชื่อพนักงานและประเภทการลา เพื่อนำไปช่วยกรองข้อมูลบนตาราง
             const allNames = [...new Set(allData.map(r => r[1]).filter(Boolean))];
             const foundName = allNames.find(fullName => {
                 const firstName = fullName.split(" ")[0].trim().toLowerCase(); 
@@ -1882,7 +1969,18 @@
 
             const todayStr = new Date().toISOString().substring(0, 10);
             const memoryText = `[MEMORY STATE]\nemployee=${aiMemory.employee || '-'}\nleaveType=${aiMemory.leaveType || '-'}\nstatus=${aiMemory.status || '-'}`;
-            const SYSTEM_RULES = `คุณคือ AI HR Assistant วันที่: ${todayStr}\n${memoryText}\nข้อมูลตาราง: ${dataContext}\nกฎ:\n1. คุณคุยเรื่องทั่วไป เล่ามุกตลก และจำประวัติการคุยได้เป็นอย่างดี\n2. ถ้าถามข้อมูล HR ให้อ้างอิงจาก "ข้อมูลตาราง" (อิง MEMORY STATE ด้วย)\n3. ถ้าผู้ใช้สั่งคุมหน้าเว็บ ให้ตอบเป็น JSON Tool เท่านั้น (ห้ามมีข้อความอื่น)`;
+            
+            // ส่งข้อมูลระดับแอดมินเข้าไปใน Prompt ของ AI ด้วย เพื่อให้แชทบอททักทายและแจ้งสถานะคิวงานได้ตรงตัวตนจริง
+            const adminStateText = `[CURRENT LOGGED ADMIN]\nName: ${currentAdminUser.name}\nRole: ${currentAdminUser.role}\nIsLoggedIn: ${currentAdminUser.isLoggedIn}`;
+
+            const SYSTEM_RULES = `คุณคือ AI HR Assistant วันที่: ${todayStr}
+${memoryText}
+${adminStateText}
+ข้อมูลตารางที่คัดกรองมาให้: ${dataContext}
+กฎการตอบ:
+1. คุณคุยเรื่องทั่วไป เล่ามุกตลก และตอบเป็นภาษากันเอง อ่อนน้อม สุภาพ และมีชีวิตชีวา
+2. หากถามเกี่ยวกับรายชื่อหรือใบลา ให้อ้างอิงข้อมูลจาก "ข้อมูลตารางที่คัดกรองมาให้" เสมอ โดยพูดให้กระชับ
+3. หากผู้ใช้ต้องการให้กรองหรือควบคุมตาราง ให้ตอบกลับเป็นข้อความอธิบาย พร้อมทั้งสรุปค่าลงรูปแบบ JSON Tool เท่านั้น (ห้ามใส่สัญลักษณ์หรือแต่งเติมด้านนอก)`;
 
             const TOOL_REGISTRY = [
                 { action: "search", keyword: "ชื่อพนักงาน" },
@@ -1928,15 +2026,15 @@
                 if (!validActions.includes(command.action)) throw new Error("Invalid Tool");
 
                 if (command.action === "search") {
-                    appendMessage(`กำลังกรองรายชื่อที่มีคำว่า "${command.keyword}" ให้ครับ 🔍`, 'ai-message');
+                    appendMessage(`กำลังกรองรายชื่อพนักงานที่มีชื่อว่า "${command.keyword}" ให้ทันทีครับ 🔍`, 'ai-message');
                     document.getElementById('searchName').value = command.keyword; document.getElementById('searchName').dispatchEvent(new Event('input'));
                 } else if (command.action === "summary") {
-                    appendMessage('กำลังเปิดหน้าตารางสรุปให้ครับ 📊', 'ai-message'); document.getElementById('summaryButton').click();
+                    appendMessage('กำลังดึงข้อมูลและเปิดหน้าต่างสรุปภาพรวมทั้งหมดให้ครับ 📊', 'ai-message'); document.getElementById('summaryButton').click();
                 } else if (command.action === "filter_type") {
-                    appendMessage(`กำลังกรองประเภทการลาให้ครับ 🏷️`, 'ai-message');
+                    appendMessage(`กำลังกรองประเภทคำขอหยุดงานเฉพาะประเภทที่ระบุให้แล้วครับ 🏷️`, 'ai-message');
                     document.getElementById('filterType').value = command.type; document.getElementById('filterType').dispatchEvent(new Event('change'));
                 } else if (command.action === "filter_status") {
-                    appendMessage(`กำลังกรองสถานะให้ครับ 📌`, 'ai-message');
+                    appendMessage(`กำลังกรองตารางประวัติให้แสดงเฉพาะสถานะที่เลือกครับ 📌`, 'ai-message');
                     document.getElementById('filterStatus').value = command.status; document.getElementById('filterStatus').dispatchEvent(new Event('change'));
                 }
             } catch (e) {
@@ -1945,6 +2043,7 @@
                 if (chatHistory.length > 10) chatHistory.shift();
             }
         }
+
 
         function appendMessage(text, className, options = []) {
             const msgDiv = document.createElement('div');
@@ -2031,42 +2130,86 @@
             }
         }
 
-        async function executeApproveAllByAI(payType = "all") {
+                async function executeApproveAllByAI(approveType = "all") {
             if (!currentAdminUser.isLoggedIn || currentAdminUser.role === "GUEST") {
                 appendMessage("⚠️ กรุณาเข้าสู่ระบบด้วย LINE ก่อนใช้คำสั่งอนุมัติครับ", "ai-message");
                 return;
             }
-            let pendingItems = allData.filter(row => row[10] && row[10].toLowerCase() === 'pending');
-            if (payType === "paid") {
-                pendingItems = pendingItems.filter(row => (row[4] === 'AL1' || row[4] === 'AL' || row[14] === 'มี'));
-            } else if (payType === "unpaid") {
-                pendingItems = pendingItems.filter(row => !(row[4] === 'AL1' || row[4] === 'AL' || row[14] === 'มี'));
+
+            // 1. ดึงข้อมูลรายการที่รอคิวอนุมัติระดับสิทธิ์ของผู้อนุมัติคนนี้ก่อนเป็นหลัก
+            let pendingItems = allData.filter(row => {
+                const st = getApprovalStepStatus(row);
+                if (currentAdminUser.role === "VIP") {
+                    return st.nextStep === "N1" || st.nextStep === "N2" || st.nextStep === "N3";
+                }
+                return st.nextStep === currentAdminUser.role;
+            });
+
+            // 2. กรองข้อมูลตามประเภทการอนุมัติและเงื่อนไขเรื่องเอกสารแนบที่เลือก
+            if (approveType === "business") {
+                // อนุมัติเฉพาะลากิจ
+                pendingItems = pendingItems.filter(row => ['BL', 'BL1', 'BL2'].includes(row[4]));
+            } else if (approveType === "vacation") {
+                // อนุมัติเฉพาะลาพักร้อน
+                pendingItems = pendingItems.filter(row => ['AL', 'AL1'].includes(row[4]));
+            } else if (approveType === "sick_paid") {
+                // อนุมัติเฉพาะลาป่วยที่ได้รับเงิน (ต้องลาป่วย และมีเอกสารแนบ คอลัมน์ O/Index 14 คือ "มี")
+                pendingItems = pendingItems.filter(row => ['SL', 'SL1', 'SL2'].includes(row[4]) && row[14] === 'มี');
+            } else if (approveType === "sick_unpaid") {
+                // อนุมัติเฉพาะลาป่วยที่ไม่ได้รับเงิน (ต้องลาป่วย และไม่มีเอกสารแนบ คอลัมน์ O/Index 14 คือ "ไม่มี")
+                pendingItems = pendingItems.filter(row => ['SL', 'SL1', 'SL2'].includes(row[4]) && row[14] !== 'มี');
             }
+
+            // 3. ตรวจเช็คว่ามีข้อมูลให้ทำรายการตามเงื่อนไขที่ระบุไหม
             if (pendingItems.length === 0) {
-                appendMessage(`ไม่มีรายการที่รออนุมัติในขณะนี้ครับ`, 'ai-message');
+                let typeLabel = "ทั้งหมด";
+                if (approveType === "business") typeLabel = "ลากิจทั้งหมด";
+                if (approveType === "vacation") typeLabel = "ลาพักร้อนทั้งหมด";
+                if (approveType === "sick_paid") typeLabel = "ลาป่วยรับเงินทั้งหมด";
+                if (approveType === "sick_unpaid") typeLabel = "ลาป่วยไม่รับเงินทั้งหมด";
+                
+                appendMessage(`❌ ไม่พบรายการที่รอคิวอนุมัติของคุณในหมวดหมู่ "${typeLabel}" ในขณะนี้ครับ`, 'ai-message');
                 return;
             }
 
+            // 4. เริ่มส่งคำขอคำนวณการอนุมัติแบบกลุ่มไปยัง Google Sheets
             const loadingOverlay = document.getElementById('loading-overlay');
             loadingOverlay.classList.add('visible');
+            
             try {
                 const isVip = currentAdminUser.role === "VIP";
+                
+                // VIP จะสั่งอนุมัติจบข้ามขั้นทันที ส่วนแอดมินคนอื่นจะรันตามระดับของตัวเอง
                 const stepToUse = isVip ? "N3" : currentAdminUser.role;
+                const defaultComment = "อนุมัติแบบกลุ่มผ่าน AI";
+
                 const updatePromises = pendingItems.map(item => {
-                    const uuid = item[19];
-                    const reqUrl = `${webAppUrl}?action=multiStepApprove&uuid=${encodeURIComponent(uuid)}&step=${encodeURIComponent(stepToUse)}&status=Approved&adminName=${encodeURIComponent(currentAdminUser.name)}&adminRole=${encodeURIComponent(currentAdminUser.role)}&vipApproveAll=${isVip}`;
+                    const uuid = item[19]; // ค้นหาด้วย UUID คอลัมน์ T เหมือนเดิม
+                    const reqUrl = `${webAppUrl}?action=multiStepApprove`
+                        + `&uuid=${encodeURIComponent(uuid)}`
+                        + `&step=${encodeURIComponent(stepToUse)}`
+                        + `&status=Approved`
+                        + `&adminName=${encodeURIComponent(currentAdminUser.name)}`
+                        + `&adminRole=${encodeURIComponent(currentAdminUser.role)}`
+                        + `&vipApproveAll=${isVip}`
+                        + `&comment=${encodeURIComponent(defaultComment)}`;
                     return fetch(reqUrl);
                 });
+                
                 await Promise.all(updatePromises);
-                appendMessage(`อนุมัติสำเร็จทั้งสิ้น ${pendingItems.length} รายการเรียบร้อยแล้วครับ! 🎉`, 'ai-message');
+                appendMessage(`✅ อนุมัติรายการกลุ่มประเภท "${approveType}" สำเร็จรวมทั้งสิ้น ${pendingItems.length} รายการเรียบร้อยแล้วครับ! 🎉`, 'ai-message');
+                
+                // สั่งโหลดตารางและอัปเดต Dashboard metrics ใหม่ทันที
                 document.getElementById('loadDataButton').click();
+                
             } catch(err) {
                 console.error(err);
-                appendMessage('เกิดข้อผิดพลาดระหว่างอนุมัติ กรุณาลองใหม่อีกครั้ง', 'ai-message');
+                appendMessage('⚠️ เกิดข้อผิดพลาดระหว่างส่งอนุมัติกลุ่ม กรุณาลองใหม่อีกครั้งครับ', 'ai-message');
             } finally {
                 loadingOverlay.classList.remove('visible');
             }
         }
+
 
         // ============================================================================
         // 🌟 ระบบ LINE LIFF Authentication & การอนุมัติลำดับขั้น (N1 -> N2 -> N3 -> VIP)
