@@ -663,12 +663,21 @@
                 <option value="WAIT_N3">⏳ รอ N3 อนุมัติ</option>
             </select>
 
+
+            
             <button type="button" id="btnLineLogin" class="btn-line-login" onclick="loginWithLine()">
                 <i class="fab fa-line" style="font-size: 1.2em;"></i> เข้าสู่ระบบด้วย LINE
             </button>
             <button type="button" id="btnLineLogout" class="btn-line-logout" style="display:none;" onclick="logoutFromLine()">
                 <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
             </button>
+            
+            <!-- ปุ่มลงทะเบียนแอดมินที่เพิ่มใหม่ใน Dashboard-admin.html -->
+            <button type="button" class="btn-line-login" style="background: linear-gradient(45deg, #1994b6, #3498db);" onclick="window.location.href='ลงทะเบียนแอดมิน.html'">
+                <i class="fas fa-user-plus"></i> ลงทะเบียนแอดมิน
+            </button>
+
+            
         </div>
     </div>
 
