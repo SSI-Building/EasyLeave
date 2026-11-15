@@ -1585,55 +1585,69 @@
                     doc.text(`${getRemainingMinutes(balanceTotal)}`, 99.5, tby1 + rowHeight*8 - 2, { align: "center" });
 
                     // =========================================================================
-                    // 🌟 กรอบผู้อนุมัติ N2 (คอลัมน์ AA) และ N3 (คอลัมน์ AB) พร้อมใส่ "เห็นสมควร"
-                    // =========================================================================
-                    function extractApproverInfo(rawVal) {
-                        const str = String(rawVal || '').trim();
-                        if (!str) return { status: '', name: '' };
-                        const m = str.match(/^(Approved|Rejected)\s*\((.+)\)$/i);
-                        if (m) return { status: m[1], name: m[2].trim() };
-                        return { status: 'Approved', name: str };
-                    }
+                        // 🌟 กรอบผู้อนุมัติ N2 (คอลัมน์ AA) และ N3 (คอลัมน์ AB) พร้อมดึงความเห็นที่ระบุเอง
+                        // =========================================================================
+                        function extractApproverInfo(rawVal) {
+                            const str = String(rawVal || '').trim();
+                            if (!str) return { status: '', name: '', comment: '' };
 
-                    const n2Info = extractApproverInfo(rowData[26]); // Column AA (Index 26) -> N2
-                    const n3Info = extractApproverInfo(rowData[27]); // Column AB (Index 27) -> N3
-                    const formattedCreateDate = typeof formatDateThailand === 'function' ? formatDateThailand(createDate) : createDate;
+                            // แยกส่วนชื่อ กับ ส่วนความเห็น ที่คั่นด้วยเครื่องหมาย "|"
+                            // ตัวอย่าง: "Approved (ภูริทัต งามดี) | เห็นสมควรอนุมัติ"
+                            const parts = str.split('|');
+                            const mainPart = parts[0].trim();
+                            const customComment = parts[1] ? parts[1].trim() : '';
 
-                    const offsetY = 20; 
-                    doc.setFontSize(14);
-                    doc.rect(15, 205 + offsetY, 180, 55, 'S');
-                    doc.line(15, 215 + offsetY, 195, 215 + offsetY);
-                    doc.line(105, 205 + offsetY, 105, 260 + offsetY);
+                            const m = mainPart.match(/^(Approved|Rejected)\s*\((.+)\)$/i);
+                            if (m) {
+                                const status = m[1];
+                                const defaultComment = status.toLowerCase() === 'rejected' ? 'ไม่เห็นสมควร' : 'เห็นสมควร';
+                                return {
+                                    status: status,
+                                    name: m[2].trim(),
+                                    comment: customComment || defaultComment
+                                };
+                            }
+                            return { status: 'Approved', name: mainPart, comment: customComment || 'เห็นสมควร' };
+                        }
 
-                    // --- ฝั่งซ้าย: N2 ความเห็นผู้บังคับบัญชา ---
-                    doc.text("ความเห็นผู้บังคับบัญชา", 45, 211 + offsetY);
-                    doc.text("ความเห็น .............................................................................", 20, 225 + offsetY);
-                    doc.text("ลงชื่อ ............................................................. (รับทราบ)", 25, 233 + offsetY);
-                    doc.text("(                                              )", 32, 241 + offsetY);
-                    doc.text("วันที่ .............................................................", 26, 249 + offsetY);
+                        const n2Info = extractApproverInfo(rowData[26]); // Column AA (Index 26) -> N2
+                        const n3Info = extractApproverInfo(rowData[27]); // Column AB (Index 27) -> N3
+                        const formattedCreateDate = typeof formatDateThailand === 'function' ? formatDateThailand(createDate) : createDate;
 
-                    if (n2Info.name) {
-                        const n2Comment = n2Info.status.toLowerCase() === 'rejected' ? "ไม่เห็นสมควร" : "เห็นสมควร";
-                        doc.text(n2Comment, 60, 224 + offsetY, { align: "center" });
-                        doc.text(n2Info.name, 57, 232 + offsetY, { align: "center" });
-                        doc.text(n2Info.name, 57, 240.5 + offsetY, { align: "center" });
-                        doc.text(formattedCreateDate, 57, 248 + offsetY, { align: "center" });
-                    }
+                        const offsetY = 20; 
+                        doc.setFontSize(14);
+                        doc.rect(15, 205 + offsetY, 180, 55, 'S');
+                        doc.line(15, 215 + offsetY, 195, 215 + offsetY);
+                        doc.line(105, 205 + offsetY, 105, 260 + offsetY);
 
-                    // --- ฝั่งขวา: N3 ความเห็นผู้มีอำนาจอนุมัติระดับส่วน/ฝ่าย ---
-                    doc.text("ความเห็นผู้มีอํานาจอนุมัติระดับส่วน/ฝ่าย", 123, 211 + offsetY);
-                    doc.text("ความเห็น .............................................................................", 110, 225 + offsetY);
-                    doc.text("ลงชื่อ ............................................................. (อนุมัติ)", 115, 233 + offsetY);
-                    doc.text("(                                              )", 122, 241 + offsetY);
-                    doc.text("วันที่ .............................................................", 116, 249 + offsetY);
+                        // --- ฝั่งซ้าย: N2 ความเห็นผู้บังคับบัญชา ---
+                        doc.text("ความเห็นผู้บังคับบัญชา", 45, 211 + offsetY);
+                        doc.text("ความเห็น .............................................................................", 20, 225 + offsetY);
+                        doc.text("ลงชื่อ ............................................................. (รับทราบ)", 25, 233 + offsetY);
+                        doc.text("(                                              )", 32, 241 + offsetY);
+                        doc.text("วันที่ .............................................................", 26, 249 + offsetY);
 
-                    if (n3Info.name) {
-                        const n3Comment = n3Info.status.toLowerCase() === 'rejected' ? "ไม่อนุมัติ" : "เห็นสมควร";
-                        doc.text(n3Comment, 150, 224 + offsetY, { align: "center" });
-                        doc.text(n3Info.name, 147, 232 + offsetY, { align: "center" });
-                        doc.text(n3Info.name, 147, 240.5 + offsetY, { align: "center" });
-                        doc.text(formattedCreateDate, 147, 248 + offsetY, { align: "center" });
-                    }
+                        if (n2Info.name) {
+                            doc.text(n2Info.comment, 60, 224 + offsetY, { align: "center" });       // ความเห็นที่ N2 เลือกหรือพิมพ์เอง
+                            doc.text(n2Info.name, 57, 232 + offsetY, { align: "center" });          // ชื่อตรงช่อง ลงชื่อ
+                            doc.text(n2Info.name, 57, 240.5 + offsetY, { align: "center" });        // ชื่อในวงเล็บ ( ... )
+                            doc.text(formattedCreateDate, 57, 248 + offsetY, { align: "center" });  // วันที่
+                        }
+
+                        // --- ฝั่งขวา: N3 ความเห็นผู้มีอำนาจอนุมัติระดับส่วน/ฝ่าย ---
+                        doc.text("ความเห็นผู้มีอํานาจอนุมัติระดับส่วน/ฝ่าย", 123, 211 + offsetY);
+                        doc.text("ความเห็น .............................................................................", 110, 225 + offsetY);
+                        doc.text("ลงชื่อ ............................................................. (อนุมัติ)", 115, 233 + offsetY);
+                        doc.text("(                                              )", 122, 241 + offsetY);
+                        doc.text("วันที่ .............................................................", 116, 249 + offsetY);
+
+                        if (n3Info.name) {
+                            doc.text(n3Info.comment, 150, 224 + offsetY, { align: "center" });      // ความเห็นที่ N3 เลือกหรือพิมพ์เอง
+                            doc.text(n3Info.name, 147, 232 + offsetY, { align: "center" });         // ชื่อตรงช่อง ลงชื่อ
+                            doc.text(n3Info.name, 147, 240.5 + offsetY, { align: "center" });       // ชื่อในวงเล็บ ( ... )
+                            doc.text(formattedCreateDate, 147, 248 + offsetY, { align: "center" }); // วันที่
+                        }
+
 
                     // ส่วนลายเซ็นพนักงาน
                     doc.setFontSize(14);
@@ -2320,78 +2334,132 @@
             actionTd.appendChild(btnWrap);
         }
 
-        async function executeMultiStepApproval(rowData, step, statusAction, vipApproveAll, btnContainer) {
-            const uuid = rowData[19]; // ดึง UUID จาก Column T (Index 19)
-            const empName = rowData[1] || "พนักงาน";
+            async function executeMultiStepApproval(rowData, step, statusAction, vipApproveAll, btnContainer) {
+                const uuid = rowData[19]; // ดึง UUID จาก Column T (Index 19)
+                const empName = rowData[1] || "พนักงาน";
 
-            if (!uuid) {
-                alert("ไม่พบรหัสอ้างอิงใบลา (UUID ในคอลัมน์ T) กรุณาตรวจสอบข้อมูลในชีต");
-                return;
-            }
+                if (!uuid) {
+                    alert("ไม่พบรหัสอ้างอิงใบลา (UUID ในคอลัมน์ T) กรุณาตรวจสอบข้อมูลในชีต");
+                    return;
+                }
 
-            const actionText = statusAction === "Approved" ? "อนุมัติ" : "ไม่อนุมัติ";
-            const confirmMsg = vipApproveAll
-                ? `ยืนยันการใช้สิทธิ์ VIP อนุมัติทุกขั้นตอนให้ "${empName}" (เปลี่ยนสถานะเป็น Approved ทันที) ใช่หรือไม่?`
-                : `ยืนยันการ "${actionText}" ในลำดับขั้น [${step}] ของ "${empName}" ใช่หรือไม่?`;
+                const isApprove = statusAction === "Approved";
+                const actionText = isApprove ? "อนุมัติ" : "ไม่อนุมัติ";
+                let selectedComment = "";
 
-            if (!confirm(confirmMsg)) return;
+                // 🌟 ถ้าเป็นขั้น N2, N3 หรือ VIP (หรือกรณีไม่อนุมัติ) ให้เด้ง Popup เลือก/พิมพ์ความเห็นได้
+                if (step === "N2" || step === "N3" || vipApproveAll || !isApprove) {
+                    const presetOptions = isApprove
+                        ? ["เห็นสมควร", "เห็นสมควรอนุมัติ", "อนุมัติตามเสนอ", "รับทราบและเห็นสมควร", "อนุญาตให้ลาได้"]
+                        : ["ไม่เห็นสมควร", "งานเร่งด่วน ไม่สามารถอนุมัติได้", "เอกสารประกอบไม่ครบถ้วน", "เกินสิทธิ์การลา"];
 
-            if (btnContainer) {
-                btnContainer.querySelectorAll("button").forEach(b => b.disabled = true);
-            }
+                    const defaultComment = isApprove ? "เห็นสมควร" : "ไม่เห็นสมควร";
 
-            const gasUrl = getGasEndpointUrl();
-            const requestUrl = `${gasUrl}?action=multiStepApprove`
-                + `&uuid=${encodeURIComponent(uuid)}`
-                + `&step=${encodeURIComponent(step)}`
-                + `&status=${encodeURIComponent(statusAction)}`
-                + `&adminName=${encodeURIComponent(currentAdminUser.name)}`
-                + `&adminRole=${encodeURIComponent(currentAdminUser.role)}`
-                + `&vipApproveAll=${vipApproveAll}`;
+                    const chipsHtml = presetOptions.map(opt => `
+                        <button type="button" class="preset-comment-chip" 
+                            onclick="document.getElementById('swalCommentInput').value='${opt}'; document.querySelectorAll('.preset-comment-chip').forEach(b=>{b.style.background='#f1f5f9';b.style.color='#334155';b.style.borderColor='#cbd5e1';}); this.style.background='#e8f4fd'; this.style.color='#1d8cf8'; this.style.borderColor='#1d8cf8';"
+                            style="margin: 3px; padding: 6px 12px; border-radius: 20px; border: 1px solid #cbd5e1; background: #f1f5f9; color: #334155; font-family: 'Kanit', sans-serif; font-size: 0.85rem; cursor: pointer; transition: all 0.15s;">
+                            💬 ${opt}
+                        </button>
+                    `).join("");
 
-            try {
-                const response = await fetch(requestUrl);
-                const result = await response.json();
-
-                if (result.status === "success") {
-                    const stamp = result.stamp || `${statusAction} (${currentAdminUser.name})`;
-
-                    if (statusAction === "Rejected") {
-                        if (step === "N1") rowData[25] = stamp;
-                        if (step === "N2") rowData[26] = stamp;
-                        if (step === "N3") rowData[27] = stamp;
-                        rowData[10] = "Rejected";
-                    } else if (vipApproveAll) {
-                        if (!rowData[25]) rowData[25] = stamp;
-                        if (!rowData[26]) rowData[26] = stamp;
-                        rowData[27] = stamp;
-                        rowData[10] = "Approved";
-                    } else {
-                        if (step === "N1") {
-                            rowData[25] = stamp;      // Column Z
-                            rowData[10] = "pending";  // Column K ยังเป็น pending
-                        } else if (step === "N2") {
-                            rowData[26] = stamp;      // Column AA
-                            rowData[10] = "pending";  // Column K ยังเป็น pending
-                        } else if (step === "N3") {
-                            rowData[27] = stamp;      // Column AB
-                            rowData[10] = "Approved"; // Column K เปลี่ยนเป็น Approved!
+                    const { value: formComment, isConfirmed } = await Swal.fire({
+                        title: vipApproveAll ? `👑 VIP อนุมัติจบทุกขั้นตอน` : `ยืนยันการ${actionText} (${step})`,
+                        html: `
+                            <div style="font-family: 'Kanit', sans-serif; text-align: left;">
+                                <div style="margin-bottom: 10px; font-size: 0.95rem; color: #475569; text-align: center;">
+                                    พนักงาน: <b style="color: #1e293b;">${empName}</b>
+                                </div>
+                                <label style="font-size: 0.85rem; font-weight: 600; color: #334155;">
+                                    1. คลิกเลือกความเห็นด่วน (ไม่ต้องพิมพ์เอง):
+                                </label>
+                                <div style="margin: 8px 0 14px 0; display: flex; flex-wrap: wrap; gap: 4px;">
+                                    ${chipsHtml}
+                                </div>
+                                <label style="font-size: 0.85rem; font-weight: 600; color: #334155;">
+                                    2. หรือพิมพ์/แก้ไขความเห็นเพิ่มเติม:
+                                </label>
+                                <input id="swalCommentInput" class="swal2-input" value="${defaultComment}" placeholder="ระบุความเห็น..." 
+                                    style="margin: 8px 0 0 0; width: 100%; box-sizing: border-box; font-family: 'Kanit', sans-serif; font-size: 0.95rem; height: 42px;">
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: `<i class="fas fa-check"></i> ยืนยัน${actionText}`,
+                        cancelButtonText: "ยกเลิก",
+                        confirmButtonColor: isApprove ? "#2ecc71" : "#e74c3c",
+                        cancelButtonColor: "#94a3b8",
+                        reverseButtons: true,
+                        preConfirm: () => {
+                            return document.getElementById("swalCommentInput").value.trim() || defaultComment;
                         }
-                    }
+                    });
 
-                    if (typeof window.displayTableData === "function") {
-                        window.displayTableData();
-                    }
+                    if (!isConfirmed) return;
+                    selectedComment = formComment;
                 } else {
-                    alert("ไม่สามารถบันทึกการอนุมัติได้: " + (result.message || "เกิดข้อผิดพลาด"));
+                    // กรณี N1 กดอนุมัติปกติ
+                    if (!confirm(`ยืนยันการ "${actionText}" ในลำดับขั้น [N1] ของ "${empName}" ใช่หรือไม่?`)) return;
+                }
+
+                if (btnContainer) {
+                    btnContainer.querySelectorAll("button").forEach(b => b.disabled = true);
+                }
+
+                const gasUrl = getGasEndpointUrl();
+                const requestUrl = `${gasUrl}?action=multiStepApprove`
+                    + `&uuid=${encodeURIComponent(uuid)}`
+                    + `&step=${encodeURIComponent(step)}`
+                    + `&status=${encodeURIComponent(statusAction)}`
+                    + `&adminName=${encodeURIComponent(currentAdminUser.name)}`
+                    + `&adminRole=${encodeURIComponent(currentAdminUser.role)}`
+                    + `&vipApproveAll=${vipApproveAll}`
+                    + `&comment=${encodeURIComponent(selectedComment)}`;
+
+                try {
+                    const response = await fetch(requestUrl);
+                    const result = await response.json();
+
+                    if (result.status === "success") {
+                        const stampBase = `${statusAction} (${currentAdminUser.name})`;
+                        const stamp = result.stamp || (selectedComment ? `${stampBase} | ${selectedComment}` : stampBase);
+
+                        if (statusAction === "Rejected") {
+                            if (step === "N1") rowData[25] = stamp;
+                            if (step === "N2") rowData[26] = stamp;
+                            if (step === "N3") rowData[27] = stamp;
+                            rowData[10] = "Rejected";
+                        } else if (vipApproveAll) {
+                            if (!rowData[25]) rowData[25] = stampBase;
+                            if (!rowData[26]) rowData[26] = stamp;
+                            rowData[27] = stamp;
+                            rowData[10] = "Approved";
+                        } else {
+                            if (step === "N1") {
+                                rowData[25] = stampBase;
+                                rowData[10] = "pending";
+                            } else if (step === "N2") {
+                                rowData[26] = stamp;
+                                rowData[10] = "pending";
+                            } else if (step === "N3") {
+                                rowData[27] = stamp;
+                                rowData[10] = "Approved";
+                            }
+                        }
+
+                        if (typeof window.displayTableData === "function") {
+                            window.displayTableData();
+                        }
+                    } else {
+                        alert("ไม่สามารถบันทึกการอนุมัติได้: " + (result.message || "เกิดข้อผิดพลาด"));
+                        if (btnContainer) btnContainer.querySelectorAll("button").forEach(b => b.disabled = false);
+                    }
+                } catch (error) {
+                    console.error("Approval Error:", error);
+                    alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google Sheets กรุณาลองใหม่อีกครั้ง");
                     if (btnContainer) btnContainer.querySelectorAll("button").forEach(b => b.disabled = false);
                 }
-            } catch (error) {
-                console.error("Approval Error:", error);
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google Sheets กรุณาลองใหม่อีกครั้ง");
-                if (btnContainer) btnContainer.querySelectorAll("button").forEach(b => b.disabled = false);
             }
-        }
+
 
         function applyRoleQueueFilter() {
             if (typeof window.filterAndSortData === "function") {
