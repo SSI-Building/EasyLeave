@@ -164,7 +164,7 @@
         .step-pill.active-turn { background: #fff3cd; color: #856404; }
         .step-pill.rejected { background: #f8d7da; color: #721c24; }
 
-                /* ===== ปุ่มจัดการในการ์ด (ปรับปรุงให้จัดกึ่งกลางอัตโนมัติทุกอุปกรณ์) ===== */
+        /* ===== ปุ่มจัดการในการ์ด (ดูไฟล์ / อัปโหลดใหม่ / พิมพ์ใบลา) ===== */
         .card-actions {
             margin-top: 14px;
             padding-top: 12px;
@@ -172,22 +172,22 @@
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            justify-content: center; /* 🌟 เปลี่ยนเป็น center เพื่อจัดกึ่งกลาง 100% */
-        }
-        
-        /* เพิ่มสไตล์ให้ปุ่มแต่ละตัวขยายขนาดให้สมดุลขึ้นเล็กน้อยบนมือถือ */
-        .btn-card-action {
-            flex-grow: 1; /* ขยายขนาดปุ่มให้สมดุลเท่าๆ กันเมื่อขึ้นแถวใหม่ */
-            max-width: calc(50% - 4px); /* บังคับให้อยู่ในสัดส่วนครึ่งจอพอดีบนมือถือแคบๆ */
-            justify-content: center;
+            justify-content: flex-end;
         }
 
-        /* สำหรับหน้าจอคอมพิวเตอร์ปกติที่มีพื้นที่กว้าง */
-        @media (min-width: 480px) {
-            .btn-card-action {
-                flex-grow: 0; /* บนคอมพิวเตอร์ให้ปุ่มมีขนาดพอดีคำ ไม่ขยายจนล้น */
-                max-width: none;
-            }
+        .btn-card-action {
+            padding: 8px 12px;
+            border-radius: 9px;
+            font-size: 0.82em;
+            font-weight: 600;
+            font-family: 'Prompt', sans-serif;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: all 0.2s ease;
         }
 
 
