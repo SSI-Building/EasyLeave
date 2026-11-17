@@ -256,7 +256,7 @@
         .btn-secondary:hover { background: #d5d5d5; color: #333; }
         body.theme-dark .btn-secondary:hover { background: #555; color: #fff; }
 
-        /* ===== Loading Screen ===== */
+        /* ===== Loading Screen (ปรับปรุงให้พื้นหลังทึบสนิท 100% เพื่อความเป็นมืออาชีพ) ===== */
         #loading-screen {
             position: fixed;
             top: 0; left: 0;
@@ -265,11 +265,16 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(240, 242, 245, 0.88);
+            /* 🌟 เปลี่ยนเป็นสีทึบสนิท 100% โดยใช้ตัวแปรสีพื้นหลังของระบบอัตโนมัติ */
+            background: var(--background-color, #f0f2f5) !important; 
             z-index: 2000;
             transition: opacity 0.3s ease-in-out;
         }
-        body.theme-dark #loading-screen { background: rgba(24, 24, 24, 0.88); }
+        /* 🌟 สำหรับโหมดมืด (Theme Dark) ก็จะใช้สีพื้นหลังโหมดมืดแบบทึบสนิท 100% เช่นกัน */
+        body.theme-dark #loading-screen { 
+            background: var(--background-color, #181818) !important; 
+        }
+
         #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
         .loading-spinner {
