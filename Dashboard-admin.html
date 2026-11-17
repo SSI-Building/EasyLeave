@@ -873,7 +873,7 @@
                 return d.toLocaleDateString("th-TH", { timeZone: "Asia/Bangkok" });
             };
 
-            window.filterAndSortData = function() {
+                       window.filterAndSortData = function(keepCurrentPage = false) {
                 let currentData = [...allData];
                 
                 const rawSearchText = searchNameInput.value.trim(); 
@@ -894,7 +894,6 @@
                     currentData = currentData.filter(row => String(row[10] || '').toLowerCase() === filterStatus.toLowerCase());
                 }
 
-                // ตัวกรองสิทธิ์คิวรอการอนุมัติแอดมิน N1 / N2 / N3
                 const queueFilterEl = document.getElementById('roleQueueFilter');
                 if (queueFilterEl && queueFilterEl.value !== 'ALL') {
                     const qVal = queueFilterEl.value;
@@ -919,9 +918,17 @@
                 });
                 
                 filteredAndSortedData = currentData;
-                currentPage = 1; 
+
+                // 🌟 ถ้าเป็นการอัปเดตเรียลไทม์ ให้คงอยู่หน้าเดิม (เช่น กำลังเปิดดูหน้าที่ 2 อยู่ ก็ไม่เด้งกลับหน้า 1)
+                if (!keepCurrentPage) {
+                    currentPage = 1;
+                } else {
+                    const maxPage = Math.max(1, Math.ceil(filteredAndSortedData.length / rowsPerPage));
+                    if (currentPage > maxPage) currentPage = maxPage;
+                }
                 displayTableData();
             };
+
 
             async function fetchData(startDate, endDate, isLiveUpdate = false) {
                 // ถ้าเป็นการทำงานแอบดึงเรียลไทม์เงียบๆ ด้านหลัง ไม่ต้องแสดงจอโหลดสีขาวบังตา
@@ -938,7 +945,8 @@
                     
                     if (data.status === 'success' && data.data) {
                         allData = data.data;
-                        filterAndSortData(); 
+                        filterAndSortData(isLiveUpdate); // 🌟 ส่งค่า isLiveUpdate เข้าไปเพื่อรักษาเลขหน้าเดิม
+                    
                     } else {
                         allData = []; filteredAndSortedData = [];
                         displayTableData();
@@ -2431,41 +2439,37 @@ ${adminStateText}
         function startLiveSyncWatcher() {
             if (liveSyncIntervalId) clearInterval(liveSyncIntervalId);
 
-            // ตั้งให้แอบส่งคำสั่งไปเช็กข้อมูลเงียบๆ ทุกๆ 15 วินาที (15000 มิลลิวินาที)
+            // เช็กการเปลี่ยนแปลงทุกๆ 8 วินาที (ใส่ &_t= เพื่อป้องกันเบราว์เซอร์จำค่าเก่า)
             liveSyncIntervalId = setInterval(async () => {
                 const gasUrl = getGasEndpointUrl();
-                if (!gasUrl || !webAppUrl) return;
+                if (!gasUrl) return;
 
                 try {
-                    const checkUrl = `${gasUrl}?action=checkFingerprint`;
-                    const res = await fetch(checkUrl);
-                    const currentFingerprint = await res.text(); // อ่านค่าเป็น String เพื่อนำมาเปรียบเทียบ
+                    const checkUrl = `${gasUrl}?action=checkFingerprint&_t=${Date.now()}`;
+                    const res = await fetch(checkUrl, { cache: "no-store" });
+                    const currentFingerprint = await res.text();
 
-                    // หากเป็นครั้งแรกที่รัน ให้เก็บค่าลายนิ้วมือปัจจุบันไว้ก่อน
                     if (!lastSheetFingerprint) {
                         lastSheetFingerprint = currentFingerprint;
                         return;
                     }
 
-                    // 💡 ถ้าพบลายนิ้วมือเปลี่ยนไป (มีพนักงานส่งใบลาเพิ่ม หรือมีคนกดอนุมัติแถวใหม่ใน Sheets)
+                    // ทันทีที่ N1, N2, N3 กดอนุมัติ หรือพนักงานอัปโหลดเอกสารแนบใหม่ ค่า Hash จะเปลี่ยนทันที!
                     if (currentFingerprint !== lastSheetFingerprint) {
-                        lastSheetFingerprint = currentFingerprint; // บันทึกค่าใหม่แทนที่
+                        lastSheetFingerprint = currentFingerprint;
 
                         const startDateInput = document.getElementById('startDate');
                         const endDateInput = document.getElementById('endDate');
-                        
+
                         if (startDateInput && endDateInput && typeof window.fetchData === "function") {
-                            // สั่งเรียกดึงข้อมูลล่าสุดจาก Sheets มาวาดตารางและกราฟแผงใหม่ทันที (แบบไม่แสดงจอโหลดสีขาวให้ขัดตา)
                             await window.fetchData(startDateInput.value, endDateInput.value, true);
-                            
-                            // ส่งแจ้งเตือนเล็กๆ สวยๆ ใน Execution Log ของเบราว์เซอร์
-                            console.log("🔄 [Live Sync] ข้อมูลใน Google Sheets มีการเปลี่ยนแปลง ระบบได้ทำการอัปเดตตารางเรียลไทม์แล้ว!");
+                            console.log("🔄 [Live Sync] อัปเดตสถานะการอนุมัติและเอกสารแนบแบบเรียลไทม์เรียบร้อย!");
                         }
                     }
                 } catch (err) {
-                    console.warn("Real-time Live Sync connection lost, retrying next turn:", err);
+                    console.warn("Live Sync retry:", err);
                 }
-            }, 15000); 
+            }, 8000); // เช็กทุก 8 วินาที
         }
 
         window.addEventListener("DOMContentLoaded", () => {
