@@ -1072,69 +1072,119 @@
             });
         }
 
-                async function printRow(rowData, btnEl) {
-            if (btnEl) btnEl.disabled = true;
-            showLoading("กำลังสร้างไฟล์ใบลา PDF...");
+        // ตรวจสอบโหมดดาวน์โหลด PDF อัตโนมัติเมื่อเด้งออกมาที่ Chrome / Safari (ไม่ผ่าน Google Drive)
+        async function checkAutoDownloadMode() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get("downloadPdf") !== "1") return false;
+
+            applySavedTheme();
+            const empId = params.get("empId") || "";
+            const uuid = params.get("uuid") || "";
+            const createTime = params.get("ct") || "";
+            const dataContainer = document.getElementById("dataContainer");
+
+            const btnContainer = document.querySelector(".buttons-container");
+            if (btnContainer) btnContainer.style.display = "none";
+
+            showLoading("กำลังสร้างและดาวน์โหลดไฟล์ใบลา PDF...");
             try {
+                const resp = await fetch(`${HISTORY_WEB_APP_URL}?empId=${encodeURIComponent(empId)}`);
+                const data = await resp.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    throw new Error("ไม่พบข้อมูลใบลาสำหรับดาวน์โหลด");
+                }
+
+                // ค้นหารายการใบลาจาก UUID (คอลัมน์ T) หรือเวลาที่ยื่น
+                const targetRow = data.find(r => uuid && String(r[19] || "").trim() === uuid)
+                               || data.find(r => createTime && String(r[11] || "") === createTime)
+                               || data[0];
+
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-                await drawSingleLeavePage(doc, rowData);
+                await drawSingleLeavePage(doc, targetRow);
 
-                const safeName = String(rowData[1] || 'พนักงาน').replace(/\s+/g, '_');
+                const safeName = String(targetRow[1] || "พนักงาน").replace(/\s+/g, "_");
                 const fileName = `ใบลา_${safeName}.pdf`;
 
-                // ตรวจสอบว่าเปิดอยู่ในแอป LINE บนมือถือหรือไม่
-                const isInLineApp = (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) 
-                                    || /Line\//i.test(navigator.userAgent);
+                hideLoading();
+                doc.save(fileName);
 
-                if (isInLineApp) {
-                    // กรณีเปิดในแอป LINE: ส่งไปสร้างลิงก์ดาวน์โหลดตรง แล้วสั่งเปิดผ่าน External Browser (Safari/Chrome) เพื่อโหลดลงเครื่องทันที
-                    showLoading("กำลังเตรียมลิงก์ดาวน์โหลด PDF สำหรับมือถือ...");
-                    const pdfDataUri = doc.output("datauristring");
-
-                    const response = await fetch(HISTORY_WEB_APP_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify({
-                            action: "createPdfDownloadLink",
-                            fileName: fileName,
-                            pdfBase64: pdfDataUri
-                        })
-                    });
-
-                    const resJson = await response.json();
-                    hideLoading();
-
-                    if (resJson.status === "success" && resJson.downloadUrl) {
-                        if (typeof liff !== "undefined" && liff.openWindow) {
-                            // เด้งออกเบราว์เซอร์หลักของมือถือเพื่อดาวน์โหลดไฟล์ PDF ทันที
-                            liff.openWindow({ url: resJson.downloadUrl, external: true });
-                        } else {
-                            window.location.href = resJson.downloadUrl;
-                        }
-                    } else {
-                        throw new Error(resJson.message || "ไม่สามารถสร้างลิงก์ดาวน์โหลด PDF ได้");
-                    }
-                } else {
-                    // กรณีเปิดบนคอมพิวเตอร์ หรือ Chrome/Safari ปกติ: ดาวน์โหลดไฟล์ PDF ลงเครื่องทันที
-                    hideLoading();
-                    doc.save(fileName);
-                }
+                // แสดงปุ่มสำรองเผื่อเบราว์เซอร์ iOS Safari รอให้ผู้ใช้แตะยืนยันดาวน์โหลด
+                dataContainer.innerHTML = `
+                    <div class="status-message" style="padding: 30px 20px;">
+                        <div style="font-size: 2.4em; margin-bottom: 10px;">✅</div>
+                        <div style="font-weight: 600; color: var(--text-color-dark); margin-bottom: 8px;">
+                            เตรียมไฟล์ ${fileName} เรียบร้อยแล้ว
+                        </div>
+                        <div style="font-size: 0.9em; margin-bottom: 18px;">
+                            ระบบกำลังดาวน์โหลดไฟล์ลงเครื่อง หากไฟล์ยังไม่เริ่มโหลดให้แตะปุ่มด้านล่างครับ
+                        </div>
+                        <button type="button" id="manualSavePdfBtn" class="btn" style="margin: 0 auto;">
+                            <i class="fas fa-download"></i> แตะเพื่อดาวน์โหลด PDF
+                        </button>
+                    </div>
+                `;
+                document.getElementById("manualSavePdfBtn").onclick = () => doc.save(fileName);
             } catch (err) {
                 hideLoading();
-                console.error("PDF Error:", err);
-                Swal.fire({
-                    icon: "error",
-                    title: "ดาวน์โหลด PDF ไม่สำเร็จ",
-                    text: err.message || "กรุณาลองใหม่อีกครั้งครับ"
-                });
-            } finally {
-                if (btnEl) btnEl.disabled = false;
+                console.error(err);
+                dataContainer.innerHTML = `<div class="status-message error">❌ ดาวน์โหลดไม่สำเร็จ: ${err.message}</div>`;
             }
+            return true;
         }
 
+                  async function printRow(rowData, btnEl) {
+                      const isInLineApp = (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) 
+                                          || /Line\//i.test(navigator.userAgent);
 
-        fetchHistory();
+                      // กรณีเปิดในแอป LINE: ส่งออกไปเปิดหน้าเว็บของเราเองบน Chrome/Safari เพื่อโหลดลงเครื่องตรงๆ
+                      if (isInLineApp) {
+                          const baseUrl = window.location.href.split("?")[0].split("#")[0];
+                          const downloadPageUrl = `${baseUrl}?downloadPdf=1`
+                              + `&empId=${encodeURIComponent(rowData[0] || "")}`
+                              + `&uuid=${encodeURIComponent(rowData[19] || "")}`
+                              + `&ct=${encodeURIComponent(rowData[11] || "")}`;
+
+                          if (typeof liff !== "undefined" && liff.openWindow) {
+                              liff.openWindow({ url: downloadPageUrl, external: true });
+                          } else {
+                              window.open(downloadPageUrl, "_blank");
+                          }
+                          return;
+                      }
+
+                      // กรณีเปิดบนคอมพิวเตอร์ หรือ Chrome/Safari ปกติ: ดาวน์โหลดไฟล์ PDF ลงเครื่องทันที
+                      if (btnEl) btnEl.disabled = true;
+                      showLoading("กำลังสร้างไฟล์ใบลา PDF...");
+                      try {
+                          const { jsPDF } = window.jspdf;
+                          const doc = new jsPDF();
+                          await drawSingleLeavePage(doc, rowData);
+
+                          const safeName = String(rowData[1] || "พนักงาน").replace(/\s+/g, "_");
+                          hideLoading();
+                          doc.save(`ใบลา_${safeName}.pdf`);
+                      } catch (err) {
+                          hideLoading();
+                          console.error("PDF Error:", err);
+                          Swal.fire({
+                              icon: "error",
+                              title: "ดาวน์โหลด PDF ไม่สำเร็จ",
+                              text: err.message || "กรุณาลองใหม่อีกครั้งครับ"
+                          });
+                      } finally {
+                          if (btnEl) btnEl.disabled = false;
+                      }
+                  }
+
+                  // เริ่มต้นทำงาน: ถ้าเป็นโหมดโหลด PDF ให้โหลดทันที ถ้าไม่ใช่ให้แสดงประวัติตามปกติ
+                  checkAutoDownloadMode().then(isAutoDownload => {
+                      if (!isAutoDownload) {
+                          fetchHistory();
+                      }
+                  });
+
 
         // ฟังก์ชันดึงรูปเอกสารแนบมาโชว์ใน Popup ทันที (ไม่ต้องเด้งไปล็อกอิน Google Drive)
         async function previewAttachedDocument(docUrl) {
