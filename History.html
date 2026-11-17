@@ -1092,67 +1092,106 @@
             });
         }
 
-        // ตรวจสอบโหมดดาวน์โหลด PDF อัตโนมัติเมื่อเด้งออกมาที่ Chrome / Safari (ไม่ผ่าน Google Drive)
-        async function checkAutoDownloadMode() {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get("downloadPdf") !== "1") return false;
+                // รองรับทั้งโหมดดาวน์โหลด PDF (downloadPdf=1) และโหมดส่งไฟล์ PDF แท้เข้าแชท (sharePdf=1) บน Chrome/Safari
+                    async function checkAutoDownloadMode() {
+                        const params = new URLSearchParams(window.location.search);
+                        const isDownload = params.get("downloadPdf") === "1";
+                        const isShare = params.get("sharePdf") === "1";
+                        if (!isDownload && !isShare) return false;
 
-            applySavedTheme();
-            const empId = params.get("empId") || "";
-            const uuid = params.get("uuid") || "";
-            const createTime = params.get("ct") || "";
-            const dataContainer = document.getElementById("dataContainer");
+                        applySavedTheme();
+                        const empId = params.get("empId") || "";
+                        const uuid = params.get("uuid") || "";
+                        const createTime = params.get("ct") || "";
+                        const dataContainer = document.getElementById("dataContainer");
 
-            const btnContainer = document.querySelector(".buttons-container");
-            if (btnContainer) btnContainer.style.display = "none";
+                        const btnContainer = document.querySelector(".buttons-container");
+                        if (btnContainer) btnContainer.style.display = "none";
 
-            showLoading("กำลังสร้างและดาวน์โหลดไฟล์ใบลา PDF...");
-            try {
-                const resp = await fetch(`${HISTORY_WEB_APP_URL}?empId=${encodeURIComponent(empId)}`);
-                const data = await resp.json();
+                        showLoading(isShare ? "กำลังเตรียมไฟล์ PDF สำหรับส่งต่อ..." : "กำลังสร้างและดาวน์โหลดไฟล์ใบลา PDF...");
+                        try {
+                            const resp = await fetch(`${HISTORY_WEB_APP_URL}?empId=${encodeURIComponent(empId)}`);
+                            const data = await resp.json();
 
-                if (!Array.isArray(data) || data.length === 0) {
-                    throw new Error("ไม่พบข้อมูลใบลาสำหรับดาวน์โหลด");
-                }
+                            if (!Array.isArray(data) || data.length === 0) {
+                                throw new Error("ไม่พบข้อมูลใบลา");
+                            }
 
-                // ค้นหารายการใบลาจาก UUID (คอลัมน์ T) หรือเวลาที่ยื่น
-                const targetRow = data.find(r => uuid && String(r[19] || "").trim() === uuid)
-                               || data.find(r => createTime && String(r[11] || "") === createTime)
-                               || data[0];
+                            const targetRow = data.find(r => uuid && String(r[19] || "").trim() === uuid)
+                                          || data.find(r => createTime && String(r[11] || "") === createTime)
+                                          || data[0];
 
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                await drawSingleLeavePage(doc, targetRow);
+                            const { jsPDF } = window.jspdf;
+                            const doc = new jsPDF();
+                            await drawSingleLeavePage(doc, targetRow);
 
-                const safeName = String(targetRow[1] || "พนักงาน").replace(/\s+/g, "_");
-                const fileName = `ใบลา_${safeName}.pdf`;
+                            const safeName = String(targetRow[1] || "พนักงาน").replace(/\s+/g, "_");
+                            const fileName = `ใบลา_${safeName}.pdf`;
+                            hideLoading();
 
-                hideLoading();
-                doc.save(fileName);
+                            // กรณีโหมดส่งไฟล์ .pdf แท้เข้าแชท LINE
+                            if (isShare) {
+                                const pdfBlob = doc.output("blob");
+                                const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
 
-                // แสดงปุ่มสำรองเผื่อเบราว์เซอร์ iOS Safari รอให้ผู้ใช้แตะยืนยันดาวน์โหลด
-                dataContainer.innerHTML = `
-                    <div class="status-message" style="padding: 30px 20px;">
-                        <div style="font-size: 2.4em; margin-bottom: 10px;">✅</div>
-                        <div style="font-weight: 600; color: var(--text-color-dark); margin-bottom: 8px;">
-                            เตรียมไฟล์ ${fileName} เรียบร้อยแล้ว
-                        </div>
-                        <div style="font-size: 0.9em; margin-bottom: 18px;">
-                            ระบบกำลังดาวน์โหลดไฟล์ลงเครื่อง หากไฟล์ยังไม่เริ่มโหลดให้แตะปุ่มด้านล่างครับ
-                        </div>
-                        <button type="button" id="manualSavePdfBtn" class="btn" style="margin: 0 auto;">
-                            <i class="fas fa-download"></i> แตะเพื่อดาวน์โหลด PDF
-                        </button>
-                    </div>
-                `;
-                document.getElementById("manualSavePdfBtn").onclick = () => doc.save(fileName);
-            } catch (err) {
-                hideLoading();
-                console.error(err);
-                dataContainer.innerHTML = `<div class="status-message error">❌ ดาวน์โหลดไม่สำเร็จ: ${err.message}</div>`;
-            }
-            return true;
-        }
+                                const triggerNativeShare = async () => {
+                                    if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+                                        try {
+                                            await navigator.share({
+                                                files: [pdfFile],
+                                                title: fileName
+                                            });
+                                        } catch (e) {
+                                            if (e.name !== "AbortError") doc.save(fileName);
+                                        }
+                                    } else {
+                                        doc.save(fileName);
+                                    }
+                                };
+
+                                dataContainer.innerHTML = `
+                                    <div class="status-message" style="padding: 30px 20px;">
+                                        <div style="font-size: 2.4em; margin-bottom: 10px;">📄</div>
+                                        <div style="font-weight: 600; color: var(--text-color-dark); margin-bottom: 8px;">
+                                            เตรียมไฟล์ ${fileName} พร้อมส่งแล้ว
+                                        </div>
+                                        <div style="font-size: 0.9em; margin-bottom: 18px;">
+                                            แตะปุ่มด้านล่าง แล้วเลือกแอป <strong>LINE</strong> เพื่อส่งไฟล์ .pdf ให้ผู้รับได้เลยครับ
+                                        </div>
+                                        <button type="button" id="triggerSharePdfBtn" class="btn" style="margin: 0 auto; background: #06C755;">
+                                            <i class="fab fa-line" style="font-size:1.2em;"></i> เลือกผู้รับใน LINE
+                                        </button>
+                                    </div>
+                                `;
+                                document.getElementById("triggerSharePdfBtn").onclick = triggerNativeShare;
+                                return true;
+                            }
+
+                            // กรณีโหมดดาวน์โหลด PDF ปกติ
+                            doc.save(fileName);
+                            dataContainer.innerHTML = `
+                                <div class="status-message" style="padding: 30px 20px;">
+                                    <div style="font-size: 2.4em; margin-bottom: 10px;">✅</div>
+                                    <div style="font-weight: 600; color: var(--text-color-dark); margin-bottom: 8px;">
+                                        เตรียมไฟล์ ${fileName} เรียบร้อยแล้ว
+                                    </div>
+                                    <div style="font-size: 0.9em; margin-bottom: 18px;">
+                                        ระบบกำลังดาวน์โหลดไฟล์ลงเครื่อง หากไฟล์ยังไม่เริ่มโหลดให้แตะปุ่มด้านล่างครับ
+                                    </div>
+                                    <button type="button" id="manualSavePdfBtn" class="btn" style="margin: 0 auto;">
+                                        <i class="fas fa-download"></i> แตะเพื่อดาวน์โหลด PDF
+                                    </button>
+                                </div>
+                            `;
+                            document.getElementById("manualSavePdfBtn").onclick = () => doc.save(fileName);
+                        } catch (err) {
+                            hideLoading();
+                            console.error(err);
+                            dataContainer.innerHTML = `<div class="status-message error">❌ ดำเนินการไม่สำเร็จ: ${err.message}</div>`;
+                        }
+                        return true;
+                    }
+
 
                   async function printRow(rowData, btnEl) {
                       const isInLineApp = (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) 
@@ -1266,79 +1305,73 @@
             }
         }
 
-        // โหมดที่ 1: สร้างไฟล์ .pdf และเปิดเมนูเลือกแอป LINE เพื่อส่งไฟล์เข้าแชทโดยตรง
-        async function shareRawPdfFile(rowData, btnEl) {
-            if (btnEl) btnEl.disabled = true;
-            showLoading("กำลังเตรียมไฟล์ PDF สำหรับส่งต่อ...");
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                await drawSingleLeavePage(doc, rowData);
+                // โหมดที่ 1: ส่งเป็นไฟล์ .pdf แท้ๆ เข้าแชท LINE
+                  async function shareRawPdfFile(rowData, btnEl) {
+                      const isInLineApp = (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) 
+                                          || /Line\//i.test(navigator.userAgent);
 
-                const safeName = String(rowData[1] || "พนักงาน").replace(/\s+/g, "_");
-                const fileName = `ใบลา_${safeName}.pdf`;
-                const pdfBlob = doc.output("blob");
-                const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
+                      // ถ้าเปิดอยู่ในแอป LINE: สั่งเด้งออก Safari/Chrome ในโหมด sharePdf=1 เพื่อให้แนบไฟล์ .pdf แท้ได้ทันที
+                      if (isInLineApp) {
+                          const baseUrl = window.location.href.split("?")[0].split("#")[0];
+                          const sharePageUrl = `${baseUrl}?sharePdf=1`
+                              + `&empId=${encodeURIComponent(rowData[0] || "")}`
+                              + `&uuid=${encodeURIComponent(rowData[19] || "")}`
+                              + `&ct=${encodeURIComponent(rowData[11] || "")}`;
 
-                hideLoading();
+                          if (typeof liff !== "undefined" && liff.openWindow) {
+                              liff.openWindow({ url: sharePageUrl, external: true });
+                          } else {
+                              window.open(sharePageUrl, "_blank");
+                          }
+                          return;
+                      }
 
-                // ตรวจสอบว่าเบราว์เซอร์รองรับการแชร์ไฟล์โดยตรงหรือไม่ (รองรับบน iPhone และ Chrome/Safari มือถือ)
-                if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-                    // ใช้ปุ่มแตะยืนยันอีกครั้งเพื่อป้องกันเบราว์เซอร์บล็อก User Gesture หลังรอโหลดรูป
-                    const readyConfirm = await Swal.fire({
-                        icon: "success",
-                        title: "เตรียมไฟล์ PDF พร้อมแล้ว",
-                        text: "แตะปุ่มด้านล่าง แล้วเลือกแอป LINE เพื่อส่งไฟล์ PDF ให้ผู้รับได้เลยครับ",
-                        confirmButtonText: '<i class="fas fa-share-alt"></i> เลือกผู้รับใน LINE',
-                        showCancelButton: true,
-                        cancelButtonText: "ยกเลิก",
-                        confirmButtonColor: "#06C755"
-                    });
+                      // กรณีเปิดอยู่บน Safari / Chrome มือถืออยู่แล้ว: สร้างไฟล์และเปิดเมนูแชร์ทันที
+                      if (btnEl) btnEl.disabled = true;
+                      showLoading("กำลังเตรียมไฟล์ PDF สำหรับส่งต่อ...");
+                      try {
+                          const { jsPDF } = window.jspdf;
+                          const doc = new jsPDF();
+                          await drawSingleLeavePage(doc, rowData);
 
-                    if (readyConfirm.isConfirmed) {
-                        await navigator.share({
-                            files: [pdfFile],
-                            title: fileName
-                        });
-                    }
-                } else {
-                    // กรณีเปิดใน LINE Android บางรุ่นที่บล็อก Web Share ไฟล์ -> สลับไปเปิด Chrome เพื่อแชร์ หรือใช้การ์ด LINE แทน
-                    const baseUrl = window.location.href.split("?")[0].split("#")[0];
-                    const extUrl = `${baseUrl}?downloadPdf=1&empId=${encodeURIComponent(rowData[0] || "")}&uuid=${encodeURIComponent(rowData[19] || "")}&ct=${encodeURIComponent(rowData[11] || "")}`;
-                    
-                    const fallback = await Swal.fire({
-                        icon: "info",
-                        title: "เบราว์เซอร์ใน LINE รุ่นนี้จำกัดการแนบไฟล์ตรง",
-                        text: "ต้องการส่งเป็น 'การ์ดใบลาพร้อมปุ่มโหลด PDF' เข้าแชท LINE ทันที หรือเปิดเบราว์เซอร์หลักเพื่อโหลดไฟล์ครับ?",
-                        showCancelButton: true,
-                        showDenyButton: true,
-                        confirmButtonText: "ส่งการ์ดใบลาใน LINE",
-                        denyButtonText: "เปิดเบราว์เซอร์โหลด PDF",
-                        cancelButtonText: "ยกเลิก",
-                        confirmButtonColor: "#06C755",
-                        denyButtonColor: "#1994b6"
-                    });
+                          const safeName = String(rowData[1] || "พนักงาน").replace(/\s+/g, "_");
+                          const fileName = `ใบลา_${safeName}.pdf`;
+                          const pdfBlob = doc.output("blob");
+                          const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
 
-                    if (fallback.isConfirmed) {
-                        await shareLineFlexCard(rowData);
-                    } else if (fallback.isDenied) {
-                        if (typeof liff !== "undefined" && liff.openWindow) {
-                            liff.openWindow({ url: extUrl, external: true });
-                        } else {
-                            window.open(extUrl, "_blank");
-                        }
-                    }
-                }
-            } catch (err) {
-                hideLoading();
-                if (err.name !== "AbortError") {
-                    console.error("Share File Error:", err);
-                    Swal.fire({ icon: "error", title: "แชร์ไฟล์ไม่สำเร็จ", text: err.message });
-                }
-            } finally {
-                if (btnEl) btnEl.disabled = false;
-            }
-        }
+                          hideLoading();
+
+                          if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+                              const readyConfirm = await Swal.fire({
+                                  icon: "success",
+                                  title: "เตรียมไฟล์ PDF พร้อมแล้ว",
+                                  text: "แตะปุ่มด้านล่าง แล้วเลือกแอป LINE เพื่อส่งไฟล์ PDF ให้ผู้รับได้เลยครับ",
+                                  confirmButtonText: '<i class="fab fa-line"></i> เลือกผู้รับใน LINE',
+                                  showCancelButton: true,
+                                  cancelButtonText: "ยกเลิก",
+                                  confirmButtonColor: "#06C755"
+                              });
+
+                              if (readyConfirm.isConfirmed) {
+                                  await navigator.share({
+                                      files: [pdfFile],
+                                      title: fileName
+                                  });
+                              }
+                          } else {
+                              doc.save(fileName);
+                          }
+                      } catch (err) {
+                          hideLoading();
+                          if (err.name !== "AbortError") {
+                              console.error("Share File Error:", err);
+                              Swal.fire({ icon: "error", title: "แชร์ไฟล์ไม่สำเร็จ", text: err.message });
+                          }
+                      } finally {
+                          if (btnEl) btnEl.disabled = false;
+                      }
+                  }
+
 
         // โหมดที่ 2: เปิดหน้าเลือกเพื่อน/กลุ่มใน LINE (shareTargetPicker) ส่งการ์ดใบลาพร้อมลิงก์โหลด PDF ทันที
         async function shareLineFlexCard(rowData) {
