@@ -211,7 +211,7 @@
         }
         .btn-print-pdf:hover { opacity: 0.92; transform: translateY(-1px); }
 
-         .btn-share-line {
+        .btn-share-line {
             background-color: #06C755;
             color: #ffffff;
             box-shadow: 0 3px 8px rgba(6, 199, 85, 0.25);
@@ -298,6 +298,301 @@
             border: 1px solid var(--border-color);
         }
         .status-message.error { color: #d32f2f; }
+
+        /* =========================================================================
+           ✨ PREMIUM CORPORATE SHARE MODAL UI/UX
+           ========================================================================= */
+        .swal2-container.corp-share-backdrop {
+            background: rgba(15, 23, 42, 0.55) !important;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .corp-share-popup {
+            background: #FFFFFF !important;
+            border-radius: 24px !important;
+            box-shadow: 0 24px 48px -12px rgba(24, 49, 83, 0.18), 0 4px 16px -2px rgba(24, 49, 83, 0.08) !important;
+            max-width: 560px !important;
+            width: 93% !important;
+            padding: 30px 26px 26px !important;
+            box-sizing: border-box !important;
+            position: relative !important;
+            font-family: 'Prompt', sans-serif !important;
+            animation: corpModalScaleIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes corpModalScaleIn {
+            0% { opacity: 0; transform: scale(0.95) translateY(8px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .corp-share-popup .swal2-html-container {
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+        }
+
+        /* ปุ่มปิด (X) มุมขวาบน */
+        .corp-modal-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #F8FAFC;
+            color: #64748B;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        .corp-modal-close-btn:hover {
+            background: #E2E8F0;
+            color: #183153;
+            transform: rotate(90deg);
+        }
+        .corp-modal-close-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* ส่วนหัว Header & Icon */
+        .corp-modal-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 22px;
+        }
+        .corp-header-icon-badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #EBF5FF;
+            border: 1px solid #DBEAFE;
+            color: #1D4ED8;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            box-shadow: 0 6px 16px rgba(29, 78, 216, 0.1);
+        }
+        .corp-modal-title {
+            margin: 0 0 8px 0;
+            font-size: 1.38rem;
+            font-weight: 700;
+            color: #183153;
+            line-height: 1.35;
+        }
+        .corp-modal-desc {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 400;
+            color: #64748B;
+            line-height: 1.6;
+            max-width: 440px;
+        }
+
+        /* การจัดวางปุ่ม Action Cards (Desktop 2 คอลัมน์ / Mobile 1 คอลัมน์) */
+        .corp-action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .corp-action-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-radius: 16px;
+            cursor: pointer;
+            text-align: left;
+            font-family: 'Prompt', sans-serif;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background-color 0.22s ease;
+            box-sizing: border-box;
+            width: 100%;
+            outline: none;
+        }
+
+        .corp-card-left {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            min-width: 0;
+        }
+
+        .corp-card-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .corp-card-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .corp-card-title {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #183153;
+            margin-bottom: 2px;
+            line-height: 1.3;
+        }
+
+        .corp-card-sub {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #64748B;
+            line-height: 1.35;
+        }
+
+        .corp-card-arrow {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+            margin-left: 8px;
+            transition: transform 0.22s ease, background-color 0.22s ease;
+        }
+
+        /* 5. ปุ่มส่งออก PDF (PDF Action Card) */
+        .corp-card-pdf {
+            background-color: #F0F7FF;
+            border: 1.5px solid #BFDBFE;
+        }
+        .corp-card-pdf .corp-card-icon {
+            background-color: #DBEAFE;
+            color: #1D4ED8;
+        }
+        .corp-card-pdf .corp-card-arrow {
+            background-color: rgba(29, 78, 216, 0.08);
+            color: #1D4ED8;
+        }
+        .corp-card-pdf:hover {
+            background-color: #E6F2FF;
+            border-color: #93C5FD;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -5px rgba(29, 78, 216, 0.15);
+        }
+        .corp-card-pdf:hover .corp-card-arrow {
+            transform: translateX(3px);
+            background-color: #1D4ED8;
+            color: #FFFFFF;
+        }
+        .corp-card-pdf:active {
+            transform: scale(0.98);
+        }
+
+        /* 6. ปุ่มส่งผ่าน LINE (LINE Action Card) */
+        .corp-card-line {
+            background-color: #F0FDF4;
+            border: 1.5px solid #BBF7D0;
+        }
+        .corp-card-line .corp-card-icon {
+            background-color: #DCFCE7;
+            color: #06B65B;
+        }
+        .corp-card-line .corp-card-arrow {
+            background-color: rgba(6, 182, 91, 0.1);
+            color: #06B65B;
+        }
+        .corp-card-line:hover {
+            background-color: #E6FAED;
+            border-color: #86EFAC;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -5px rgba(6, 182, 91, 0.16);
+        }
+        .corp-card-line:hover .corp-card-arrow {
+            transform: translateX(3px);
+            background-color: #06B65B;
+            color: #FFFFFF;
+        }
+        .corp-card-line:active {
+            transform: scale(0.98);
+        }
+
+        /* 7. ปุ่มยกเลิก (Cancel Button - Pill Shape) */
+        .corp-modal-footer {
+            display: flex;
+            justify-content: center;
+        }
+        .corp-cancel-pill {
+            background-color: #FFFFFF;
+            border: 1.5px solid #CBD5E1;
+            color: #475569;
+            border-radius: 999px;
+            padding: 10px 28px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            font-family: 'Prompt', sans-serif;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .corp-cancel-pill:hover {
+            background-color: #F8FAFC;
+            border-color: #94A3B8;
+            color: #1E293B;
+        }
+        .corp-cancel-pill:active {
+            transform: scale(0.97);
+        }
+
+        /* Responsive สำหรับหน้าจอมือถือ */
+        @media (max-width: 540px) {
+            .corp-share-popup {
+                width: 93% !important;
+                padding: 26px 18px 22px !important;
+                border-radius: 22px !important;
+            }
+            .corp-action-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .corp-modal-title {
+                font-size: 1.25rem;
+            }
+            .corp-modal-desc {
+                font-size: 14.5px;
+            }
+            .corp-cancel-pill {
+                width: 100%;
+                max-width: 220px;
+            }
+        }
+
+        /* รองรับ prefers-reduced-motion */
+        @media (prefers-reduced-motion: reduce) {
+            .corp-share-popup,
+            .corp-action-card,
+            .corp-card-arrow,
+            .corp-modal-close-btn,
+            .corp-cancel-pill {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -500,7 +795,6 @@
                         actionsDiv.appendChild(viewDocBtn);
                     }
 
-
                     // 2. ปุ่มอัปโหลดเอกสารแนบใหม่ (เผื่อรูปเดิมไม่ชัด หรือลืมแนบ)
                     const reuploadBtn = document.createElement('button');
                     reuploadBtn.type = 'button';
@@ -526,7 +820,6 @@
                     shareBtn.innerHTML = `<i class="fab fa-line" style="font-size:1.1em;"></i> ส่งต่อ LINE`;
                     shareBtn.onclick = () => shareLeavePdf(row, shareBtn);
                     actionsDiv.appendChild(shareBtn);
-
 
                     card.appendChild(actionsDiv);
                     dataContainer.appendChild(card);
@@ -635,7 +928,7 @@
                         text: "ระบบบันทึกไฟล์เอกสารแนบใหม่เรียบร้อยแล้วครับ",
                         confirmButtonColor: "#36a761"
                     });
-                    fetchHistory(); // โหลดรายการใหม่เพื่อแสดงลิงก์ไฟล์ล่าสุดทันที
+                    fetchHistory();
                 } else {
                     throw new Error(result.message || "เกิดข้อผิดพลาดในการบันทึกไฟล์");
                 }
@@ -1092,158 +1385,156 @@
             });
         }
 
-                // รองรับทั้งโหมดดาวน์โหลด PDF (downloadPdf=1) และโหมดส่งไฟล์ PDF แท้เข้าแชท (sharePdf=1) บน Chrome/Safari
-                    async function checkAutoDownloadMode() {
-                        const params = new URLSearchParams(window.location.search);
-                        const isDownload = params.get("downloadPdf") === "1";
-                        const isShare = params.get("sharePdf") === "1";
-                        if (!isDownload && !isShare) return false;
+        // รองรับทั้งโหมดดาวน์โหลด PDF (downloadPdf=1) และโหมดส่งไฟล์ PDF แท้เข้าแชท (sharePdf=1) บน Chrome/Safari
+        async function checkAutoDownloadMode() {
+            const params = new URLSearchParams(window.location.search);
+            const isDownload = params.get("downloadPdf") === "1";
+            const isShare = params.get("sharePdf") === "1";
+            if (!isDownload && !isShare) return false;
 
-                        applySavedTheme();
-                        const empId = params.get("empId") || "";
-                        const uuid = params.get("uuid") || "";
-                        const createTime = params.get("ct") || "";
-                        const dataContainer = document.getElementById("dataContainer");
+            applySavedTheme();
+            const empId = params.get("empId") || "";
+            const uuid = params.get("uuid") || "";
+            const createTime = params.get("ct") || "";
+            const dataContainer = document.getElementById("dataContainer");
 
-                        const btnContainer = document.querySelector(".buttons-container");
-                        if (btnContainer) btnContainer.style.display = "none";
+            const btnContainer = document.querySelector(".buttons-container");
+            if (btnContainer) btnContainer.style.display = "none";
 
-                        showLoading(isShare ? "กำลังเตรียมไฟล์ PDF สำหรับส่งต่อ..." : "กำลังสร้างและดาวน์โหลดไฟล์ใบลา PDF...");
-                        try {
-                            const resp = await fetch(`${HISTORY_WEB_APP_URL}?empId=${encodeURIComponent(empId)}`);
-                            const data = await resp.json();
+            showLoading(isShare ? "กำลังเตรียมไฟล์ PDF สำหรับส่งต่อ..." : "กำลังสร้างและดาวน์โหลดไฟล์ใบลา PDF...");
+            try {
+                const resp = await fetch(`${HISTORY_WEB_APP_URL}?empId=${encodeURIComponent(empId)}`);
+                const data = await resp.json();
 
-                            if (!Array.isArray(data) || data.length === 0) {
-                                throw new Error("ไม่พบข้อมูลใบลา");
+                if (!Array.isArray(data) || data.length === 0) {
+                    throw new Error("ไม่พบข้อมูลใบลา");
+                }
+
+                const targetRow = data.find(r => uuid && String(r[19] || "").trim() === uuid)
+                              || data.find(r => createTime && String(r[11] || "") === createTime)
+                              || data[0];
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                await drawSingleLeavePage(doc, targetRow);
+
+                const safeName = String(targetRow[1] || "พนักงาน").replace(/\s+/g, "_");
+                const fileName = `ใบลา_${safeName}.pdf`;
+                hideLoading();
+
+                // กรณีโหมดส่งไฟล์ .pdf แท้เข้าแชท LINE
+                if (isShare) {
+                    const pdfBlob = doc.output("blob");
+                    const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
+
+                    const triggerNativeShare = async () => {
+                        if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+                            try {
+                                await navigator.share({
+                                    files: [pdfFile],
+                                    title: fileName
+                                });
+                            } catch (e) {
+                                if (e.name !== "AbortError") doc.save(fileName);
                             }
-
-                            const targetRow = data.find(r => uuid && String(r[19] || "").trim() === uuid)
-                                          || data.find(r => createTime && String(r[11] || "") === createTime)
-                                          || data[0];
-
-                            const { jsPDF } = window.jspdf;
-                            const doc = new jsPDF();
-                            await drawSingleLeavePage(doc, targetRow);
-
-                            const safeName = String(targetRow[1] || "พนักงาน").replace(/\s+/g, "_");
-                            const fileName = `ใบลา_${safeName}.pdf`;
-                            hideLoading();
-
-                            // กรณีโหมดส่งไฟล์ .pdf แท้เข้าแชท LINE
-                            if (isShare) {
-                                const pdfBlob = doc.output("blob");
-                                const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
-
-                                const triggerNativeShare = async () => {
-                                    if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-                                        try {
-                                            await navigator.share({
-                                                files: [pdfFile],
-                                                title: fileName
-                                            });
-                                        } catch (e) {
-                                            if (e.name !== "AbortError") doc.save(fileName);
-                                        }
-                                    } else {
-                                        doc.save(fileName);
-                                    }
-                                };
-
-                                dataContainer.innerHTML = `
-                                    <div class="status-message" style="padding: 30px 20px;">
-                                        <div style="font-size: 2.4em; margin-bottom: 10px;">📄</div>
-                                        <div style="font-weight: 600; color: var(--text-color-dark); margin-bottom: 8px;">
-                                            เตรียมไฟล์ ${fileName} พร้อมส่งแล้ว
-                                        </div>
-                                        <div style="font-size: 0.9em; margin-bottom: 18px;">
-                                            แตะปุ่มด้านล่าง แล้วเลือกแอป <strong>LINE</strong> เพื่อส่งไฟล์ .pdf ให้ผู้รับได้เลยครับ
-                                        </div>
-                                        <button type="button" id="triggerSharePdfBtn" class="btn" style="margin: 0 auto; background: #06C755;">
-                                            <i class="fab fa-line" style="font-size:1.2em;"></i> เลือกผู้รับใน LINE
-                                        </button>
-                                    </div>
-                                `;
-                                document.getElementById("triggerSharePdfBtn").onclick = triggerNativeShare;
-                                return true;
-                            }
-
-                            // กรณีโหมดดาวน์โหลด PDF ปกติ
+                        } else {
                             doc.save(fileName);
-                            dataContainer.innerHTML = `
-                                <div class="status-message" style="padding: 30px 20px;">
-                                    <div style="font-size: 2.4em; margin-bottom: 10px;">✅</div>
-                                    <div style="font-weight: 600; color: var(--text-color-dark); margin-bottom: 8px;">
-                                        เตรียมไฟล์ ${fileName} เรียบร้อยแล้ว
-                                    </div>
-                                    <div style="font-size: 0.9em; margin-bottom: 18px;">
-                                        ระบบกำลังดาวน์โหลดไฟล์ลงเครื่อง หากไฟล์ยังไม่เริ่มโหลดให้แตะปุ่มด้านล่างครับ
-                                    </div>
-                                    <button type="button" id="manualSavePdfBtn" class="btn" style="margin: 0 auto;">
-                                        <i class="fas fa-download"></i> แตะเพื่อดาวน์โหลด PDF
-                                    </button>
-                                </div>
-                            `;
-                            document.getElementById("manualSavePdfBtn").onclick = () => doc.save(fileName);
-                        } catch (err) {
-                            hideLoading();
-                            console.error(err);
-                            dataContainer.innerHTML = `<div class="status-message error">❌ ดำเนินการไม่สำเร็จ: ${err.message}</div>`;
                         }
-                        return true;
-                    }
+                    };
 
+                    dataContainer.innerHTML = `
+                        <div class="status-message" style="padding: 30px 20px;">
+                            <div style="font-size: 2.4em; margin-bottom: 10px;">📄</div>
+                            <div style="font-weight: 600; color: var(--text-color-dark); margin-bottom: 8px;">
+                                เตรียมไฟล์ ${fileName} พร้อมส่งแล้ว
+                            </div>
+                            <div style="font-size: 0.9em; margin-bottom: 18px;">
+                                แตะปุ่มด้านล่าง แล้วเลือกแอป <strong>LINE</strong> เพื่อส่งไฟล์ .pdf ให้ผู้รับได้เลยครับ
+                            </div>
+                            <button type="button" id="triggerSharePdfBtn" class="btn" style="margin: 0 auto; background: #06C755;">
+                                <i class="fab fa-line" style="font-size:1.2em;"></i> เลือกผู้รับใน LINE
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById("triggerSharePdfBtn").onclick = triggerNativeShare;
+                    return true;
+                }
 
-                  async function printRow(rowData, btnEl) {
-                      const isInLineApp = (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) 
-                                          || /Line\//i.test(navigator.userAgent);
+                // กรณีโหมดดาวน์โหลด PDF ปกติ
+                doc.save(fileName);
+                dataContainer.innerHTML = `
+                    <div class="status-message" style="padding: 30px 20px;">
+                        <div style="font-size: 2.4em; margin-bottom: 10px;">✅</div>
+                        <div style="font-weight: 600; color: var(--text-color-dark); margin-bottom: 8px;">
+                            เตรียมไฟล์ ${fileName} เรียบร้อยแล้ว
+                        </div>
+                        <div style="font-size: 0.9em; margin-bottom: 18px;">
+                            ระบบกำลังดาวน์โหลดไฟล์ลงเครื่อง หากไฟล์ยังไม่เริ่มโหลดให้แตะปุ่มด้านล่างครับ
+                        </div>
+                        <button type="button" id="manualSavePdfBtn" class="btn" style="margin: 0 auto;">
+                            <i class="fas fa-download"></i> แตะเพื่อดาวน์โหลด PDF
+                        </button>
+                    </div>
+                `;
+                document.getElementById("manualSavePdfBtn").onclick = () => doc.save(fileName);
+            } catch (err) {
+                hideLoading();
+                console.error(err);
+                dataContainer.innerHTML = `<div class="status-message error">❌ ดำเนินการไม่สำเร็จ: ${err.message}</div>`;
+            }
+            return true;
+        }
 
-                      // กรณีเปิดในแอป LINE: ส่งออกไปเปิดหน้าเว็บของเราเองบน Chrome/Safari เพื่อโหลดลงเครื่องตรงๆ
-                      if (isInLineApp) {
-                          const baseUrl = window.location.href.split("?")[0].split("#")[0];
-                          const downloadPageUrl = `${baseUrl}?downloadPdf=1`
-                              + `&empId=${encodeURIComponent(rowData[0] || "")}`
-                              + `&uuid=${encodeURIComponent(rowData[19] || "")}`
-                              + `&ct=${encodeURIComponent(rowData[11] || "")}`;
+        async function printRow(rowData, btnEl) {
+            const isInLineApp = (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) 
+                                || /Line\//i.test(navigator.userAgent);
 
-                          if (typeof liff !== "undefined" && liff.openWindow) {
-                              liff.openWindow({ url: downloadPageUrl, external: true });
-                          } else {
-                              window.open(downloadPageUrl, "_blank");
-                          }
-                          return;
-                      }
+            // กรณีเปิดในแอป LINE: ส่งออกไปเปิดหน้าเว็บของเราเองบน Chrome/Safari เพื่อโหลดลงเครื่องตรงๆ
+            if (isInLineApp) {
+                const baseUrl = window.location.href.split("?")[0].split("#")[0];
+                const downloadPageUrl = `${baseUrl}?downloadPdf=1`
+                    + `&empId=${encodeURIComponent(rowData[0] || "")}`
+                    + `&uuid=${encodeURIComponent(rowData[19] || "")}`
+                    + `&ct=${encodeURIComponent(rowData[11] || "")}`;
 
-                      // กรณีเปิดบนคอมพิวเตอร์ หรือ Chrome/Safari ปกติ: ดาวน์โหลดไฟล์ PDF ลงเครื่องทันที
-                      if (btnEl) btnEl.disabled = true;
-                      showLoading("กำลังสร้างไฟล์ใบลา PDF...");
-                      try {
-                          const { jsPDF } = window.jspdf;
-                          const doc = new jsPDF();
-                          await drawSingleLeavePage(doc, rowData);
+                if (typeof liff !== "undefined" && liff.openWindow) {
+                    liff.openWindow({ url: downloadPageUrl, external: true });
+                } else {
+                    window.open(downloadPageUrl, "_blank");
+                }
+                return;
+            }
 
-                          const safeName = String(rowData[1] || "พนักงาน").replace(/\s+/g, "_");
-                          hideLoading();
-                          doc.save(`ใบลา_${safeName}.pdf`);
-                      } catch (err) {
-                          hideLoading();
-                          console.error("PDF Error:", err);
-                          Swal.fire({
-                              icon: "error",
-                              title: "ดาวน์โหลด PDF ไม่สำเร็จ",
-                              text: err.message || "กรุณาลองใหม่อีกครั้งครับ"
-                          });
-                      } finally {
-                          if (btnEl) btnEl.disabled = false;
-                      }
-                  }
+            // กรณีเปิดบนคอมพิวเตอร์ หรือ Chrome/Safari ปกติ: ดาวน์โหลดไฟล์ PDF ลงเครื่องทันที
+            if (btnEl) btnEl.disabled = true;
+            showLoading("กำลังสร้างไฟล์ใบลา PDF...");
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                await drawSingleLeavePage(doc, rowData);
 
-                  // เริ่มต้นทำงาน: ถ้าเป็นโหมดโหลด PDF ให้โหลดทันที ถ้าไม่ใช่ให้แสดงประวัติตามปกติ
-                  checkAutoDownloadMode().then(isAutoDownload => {
-                      if (!isAutoDownload) {
-                          fetchHistory();
-                      }
-                  });
+                const safeName = String(rowData[1] || "พนักงาน").replace(/\s+/g, "_");
+                hideLoading();
+                doc.save(`ใบลา_${safeName}.pdf`);
+            } catch (err) {
+                hideLoading();
+                console.error("PDF Error:", err);
+                Swal.fire({
+                    icon: "error",
+                    title: "ดาวน์โหลด PDF ไม่สำเร็จ",
+                    text: err.message || "กรุณาลองใหม่อีกครั้งครับ"
+                });
+            } finally {
+                if (btnEl) btnEl.disabled = false;
+            }
+        }
 
+        // เริ่มต้นทำงาน: ถ้าเป็นโหมดโหลด PDF ให้โหลดทันที ถ้าไม่ใช่ให้แสดงประวัติตามปกติ
+        checkAutoDownloadMode().then(isAutoDownload => {
+            if (!isAutoDownload) {
+                fetchHistory();
+            }
+        });
 
         // ฟังก์ชันดึงรูปเอกสารแนบมาโชว์ใน Popup ทันที (ไม่ต้องเด้งไปล็อกอิน Google Drive)
         async function previewAttachedDocument(docUrl) {
@@ -1277,101 +1568,175 @@
             }
         }
 
-                // =========================================================================
-        // 📲 ฟังก์ชันแชร์ / ส่งต่อใบลา PDF ไปให้เพื่อนหรือกลุ่มใน LINE
+        // =========================================================================
+        // 📲 ฟังก์ชันแชร์ / ส่งต่อใบลา PDF (Premium Corporate Modal UI/UX)
         // =========================================================================
         async function shareLeavePdf(rowData, btnEl) {
-            const choice = await Swal.fire({
-                title: "เลือกรูปแบบการส่งต่อ LINE",
-                html: `<div style="font-size:0.9em; color:#555;">เลือกว่าต้องการส่งเป็นไฟล์ .pdf โดยตรง หรือส่งเป็นการ์ดใบลาเข้าห้องแชท LINE</div>`,
-                showCancelButton: true,
-                showDenyButton: true,
-                confirmButtonText: '<i class="fas fa-file-pdf"></i> ส่งเป็นไฟล์ PDF แท้',
-                denyButtonText: '<i class="fab fa-line"></i> เลือกเพื่อนส่งการ์ดใบลา',
-                cancelButtonText: "ยกเลิก",
-                confirmButtonColor: "#1994b6",
-                denyButtonColor: "#06C755"
+            let selectedMode = null;
+
+            await Swal.fire({
+                showConfirmButton: false,
+                showCancelButton: false,
+                showDenyButton: false,
+                 customClass: {
+                    container: 'corp-share-backdrop',
+                    popup: 'corp-share-popup'
+                },
+                html: `
+                    <button type="button" class="corp-modal-close-btn" id="corpModalCloseX" aria-label="ปิดหน้าต่าง">
+                        <i class="fas fa-times"></i>
+                    </button>
+
+                    <div class="corp-modal-header">
+                        <div class="corp-header-icon-badge">
+                            <i class="fas fa-share-alt"></i>
+                        </div>
+                        <h3 class="corp-modal-title">เลือกช่องทางการส่งต่อ</h3>
+                        <p class="corp-modal-desc">
+                            เลือกรูปแบบที่ต้องการส่งต่อข้อมูลการลา สามารถส่งเป็นไฟล์ PDF หรือแชร์การ์ดผ่าน LINE ได้ทันที
+                        </p>
+                    </div>
+
+                    <div class="corp-action-grid">
+                        <!-- ปุ่มที่ 1: PDF Action Card -->
+                        <button type="button" class="corp-action-card corp-card-pdf" id="corpSelectPdfBtn">
+                            <div class="corp-card-left">
+                                <div class="corp-card-icon">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                                <div class="corp-card-text">
+                                    <span class="corp-card-title">ส่งเป็นไฟล์ PDF</span>
+                                    <span class="corp-card-sub">ดาวน์โหลดหรือเปิดไฟล์ PDF</span>
+                                </div>
+                            </div>
+                            <div class="corp-card-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </button>
+
+                        <!-- ปุ่มที่ 2: LINE Action Card -->
+                        <button type="button" class="corp-action-card corp-card-line" id="corpSelectLineBtn">
+                            <div class="corp-card-left">
+                                <div class="corp-card-icon">
+                                    <i class="fab fa-line"></i>
+                                </div>
+                                <div class="corp-card-text">
+                                    <span class="corp-card-title">ส่งเป็นการ์ดใน LINE</span>
+                                    <span class="corp-card-sub">แชร์การ์ดใบลาผ่าน LINE</span>
+                                </div>
+                            </div>
+                            <div class="corp-card-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="corp-modal-footer">
+                        <button type="button" class="corp-cancel-pill" id="corpModalCancelBtn">
+                            <i class="fas fa-times"></i> ยกเลิก
+                        </button>
+                    </div>
+                `,
+                didOpen: () => {
+                    const closeX = document.getElementById('corpModalCloseX');
+                    const cancelBtn = document.getElementById('corpModalCancelBtn');
+                    const pdfBtn = document.getElementById('corpSelectPdfBtn');
+                    const lineBtn = document.getElementById('corpSelectLineBtn');
+
+                    if (closeX) closeX.onclick = () => Swal.close();
+                    if (cancelBtn) cancelBtn.onclick = () => Swal.close();
+
+                    if (pdfBtn) {
+                        pdfBtn.onclick = () => {
+                            selectedMode = 'pdf';
+                            Swal.close();
+                        };
+                    }
+                    if (lineBtn) {
+                        lineBtn.onclick = () => {
+                            selectedMode = 'line';
+                            Swal.close();
+                        };
+                    }
+                }
             });
 
-            if (choice.isDismissed) return;
+            if (!selectedMode) return;
 
-            // โหมดที่ 1: ส่งเป็นไฟล์ .pdf แท้ๆ เข้าแชท LINE (ผ่านเมนูแชร์ของเครื่อง)
-            if (choice.isConfirmed) {
+            // เชื่อมต่อกับฟังก์ชันเดิมโดยตรง 100%
+            if (selectedMode === 'pdf') {
                 await shareRawPdfFile(rowData, btnEl);
-            }
-            // โหมดที่ 2: เลือกเพื่อน/กลุ่มใน LINE ทันที (ส่งการ์ดใบลา + ปุ่มโหลด PDF)
-            else if (choice.isDenied) {
+            } else if (selectedMode === 'line') {
                 await shareLineFlexCard(rowData);
             }
         }
 
-                // โหมดที่ 1: ส่งเป็นไฟล์ .pdf แท้ๆ เข้าแชท LINE
-                  async function shareRawPdfFile(rowData, btnEl) {
-                      const isInLineApp = (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) 
-                                          || /Line\//i.test(navigator.userAgent);
+        // โหมดที่ 1: ส่งเป็นไฟล์ .pdf แท้ๆ เข้าแชท LINE
+        async function shareRawPdfFile(rowData, btnEl) {
+            const isInLineApp = (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) 
+                                || /Line\//i.test(navigator.userAgent);
 
-                      // ถ้าเปิดอยู่ในแอป LINE: สั่งเด้งออก Safari/Chrome ในโหมด sharePdf=1 เพื่อให้แนบไฟล์ .pdf แท้ได้ทันที
-                      if (isInLineApp) {
-                          const baseUrl = window.location.href.split("?")[0].split("#")[0];
-                          const sharePageUrl = `${baseUrl}?sharePdf=1`
-                              + `&empId=${encodeURIComponent(rowData[0] || "")}`
-                              + `&uuid=${encodeURIComponent(rowData[19] || "")}`
-                              + `&ct=${encodeURIComponent(rowData[11] || "")}`;
+            // ถ้าเปิดอยู่ในแอป LINE: สั่งเด้งออก Safari/Chrome ในโหมด sharePdf=1 เพื่อให้แนบไฟล์ .pdf แท้ได้ทันที
+            if (isInLineApp) {
+                const baseUrl = window.location.href.split("?")[0].split("#")[0];
+                const sharePageUrl = `${baseUrl}?sharePdf=1`
+                    + `&empId=${encodeURIComponent(rowData[0] || "")}`
+                    + `&uuid=${encodeURIComponent(rowData[19] || "")}`
+                    + `&ct=${encodeURIComponent(rowData[11] || "")}`;
 
-                          if (typeof liff !== "undefined" && liff.openWindow) {
-                              liff.openWindow({ url: sharePageUrl, external: true });
-                          } else {
-                              window.open(sharePageUrl, "_blank");
-                          }
-                          return;
-                      }
+                if (typeof liff !== "undefined" && liff.openWindow) {
+                    liff.openWindow({ url: sharePageUrl, external: true });
+                } else {
+                    window.open(sharePageUrl, "_blank");
+                }
+                return;
+            }
 
-                      // กรณีเปิดอยู่บน Safari / Chrome มือถืออยู่แล้ว: สร้างไฟล์และเปิดเมนูแชร์ทันที
-                      if (btnEl) btnEl.disabled = true;
-                      showLoading("กำลังเตรียมไฟล์ PDF สำหรับส่งต่อ...");
-                      try {
-                          const { jsPDF } = window.jspdf;
-                          const doc = new jsPDF();
-                          await drawSingleLeavePage(doc, rowData);
+            // กรณีเปิดอยู่บน Safari / Chrome มือถืออยู่แล้ว: สร้างไฟล์และเปิดเมนูแชร์ทันที
+            if (btnEl) btnEl.disabled = true;
+            showLoading("กำลังเตรียมไฟล์ PDF สำหรับส่งต่อ...");
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                await drawSingleLeavePage(doc, rowData);
 
-                          const safeName = String(rowData[1] || "พนักงาน").replace(/\s+/g, "_");
-                          const fileName = `ใบลา_${safeName}.pdf`;
-                          const pdfBlob = doc.output("blob");
-                          const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
+                const safeName = String(rowData[1] || "พนักงาน").replace(/\s+/g, "_");
+                const fileName = `ใบลา_${safeName}.pdf`;
+                const pdfBlob = doc.output("blob");
+                const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
 
-                          hideLoading();
+                hideLoading();
 
-                          if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-                              const readyConfirm = await Swal.fire({
-                                  icon: "success",
-                                  title: "เตรียมไฟล์ PDF พร้อมแล้ว",
-                                  text: "แตะปุ่มด้านล่าง แล้วเลือกแอป LINE เพื่อส่งไฟล์ PDF ให้ผู้รับได้เลยครับ",
-                                  confirmButtonText: '<i class="fab fa-line"></i> เลือกผู้รับใน LINE',
-                                  showCancelButton: true,
-                                  cancelButtonText: "ยกเลิก",
-                                  confirmButtonColor: "#06C755"
-                              });
+                if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+                    const readyConfirm = await Swal.fire({
+                        icon: "success",
+                        title: "เตรียมไฟล์ PDF พร้อมแล้ว",
+                        text: "แตะปุ่มด้านล่าง แล้วเลือกแอป LINE เพื่อส่งไฟล์ PDF ให้ผู้รับได้เลยครับ",
+                        confirmButtonText: '<i class="fab fa-line"></i> เลือกผู้รับใน LINE',
+                        showCancelButton: true,
+                        cancelButtonText: "ยกเลิก",
+                        confirmButtonColor: "#06C755"
+                    });
 
-                              if (readyConfirm.isConfirmed) {
-                                  await navigator.share({
-                                      files: [pdfFile],
-                                      title: fileName
-                                  });
-                              }
-                          } else {
-                              doc.save(fileName);
-                          }
-                      } catch (err) {
-                          hideLoading();
-                          if (err.name !== "AbortError") {
-                              console.error("Share File Error:", err);
-                              Swal.fire({ icon: "error", title: "แชร์ไฟล์ไม่สำเร็จ", text: err.message });
-                          }
-                      } finally {
-                          if (btnEl) btnEl.disabled = false;
-                      }
-                  }
-
+                    if (readyConfirm.isConfirmed) {
+                        await navigator.share({
+                            files: [pdfFile],
+                            title: fileName
+                        });
+                    }
+                } else {
+                    doc.save(fileName);
+                }
+            } catch (err) {
+                hideLoading();
+                if (err.name !== "AbortError") {
+                    console.error("Share File Error:", err);
+                    Swal.fire({ icon: "error", title: "แชร์ไฟล์ไม่สำเร็จ", text: err.message });
+                }
+            } finally {
+                if (btnEl) btnEl.disabled = false;
+            }
+        }
 
         // โหมดที่ 2: เปิดหน้าเลือกเพื่อน/กลุ่มใน LINE (shareTargetPicker) ส่งการ์ดใบลาพร้อมลิงก์โหลด PDF ทันที
         async function shareLineFlexCard(rowData) {
@@ -1462,9 +1827,6 @@
                 Swal.fire({ icon: "error", title: "ส่งข้อความไม่สำเร็จ", text: err.message || "กรุณาลองใหม่อีกครั้ง" });
             }
         }
-
-
-
     </script>
 </body>
 </html>
