@@ -2710,61 +2710,88 @@ ${memoryText}
             } catch (_) {}
         }
 
-        function checkAndNotifyAdminQueue() {
-            // ถ้ายังไม่ได้ล็อกอิน หรือเป็น GUEST ไม่ต้องแจ้งเตือน
-            if (!currentAdminUser || !currentAdminUser.isLoggedIn || currentAdminUser.role === "GUEST") {
-                return;
-            }
-            if (!Array.isArray(allData) || allData.length === 0) return;
-
-            const newlyArrivedItems = [];
-
-            allData.forEach(row => {
-                const uuid = String(row[19] || "").trim();
-                if (!uuid) return;
-
-                const st = getApprovalStepStatus(row);
-                const isMyTurn = (currentAdminUser.role === "VIP")
-                    ? (st.nextStep === "N1" || st.nextStep === "N2" || st.nextStep === "N3")
-                    : (st.nextStep === currentAdminUser.role);
-
-                if (isMyTurn) {
-                    const uniqueKey = `${uuid}_${st.nextStep}`;
-                    if (!notifiedQueueKeys.has(uniqueKey)) {
-                        notifiedQueueKeys.add(uniqueKey);
-                        newlyArrivedItems.push({ row, step: st.nextStep });
-                    }
+            // ============================================================================
+            // 🔔 [แก้ไข] ระบบ AI แจ้งเตือนคิวงานเชิงรุก จำข้ามการรีโหลดหน้าจอ (Persistent Notified Queue)
+            // ============================================================================
+            function checkAndNotifyAdminQueue() {
+                // 1. ถ้ายังไม่ได้ล็อกอิน หรือเป็น GUEST ไม่ต้องแจ้งเตือน
+                if (!currentAdminUser || !currentAdminUser.isLoggedIn || currentAdminUser.role === "GUEST") {
+                    return;
                 }
-            });
+                if (!Array.isArray(allData) || allData.length === 0) return;
 
-            if (newlyArrivedItems.length === 0) return;
+                // 2. ดึงประวัติรายการที่เคยแจ้งเตือนไปแล้วจากความจำเครื่อง (localStorage)
+                let savedNotifiedKeys = [];
+                try {
+                    const rawKeys = localStorage.getItem(`notified_leaves_${currentAdminUser.empId}`);
+                    if (rawKeys) savedNotifiedKeys = JSON.parse(rawKeys);
+                } catch (e) {
+                    console.warn("อ่านความจำแจ้งเตือนไม่ได้:", e);
+                }
+                const notifiedSet = new Set(savedNotifiedKeys);
 
-            const firstName = String(currentAdminUser.name || "").split(" ")[0] || currentAdminUser.name;
-            const maxShow = 8;
-            const nameLines = newlyArrivedItems.slice(0, maxShow).map(item => {
-                const empName = item.row[1] || "ไม่ระบุชื่อ";
-                const leaveLabel = getLeaveTypeDisplay(item.row[4]);
-                const docTag = String(item.row[14] || "") === "มี" ? " • 📎มีเอกสาร" : "";
-                return `• ${empName} (${leaveLabel}${docTag})`;
-            });
+                const newlyArrivedItems = [];
+                const currentTurnKeys = []; // เก็บคีย์คิวงานที่กำลังรออนุมัติอยู่ในขณะนี้จริง ๆ
 
-            if (newlyArrivedItems.length > maxShow) {
-                nameLines.push(`...และอีก ${newlyArrivedItems.length - maxShow} รายการ`);
+                allData.forEach(row => {
+                    const uuid = String(row[19] || "").trim();
+                    if (!uuid) return;
+
+                    const st = getApprovalStepStatus(row);
+                    const isMyTurn = (currentAdminUser.role === "VIP")
+                        ? (st.nextStep === "N1" || st.nextStep === "N2" || st.nextStep === "N3")
+                        : (st.nextStep === currentAdminUser.role);
+
+                    if (isMyTurn) {
+                        const uniqueKey = `${uuid}_${st.nextStep}`;
+                        currentTurnKeys.push(uniqueKey); // เพิ่มลงรายการคิวปัจจุบัน
+
+                        // เช็กว่าคิวงานตัวนี้ เคยเด้งแจ้งเตือนแอดมินคนนี้ไปแล้วหรือยัง
+                        if (!notifiedSet.has(uniqueKey)) {
+                            notifiedSet.add(uniqueKey);
+                            newlyArrivedItems.push({ row, step: st.nextStep });
+                        }
+                    }
+                });
+
+                // 3. ปรับปรุงฐานข้อมูลความจำ (ลบคีย์งานเก่าที่จบไปแล้วออกจาก localStorage เพื่อไม่ให้เมมโมรี่ล้นเครื่อง)
+                const updatedKeysArray = Array.from(notifiedSet).filter(key => {
+                    // เก็บเฉพาะคีย์ที่เคยแจ้งแล้ว และต้องยังเป็นคิวงานที่ค้างรออนุมัติอยู่จริงในตารางขณะนี้ด้วย
+                    return currentTurnKeys.includes(key); 
+                });
+                localStorage.setItem(`notified_leaves_${currentAdminUser.empId}`, JSON.stringify(updatedKeysArray));
+
+                // 4. ถ้าไม่มีรายการใหม่เพิ่งวิ่งเข้าคิวตัวเองเพิ่ม ก็ไม่ต้องเปิดแชทและไม่ต้องเด้งแจ้งเตือน
+                if (newlyArrivedItems.length === 0) return;
+
+                // 5. แสดงผลทักทายชื่อจริงแอดมิน พร้อมแจ้งรายชื่อที่มีงานใหม่เพิ่มขึ้นมาเท่านั้น
+                const firstName = String(currentAdminUser.name || "").split(" ")[0] || currentAdminUser.name;
+                const maxShow = 8;
+                const nameLines = newlyArrivedItems.slice(0, maxShow).map(item => {
+                    const empName = item.row[1] || "ไม่ระบุชื่อ";
+                    const leaveLabel = getLeaveTypeDisplay(item.row[4]);
+                    const docTag = String(item.row[14] || "") === "มี" ? " • 📎มีเอกสาร" : "";
+                    return `• ${empName} (${leaveLabel}${docTag})`;
+                });
+
+                if (newlyArrivedItems.length > maxShow) {
+                    nameLines.push(`...และอีก ${newlyArrivedItems.length - maxShow} รายการ`);
+                }
+
+                const notifyMessage = `คุณ${firstName}\n`
+                    + `มีรายการรออนุมัติใหม่เข้ามาในคิวของคุณ (${newlyArrivedItems.length} รายการ) รายชื่อดังนี้ครับ:\n\n`
+                    + `${nameLines.join("\n")}\n\n`
+                    + `ให้ฉันอนุมัติแทนทั้งหมดเลยไหมครับ?`;
+
+                // เปิดหน้าต่างแชทและส่งสัญญาณเสียงเตือน
+                chatWindow.classList.remove("hidden");
+                playNotificationChime();
+
+                appendMessage(notifyMessage, "ai-message", [
+                    { label: "✅ อนุมัติทั้งหมด", value: "อนุมัติทั้งหมดทุกรายการ" },
+                    { label: "👀 เดี๋ยวฉันอนุมัติเอง", value: "เดี๋ยวฉันอนุมัติเอง" }
+                ]);
             }
-
-            const notifyMessage = `คุณ${firstName}\n`
-                + `มีรายการนี้รออนุมัติอยู่นะ รายชื่อนี้:\n\n`
-                + `${nameLines.join("\n")}\n\n`
-                + `ให้ฉันอนุมัติแทนทั้งหมดเลยไหม?`;
-
-            chatWindow.classList.remove("hidden");
-            playNotificationChime();
-
-            appendMessage(notifyMessage, "ai-message", [
-                { label: "✅ อนุมัติทั้งหมด", value: "อนุมัติทั้งหมดทุกรายการ" },
-                { label: "👀 เดี๋ยวฉันอนุมัติเอง", value: "เดี๋ยวฉันอนุมัติเอง" }
-            ]);
-        }
 
         function startLiveSyncWatcher() {
             if (liveSyncIntervalId) clearInterval(liveSyncIntervalId);
