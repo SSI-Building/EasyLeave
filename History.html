@@ -479,15 +479,16 @@
                     const actionsDiv = document.createElement('div');
                     actionsDiv.className = 'card-actions';
 
-                    // 1. ปุ่มดูรูปเอกสารแนบเดิม (ถ้ามีลิงก์ในคอลัมน์ Y)
-                    if (hasDoc === 'มี' && docUrl && docUrl.startsWith('http')) {
-                        const viewDocBtn = document.createElement('a');
+                    // 1. ปุ่มดูรูปเอกสารแนบเดิม (แสดงภาพใน Popup ทันที ไม่ต้องล็อกอิน Google)
+                    if (hasDoc === 'มี' && docUrl) {
+                        const viewDocBtn = document.createElement('button');
+                        viewDocBtn.type = 'button';
                         viewDocBtn.className = 'btn-card-action btn-view-file';
-                        viewDocBtn.href = docUrl;
-                        viewDocBtn.target = '_blank';
-                        viewDocBtn.innerHTML = `<i class="fas fa-paperclip"></i> ดูเอกสารเดิม`;
+                        viewDocBtn.innerHTML = `<i class="fas fa-eye"></i> ดูเอกสารเดิม`;
+                        viewDocBtn.onclick = () => previewAttachedDocument(docUrl);
                         actionsDiv.appendChild(viewDocBtn);
                     }
+
 
                     // 2. ปุ่มอัปโหลดเอกสารแนบใหม่ (เผื่อรูปเดิมไม่ชัด หรือลืมแนบ)
                     const reuploadBtn = document.createElement('button');
@@ -1071,31 +1072,103 @@
             });
         }
 
-        async function printRow(rowData, btnEl) {
+                async function printRow(rowData, btnEl) {
             if (btnEl) btnEl.disabled = true;
-            showLoading("กำลังสร้างเอกสารใบลา PDF...");
+            showLoading("กำลังสร้างไฟล์ใบลา PDF...");
             try {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 await drawSingleLeavePage(doc, rowData);
 
-                // บนมือถือ/LINE Browser การสั่ง doc.save หรือเปิดแท็บใหม่อาจถูกบล็อก จึงรองรับทั้งคู่
-                const blob = doc.output('blob');
-                const url = URL.createObjectURL(blob);
-                const win = window.open(url, '_blank');
-                if (!win) {
-                    doc.save(`ใบลา_${rowData[1] || 'พนักงาน'}.pdf`);
+                const safeName = String(rowData[1] || 'พนักงาน').replace(/\s+/g, '_');
+                const fileName = `ใบลา_${safeName}.pdf`;
+
+                // ตรวจสอบว่าเปิดอยู่ในแอป LINE บนมือถือหรือไม่
+                const isInLineApp = (typeof liff !== "undefined" && liff.isInClient && liff.isInClient()) 
+                                    || /Line\//i.test(navigator.userAgent);
+
+                if (isInLineApp) {
+                    // กรณีเปิดในแอป LINE: ส่งไปสร้างลิงก์ดาวน์โหลดตรง แล้วสั่งเปิดผ่าน External Browser (Safari/Chrome) เพื่อโหลดลงเครื่องทันที
+                    showLoading("กำลังเตรียมลิงก์ดาวน์โหลด PDF สำหรับมือถือ...");
+                    const pdfDataUri = doc.output("datauristring");
+
+                    const response = await fetch(HISTORY_WEB_APP_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify({
+                            action: "createPdfDownloadLink",
+                            fileName: fileName,
+                            pdfBase64: pdfDataUri
+                        })
+                    });
+
+                    const resJson = await response.json();
+                    hideLoading();
+
+                    if (resJson.status === "success" && resJson.downloadUrl) {
+                        if (typeof liff !== "undefined" && liff.openWindow) {
+                            // เด้งออกเบราว์เซอร์หลักของมือถือเพื่อดาวน์โหลดไฟล์ PDF ทันที
+                            liff.openWindow({ url: resJson.downloadUrl, external: true });
+                        } else {
+                            window.location.href = resJson.downloadUrl;
+                        }
+                    } else {
+                        throw new Error(resJson.message || "ไม่สามารถสร้างลิงก์ดาวน์โหลด PDF ได้");
+                    }
+                } else {
+                    // กรณีเปิดบนคอมพิวเตอร์ หรือ Chrome/Safari ปกติ: ดาวน์โหลดไฟล์ PDF ลงเครื่องทันที
+                    hideLoading();
+                    doc.save(fileName);
                 }
             } catch (err) {
-                console.error(err);
-                Swal.fire({ icon: "error", title: "สร้าง PDF ไม่สำเร็จ", text: "กรุณาลองใหม่อีกครั้งครับ" });
-            } finally {
                 hideLoading();
+                console.error("PDF Error:", err);
+                Swal.fire({
+                    icon: "error",
+                    title: "ดาวน์โหลด PDF ไม่สำเร็จ",
+                    text: err.message || "กรุณาลองใหม่อีกครั้งครับ"
+                });
+            } finally {
                 if (btnEl) btnEl.disabled = false;
             }
         }
 
+
         fetchHistory();
+
+        // ฟังก์ชันดึงรูปเอกสารแนบมาโชว์ใน Popup ทันที (ไม่ต้องเด้งไปล็อกอิน Google Drive)
+        async function previewAttachedDocument(docUrl) {
+            const match = String(docUrl || "").match(/[-\w]{25,}/);
+            if (!match) {
+                window.open(docUrl, "_blank");
+                return;
+            }
+            const fileId = match[0];
+            const imgApiUrl = `https://script.google.com/macros/s/AKfycbzfMQdmiwDMNo34oa5UPzo8vZRw_d3t3rcuwS_HnxBIfxutlgo9jCOpBW4JN5di3YObgQ/exec?id=${fileId}`;
+
+            showLoading("กำลังเปิดดูเอกสารแนบ...");
+            try {
+                const res = await fetch(imgApiUrl);
+                const base64Img = await res.text();
+                hideLoading();
+
+                if (base64Img && base64Img.startsWith("data:image")) {
+                    Swal.fire({
+                        title: "เอกสารประกอบการลา",
+                        html: `<img src="${base64Img}" style="max-width:100%; max-height:65vh; border-radius:10px; border:1px solid #ddd;">`,
+                        confirmButtonText: "ปิดหน้าต่าง",
+                        confirmButtonColor: "#1994b6"
+                    });
+                } else {
+                    window.open(docUrl, "_blank");
+                }
+            } catch (err) {
+                hideLoading();
+                window.open(docUrl, "_blank");
+            }
+        }
+
+
     </script>
 </body>
 </html>
