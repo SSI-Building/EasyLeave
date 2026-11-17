@@ -210,6 +210,17 @@
             box-shadow: 0 3px 8px rgba(0,0,0,0.12);
         }
         .btn-print-pdf:hover { opacity: 0.92; transform: translateY(-1px); }
+
+         .btn-share-line {
+            background-color: #06C755;
+            color: #ffffff;
+            box-shadow: 0 3px 8px rgba(6, 199, 85, 0.25);
+        }
+        .btn-share-line:hover {
+            background-color: #05b34c;
+            transform: translateY(-1px);
+        }
+
         .btn-card-action:disabled { opacity: 0.6; cursor: wait; }
 
         /* ===== Top Back Button ===== */
@@ -500,13 +511,22 @@
                     reuploadBtn.onclick = () => triggerReuploadDocument(row);
                     actionsDiv.appendChild(reuploadBtn);
 
-                    // 3. ปุ่มปริ้นใบลา PDF (เหมือนหน้า Dashboard-admin)
+                    // 3. ปุ่มปริ้นใบลา PDF
                     const printBtn = document.createElement('button');
                     printBtn.type = 'button';
                     printBtn.className = 'btn-card-action btn-print-pdf';
                     printBtn.innerHTML = `<i class="fas fa-print"></i> ปริ้นใบลา`;
                     printBtn.onclick = () => printRow(row, printBtn);
                     actionsDiv.appendChild(printBtn);
+
+                    // 4. ปุ่มแชร์ / ส่งต่อใบลาไปที่ LINE
+                    const shareBtn = document.createElement('button');
+                    shareBtn.type = 'button';
+                    shareBtn.className = 'btn-card-action btn-share-line';
+                    shareBtn.innerHTML = `<i class="fab fa-line" style="font-size:1.1em;"></i> ส่งต่อ LINE`;
+                    shareBtn.onclick = () => shareLeavePdf(row, shareBtn);
+                    actionsDiv.appendChild(shareBtn);
+
 
                     card.appendChild(actionsDiv);
                     dataContainer.appendChild(card);
@@ -1217,6 +1237,199 @@
                 window.open(docUrl, "_blank");
             }
         }
+
+                // =========================================================================
+        // 📲 ฟังก์ชันแชร์ / ส่งต่อใบลา PDF ไปให้เพื่อนหรือกลุ่มใน LINE
+        // =========================================================================
+        async function shareLeavePdf(rowData, btnEl) {
+            const choice = await Swal.fire({
+                title: "เลือกรูปแบบการส่งต่อ LINE",
+                html: `<div style="font-size:0.9em; color:#555;">เลือกว่าต้องการส่งเป็นไฟล์ .pdf โดยตรง หรือส่งเป็นการ์ดใบลาเข้าห้องแชท LINE</div>`,
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: '<i class="fas fa-file-pdf"></i> ส่งเป็นไฟล์ PDF แท้',
+                denyButtonText: '<i class="fab fa-line"></i> เลือกเพื่อนส่งการ์ดใบลา',
+                cancelButtonText: "ยกเลิก",
+                confirmButtonColor: "#1994b6",
+                denyButtonColor: "#06C755"
+            });
+
+            if (choice.isDismissed) return;
+
+            // โหมดที่ 1: ส่งเป็นไฟล์ .pdf แท้ๆ เข้าแชท LINE (ผ่านเมนูแชร์ของเครื่อง)
+            if (choice.isConfirmed) {
+                await shareRawPdfFile(rowData, btnEl);
+            }
+            // โหมดที่ 2: เลือกเพื่อน/กลุ่มใน LINE ทันที (ส่งการ์ดใบลา + ปุ่มโหลด PDF)
+            else if (choice.isDenied) {
+                await shareLineFlexCard(rowData);
+            }
+        }
+
+        // โหมดที่ 1: สร้างไฟล์ .pdf และเปิดเมนูเลือกแอป LINE เพื่อส่งไฟล์เข้าแชทโดยตรง
+        async function shareRawPdfFile(rowData, btnEl) {
+            if (btnEl) btnEl.disabled = true;
+            showLoading("กำลังเตรียมไฟล์ PDF สำหรับส่งต่อ...");
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                await drawSingleLeavePage(doc, rowData);
+
+                const safeName = String(rowData[1] || "พนักงาน").replace(/\s+/g, "_");
+                const fileName = `ใบลา_${safeName}.pdf`;
+                const pdfBlob = doc.output("blob");
+                const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
+
+                hideLoading();
+
+                // ตรวจสอบว่าเบราว์เซอร์รองรับการแชร์ไฟล์โดยตรงหรือไม่ (รองรับบน iPhone และ Chrome/Safari มือถือ)
+                if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+                    // ใช้ปุ่มแตะยืนยันอีกครั้งเพื่อป้องกันเบราว์เซอร์บล็อก User Gesture หลังรอโหลดรูป
+                    const readyConfirm = await Swal.fire({
+                        icon: "success",
+                        title: "เตรียมไฟล์ PDF พร้อมแล้ว",
+                        text: "แตะปุ่มด้านล่าง แล้วเลือกแอป LINE เพื่อส่งไฟล์ PDF ให้ผู้รับได้เลยครับ",
+                        confirmButtonText: '<i class="fas fa-share-alt"></i> เลือกผู้รับใน LINE',
+                        showCancelButton: true,
+                        cancelButtonText: "ยกเลิก",
+                        confirmButtonColor: "#06C755"
+                    });
+
+                    if (readyConfirm.isConfirmed) {
+                        await navigator.share({
+                            files: [pdfFile],
+                            title: fileName
+                        });
+                    }
+                } else {
+                    // กรณีเปิดใน LINE Android บางรุ่นที่บล็อก Web Share ไฟล์ -> สลับไปเปิด Chrome เพื่อแชร์ หรือใช้การ์ด LINE แทน
+                    const baseUrl = window.location.href.split("?")[0].split("#")[0];
+                    const extUrl = `${baseUrl}?downloadPdf=1&empId=${encodeURIComponent(rowData[0] || "")}&uuid=${encodeURIComponent(rowData[19] || "")}&ct=${encodeURIComponent(rowData[11] || "")}`;
+                    
+                    const fallback = await Swal.fire({
+                        icon: "info",
+                        title: "เบราว์เซอร์ใน LINE รุ่นนี้จำกัดการแนบไฟล์ตรง",
+                        text: "ต้องการส่งเป็น 'การ์ดใบลาพร้อมปุ่มโหลด PDF' เข้าแชท LINE ทันที หรือเปิดเบราว์เซอร์หลักเพื่อโหลดไฟล์ครับ?",
+                        showCancelButton: true,
+                        showDenyButton: true,
+                        confirmButtonText: "ส่งการ์ดใบลาใน LINE",
+                        denyButtonText: "เปิดเบราว์เซอร์โหลด PDF",
+                        cancelButtonText: "ยกเลิก",
+                        confirmButtonColor: "#06C755",
+                        denyButtonColor: "#1994b6"
+                    });
+
+                    if (fallback.isConfirmed) {
+                        await shareLineFlexCard(rowData);
+                    } else if (fallback.isDenied) {
+                        if (typeof liff !== "undefined" && liff.openWindow) {
+                            liff.openWindow({ url: extUrl, external: true });
+                        } else {
+                            window.open(extUrl, "_blank");
+                        }
+                    }
+                }
+            } catch (err) {
+                hideLoading();
+                if (err.name !== "AbortError") {
+                    console.error("Share File Error:", err);
+                    Swal.fire({ icon: "error", title: "แชร์ไฟล์ไม่สำเร็จ", text: err.message });
+                }
+            } finally {
+                if (btnEl) btnEl.disabled = false;
+            }
+        }
+
+        // โหมดที่ 2: เปิดหน้าเลือกเพื่อน/กลุ่มใน LINE (shareTargetPicker) ส่งการ์ดใบลาพร้อมลิงก์โหลด PDF ทันที
+        async function shareLineFlexCard(rowData) {
+            if (typeof liff === "undefined" || !liff.isApiAvailable("shareTargetPicker")) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "ยังไม่เปิดใช้งาน Share Target Picker",
+                    text: "กรุณาเปิดสวิตช์ Share target picker ในหน้า LINE Developers Console ก่อนครับ"
+                });
+                return;
+            }
+
+            let rawType = String(rowData[4] || "");
+            let leaveType = rawType;
+            if (rawType.startsWith("AL")) leaveType = "ลาพักร้อน (AL)";
+            else if (rawType.startsWith("SL")) leaveType = "ลาป่วย (SL)";
+            else if (rawType.startsWith("BL")) leaveType = "ลากิจ (BL)";
+
+            let rawStatus = String(rowData[10] || "pending").trim().toLowerCase();
+            let statusText = "⏳ รออนุมัติ";
+            let statusColor = "#f39c12";
+            if (rawStatus === "approved") { statusText = "✅ อนุมัติแล้ว"; statusColor = "#27ae60"; }
+            else if (rawStatus === "rejected" || rawStatus === "reject") { statusText = "❌ ไม่อนุมัติ"; statusColor = "#e74c3c"; }
+
+            // ใส่ openExternalBrowser=1 เพื่อให้ผู้รับกดปุ่มแล้วเด้งออก Safari/Chrome ดาวน์โหลด PDF ทันทีโดยไม่ติดบล็อก LINE
+            const baseUrl = window.location.href.split("?")[0].split("#")[0];
+            const directPdfUrl = `${baseUrl}?downloadPdf=1`
+                + `&empId=${encodeURIComponent(rowData[0] || "")}`
+                + `&uuid=${encodeURIComponent(rowData[19] || "")}`
+                + `&ct=${encodeURIComponent(rowData[11] || "")}`
+                + `&openExternalBrowser=1`;
+
+            try {
+                const res = await liff.shareTargetPicker([
+                    {
+                        type: "flex",
+                        altText: `ใบลาหยุดงาน - ${rowData[1] || ""} (${leaveType})`,
+                        contents: {
+                            type: "bubble",
+                            header: {
+                                type: "box",
+                                layout: "vertical",
+                                backgroundColor: "#1994b6",
+                                contents: [
+                                    { type: "text", text: "📄 เอกสารใบลาหยุดงาน", color: "#ffffff", weight: "bold", size: "md" },
+                                    { type: "text", text: `${rowData[1] || "-"} (${rowData[0] || "-"})`, color: "#e0f7fa", size: "sm", margin: "xs" }
+                                ]
+                            },
+                            body: {
+                                type: "box",
+                                layout: "vertical",
+                                spacing: "sm",
+                                contents: [
+                                    { type: "text", text: leaveType, weight: "bold", size: "lg", color: "#333333" },
+                                    { type: "text", text: `สถานะ: ${statusText}`, weight: "bold", size: "sm", color: statusColor },
+                                    { type: "separator", margin: "md" },
+                                    { type: "text", text: `ตั้งแต่: ${formatDate(rowData[5])} (${formatTime(rowData[6])})`, size: "xs", color: "#555555", margin: "md" },
+                                    { type: "text", text: `ถึง: ${formatDate(rowData[7])} (${formatTime(rowData[8])})`, size: "xs", color: "#555555" },
+                                    { type: "text", text: `รวมเวลา: ${formatMinutes(rowData[9])}`, size: "xs", color: "#333333", weight: "bold" },
+                                    { type: "text", text: `เหตุผล: ${rowData[12] || "-"}`, size: "xs", color: "#666666", wrap: true }
+                                ]
+                            },
+                            footer: {
+                                type: "box",
+                                layout: "vertical",
+                                contents: [
+                                    {
+                                        type: "button",
+                                        style: "primary",
+                                        color: "#36a761",
+                                        action: {
+                                            type: "uri",
+                                            label: "📥 ดาวน์โหลดไฟล์ใบลา (PDF)",
+                                            uri: directPdfUrl
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]);
+
+                if (res) {
+                    Swal.fire({ icon: "success", title: "ส่งใบลาสำเร็จ!", timer: 1800, showConfirmButton: false });
+                }
+            } catch (err) {
+                console.error("ShareTargetPicker Error:", err);
+                Swal.fire({ icon: "error", title: "ส่งข้อความไม่สำเร็จ", text: err.message || "กรุณาลองใหม่อีกครั้ง" });
+            }
+        }
+
 
 
     </script>
