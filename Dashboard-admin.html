@@ -2297,8 +2297,8 @@ ${memoryText}
             }
         }
 
-        // ============================================================================
-        // 🌟 7. ระบบ LINE LIFF Authentication & การอนุมัติลำดับขั้น (N1 -> N2 -> N3 -> VIP)
+                // ============================================================================
+        // 🌟 [แก้ไขสมบูรณ์] ระบบ LINE LIFF Authentication & การอนุมัติลำดับขั้น (N1 -> N2 -> N3 -> VIP)
         // ============================================================================
         const LIFF_ID_ADMIN = "2007956727-rbZz9a0z";
         const FALLBACK_ADMIN_LIST = [
@@ -2309,6 +2309,7 @@ ${memoryText}
             { empId: "S2860", name: "วันเฉลิม รุ่งโรจน์รัตน์", lineUid: "U4793d3bd1103575556723bf51147d3b0", role: "N2" }
         ];
 
+        // 🌟 ประสานชื่อตัวแปรแอดมินให้เป็นตัวเดียวกันทั้งหมดทั่วทั้งไฟล์
         let currentAdminUser = {
             isLoggedIn: false,
             empId: "",
@@ -2323,46 +2324,9 @@ ${memoryText}
             return "";
         }
 
-        function updateAdminAuthBarUI(adminObj) {
-            const avatarEl = document.getElementById("adminAvatar");
-            const nameEl = document.getElementById("adminDisplayName");
-            const badgeEl = document.getElementById("adminRoleBadge");
-            const subTextEl = document.getElementById("adminSubText");
-            const filterEl = document.getElementById("roleQueueFilter");
-            const btnRegister = document.getElementById("btnAdminRegister");
-            const btnLogin = document.getElementById("btnLineLogin");
-            const btnLogout = document.getElementById("btnLineLogout");
-
-            if (adminObj.pictureUrl && avatarEl) avatarEl.src = adminObj.pictureUrl;
-            
-            if (adminObj.role !== "GUEST") {
-                if (btnRegister) btnRegister.style.display = "none";
-                if (btnLogin) btnLogin.style.display = "none";
-                if (btnLogout) btnLogout.style.display = "inline-block";
-                if (nameEl) nameEl.textContent = `${adminObj.name} (${adminObj.empId})`;
-                if (badgeEl) {
-                    badgeEl.textContent = `ระดับ ${adminObj.role}`;
-                    badgeEl.className = `role-badge role-${adminObj.role}`;
-                }
-                if (subTextEl) {
-                    subTextEl.textContent = adminObj.role === "VIP"
-                        ? "👑 สิทธิ์ VIP: คุณสามารถอนุมัติได้ทุกระดับ (N1, N2, N3) หรือกดอนุมัติด่วนจบในคลิกเดียว"
-                        : `✅ คุณได้รับสิทธิ์อนุมัติใบลาในลำดับขั้น ${adminObj.role}`;
-                }
-                if (filterEl) filterEl.style.display = "inline-block";
-            } else {
-                if (nameEl) nameEl.textContent = `${adminObj.name} (ผู้ใช้งานทั่วไป)`;
-                if (badgeEl) {
-                    badgeEl.textContent = "ไม่มีสิทธิ์อนุมัติ";
-                    badgeEl.className = "role-badge role-GUEST";
-                }
-                if (subTextEl) subTextEl.textContent = `LINE UID: ${adminObj.lineUid || '-'} (เข้าชมข้อมูลได้ แต่ไม่สามารถกดอนุมัติได้)`;
-            }
-        }
-
         async function initAdminLiff() {
             try {
-                // ดึงข้อมูลแอดมินที่เคยล็อกอินไว้ในเครื่องขึ้นมาแสดงทันที
+                // ดึงข้อมูลแอดมินที่จดจำไว้ในความจำเครื่องขึ้นมาแสดงทันที
                 const savedAdminData = localStorage.getItem("persistentAdminUser");
                 if (savedAdminData) {
                     try {
@@ -2379,6 +2343,9 @@ ${memoryText}
                 if (liff.isLoggedIn()) {
                     const profile = await liff.getProfile();
                     await matchAdminPermission(profile);
+                } else if (savedAdminData) {
+                    localStorage.removeItem("persistentAdminUser");
+                    window.location.reload();
                 }
             } catch (error) {
                 console.warn("LIFF Init Notice:", error);
@@ -2453,12 +2420,8 @@ ${memoryText}
             }
 
             const avatarEl = document.getElementById("adminAvatar");
-            const nameEl = document.getElementById("adminDisplayName");
-            const badgeEl = document.getElementById("adminRoleBadge");
-            const subTextEl = document.getElementById("adminSubText");
             const btnLogin = document.getElementById("btnLineLogin");
             const btnLogout = document.getElementById("btnLineLogout");
-            const filterEl = document.getElementById("roleQueueFilter");
             const btnRegister = document.getElementById("btnAdminRegister");
 
             if (avatarEl && profile.pictureUrl) avatarEl.src = profile.pictureUrl;
@@ -2478,7 +2441,9 @@ ${memoryText}
                 };
                 localStorage.setItem("persistentAdminUser", JSON.stringify(currentAdminUser));
                 updateAdminAuthBarUI(currentAdminUser);
-                setTimeout(() => checkAndNotifyAdminQueue(), 800);
+                
+                // สั่งประมวลผลเช็กงานทันทีหลังจากตรวจสอบสิทธิ์ล็อกอินสำเร็จ
+                setTimeout(() => checkAndNotifyAdminQueue(), 1200);
             } else {
                 const guestObj = {
                     isLoggedIn: false,
@@ -2493,6 +2458,43 @@ ${memoryText}
 
             if (typeof window.displayTableData === "function") {
                 window.displayTableData();
+            }
+        }
+
+        function updateAdminAuthBarUI(adminObj) {
+            const avatarEl = document.getElementById("adminAvatar");
+            const nameEl = document.getElementById("adminDisplayName");
+            const badgeEl = document.getElementById("adminRoleBadge");
+            const subTextEl = document.getElementById("adminSubText");
+            const filterEl = document.getElementById("roleQueueFilter");
+            const btnRegister = document.getElementById("btnAdminRegister");
+            const btnLogin = document.getElementById("btnLineLogin");
+            const btnLogout = document.getElementById("btnLineLogout");
+
+            if (adminObj.pictureUrl && avatarEl) avatarEl.src = adminObj.pictureUrl;
+            
+            if (adminObj.role !== "GUEST") {
+                if (btnRegister) btnRegister.style.display = "none";
+                if (btnLogin) btnLogin.style.display = "none";
+                if (btnLogout) btnLogout.style.display = "inline-block";
+                if (nameEl) nameEl.textContent = `${adminObj.name} (${adminObj.empId})`;
+                if (badgeEl) {
+                    badgeEl.textContent = `ระดับ ${adminObj.role}`;
+                    badgeEl.className = `role-badge role-${adminObj.role}`;
+                }
+                if (subTextEl) {
+                    subTextEl.textContent = adminObj.role === "VIP"
+                        ? "👑 สิทธิ์ VIP: คุณสามารถอนุมัติได้ทุกระดับ (N1, N2, N3) หรือกดอนุมัติด่วนจบในคลิกเดียว"
+                        : `✅ คุณได้รับสิทธิ์อนุมัติใบลาในลำดับขั้น ${adminObj.role}`;
+                }
+                if (filterEl) filterEl.style.display = "inline-block";
+            } else {
+                if (nameEl) nameEl.textContent = `${adminObj.name} (ผู้ใช้งานทั่วไป)`;
+                if (badgeEl) {
+                    badgeEl.textContent = "ไม่มีสิทธิ์อนุมัติ";
+                    badgeEl.className = "role-badge role-GUEST";
+                }
+                if (subTextEl) subTextEl.textContent = `LINE UID: ${adminObj.lineUid || '-'} (เข้าชมข้อมูลได้ แต่ไม่สามารถกดอนุมัติได้)`;
             }
         }
 
@@ -2623,9 +2625,7 @@ ${memoryText}
                 const presetOptions = isApprove
                     ? ["เห็นสมควร", "เห็นสมควรอนุมัติ", "อนุมัติตามเสนอ", "รับทราบและเห็นสมควร", "อนุญาตให้ลาได้"]
                     : ["ไม่เห็นสมควร", "งานเร่งด่วน ไม่สามารถอนุมัติได้", "เอกสารประกอบไม่ครบถ้วน", "เกินสิทธิ์การลา"];
-
                 const defaultComment = isApprove ? "เห็นสมควร" : "ไม่เห็นสมควร";
-
                 const chipsHtml = presetOptions.map(opt => `
                     <button type="button" class="preset-comment-chip" 
                         onclick="document.getElementById('swalCommentInput').value='${opt}'; document.querySelectorAll('.preset-comment-chip').forEach(b=>{b.style.background='#f1f5f9';b.style.color='#334155';b.style.borderColor='#cbd5e1';}); this.style.background='#e8f4fd'; this.style.color='#1d8cf8'; this.style.borderColor='#1d8cf8';"
@@ -2633,7 +2633,6 @@ ${memoryText}
                         💬 ${opt}
                     </button>
                 `).join("");
-
                 const { value: formComment, isConfirmed } = await Swal.fire({
                     title: vipApproveAll ? `👑 VIP อนุมัติจบทุกขั้นตอน` : `ยืนยันการ${actionText} (${step})`,
                     html: `
@@ -2664,7 +2663,6 @@ ${memoryText}
                         return document.getElementById("swalCommentInput").value.trim() || defaultComment;
                     }
                 });
-
                 if (!isConfirmed) return;
                 selectedComment = formComment;
             } else {
@@ -2737,13 +2735,18 @@ ${memoryText}
         }
 
         // ============================================================================
-        // 🔔 8. ระบบ AI แจ้งเตือนคิวงานเชิงรุก (Persistent Notified Queue) & Real-time Live Sync
+        // 🔔 8. [แก้ไขสมบูรณ์] ระบบ AI แจ้งเตือนคิวงานเชิงรุก และ Real-time Live Sync
         // ============================================================================
         function checkAndNotifyAdminQueue() {
+            // 🌟 แก้จุดที่ 1: ตรวจเช็กสถานะการล็อกอิน LINE ของแอดมินจริง ๆ ทั่วหน้าจอ
             if (!currentAdminUser || !currentAdminUser.isLoggedIn || currentAdminUser.role === "GUEST") {
                 return;
             }
-            if (!Array.isArray(allData) || allData.length === 0) return;
+
+            // 🌟 แก้จุดที่ 2: ดักจับและแชร์ตัวแปรตารางข้อมูล allData ให้ถูกต้อง 100%
+            if (typeof allData === "undefined" || !Array.isArray(allData) || allData.length === 0) {
+                return;
+            }
 
             let savedNotifiedKeys = [];
             try {
@@ -2777,19 +2780,23 @@ ${memoryText}
                 }
             });
 
+            // ปรับปรุงคีย์สิทธิ์ความจำในเครื่อง
             const updatedKeysArray = Array.from(notifiedSet).filter(key => currentTurnKeys.includes(key));
             localStorage.setItem(`notified_leaves_${currentAdminUser.empId}`, JSON.stringify(updatedKeysArray));
 
             if (newlyArrivedItems.length === 0) return;
 
+            // ส่งข้อมูลรวบรวมค้างรอเข้าคิวแจ้งเตือนสะสมไว้
             pendingQueueAlertItems = pendingQueueAlertItems.concat(newlyArrivedItems);
 
+            // 🔴 แสดงจุดแดงและเพิ่มจำนวนตัวเลขแจ้งเตือนบนปุ่มแชท
             const badgeEl = document.getElementById('chatBadge');
             if (badgeEl) {
                 badgeEl.textContent = pendingQueueAlertItems.length > 99 ? '99+' : pendingQueueAlertItems.length;
                 badgeEl.style.display = 'block';
             }
 
+            // เล่นเสียงเตือนนุ่ม ๆ
             playNotificationChime();
         }
 
@@ -2815,6 +2822,7 @@ ${memoryText}
         function startLiveSyncWatcher() {
             if (liveSyncIntervalId) clearInterval(liveSyncIntervalId);
 
+            // เช็กคิวงานเมื่อเปิดจอครั้งแรกหลังโหลดเสร็จ 2.5 วินาที
             setTimeout(() => {
                 checkAndNotifyAdminQueue();
             }, 2500);
@@ -2840,7 +2848,11 @@ ${memoryText}
                         const endDateInput = document.getElementById('endDate');
                         
                         if (startDateInput && endDateInput && typeof window.fetchData === "function") {
+                            // สั่งดึงข้อมูลสด เรียบเนียน ไม่บังหน้าจอโหลด
                             await window.fetchData(startDateInput.value, endDateInput.value, true);
+                            
+                            // 🌟 ตรวจสอบและสแกนคิวงานเพื่อเด้งป้ายจุดแดงแจ้งเตือนหลังซิงก์ตารางข้อมูลเสร็จ
+                            setTimeout(() => checkAndNotifyAdminQueue(), 600);
                         }
                     }
                 } catch (err) {
