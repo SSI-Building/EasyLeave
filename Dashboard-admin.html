@@ -1532,12 +1532,21 @@
                     doc.text("สิทธิลาที่ใช้/สิทธิลาคงเหลือ", (tbx1 + tbx2) / 2, tby1 + rowHeight - 2, { align: "center" });
                     doc.text("รายการ", (15 + 40) / 2, tby1 + rowHeight + rowHeight - 2, { align: "center" });
                 
-                    const headersList = ["SL", "AL", "AW/L", "PR/L", "BL", "ML/L", "MT/L", "OTH", "Total"];
-                    colXs.forEach((cx, idx) => {
-                        if (idx < headersList.length) {
-                            doc.text(headersList[idx], (cx + colXs[idx+1] || tbx2) / 2, tby1 + rowHeight + rowHeight - 2, { align: "center" });
-                        }
-                    });
+						const headersList = ["SL", "AL", "AW/L", "PR/L", "BL", "ML/L", "MT/L", "OTH", "Total"];
+						
+						colXs.forEach((cx, idx) => {
+						    if (idx < headersList.length) {
+						        const nextX = colXs[idx + 1] ?? tbx2;
+						        const centerX = (cx + nextX) / 2;
+						
+						        doc.text(
+						            headersList[idx],
+						            centerX,
+						            tby1 + rowHeight + rowHeight - 2,
+						            { align: "center" }
+						        );
+						    }
+						});
                 
                     doc.text("ลาสะสม", tbx1 + 2, tby1 + rowHeight * 3.5); 
                     doc.text("คงเหลือ", tbx1 + 2, tby1 + rowHeight * 6.5); 
