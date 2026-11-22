@@ -949,16 +949,60 @@
         document.getElementById("AddButton").addEventListener("click", () => { window.location.href = "add.html"; });
 
 
-        // ==================== 9. ระบบตรวจสอบรหัสผ่านเข้าใช้งานครั้งแรก ====================
+// ==================== 9. ระบบตรวจสอบรหัสผ่านเข้าใช้งานครั้งแรก (ใช้ Token จากเซิร์ฟเวอร์) ====================
         function checkFirstTimeWebAccess() {
-            const isUnlocked = localStorage.getItem("adminPageUnlocked");
+            const savedToken = localStorage.getItem("adminAccessToken");
             const gateOverlay = document.getElementById("password-gate-overlay");
-            if (isUnlocked !== "true" && gateOverlay) {
+            if (!savedToken && gateOverlay) {
                 gateOverlay.classList.remove("hidden");
                 setTimeout(() => {
                     const inputEl = document.getElementById("webAccessPasswordInput");
                     if (inputEl) inputEl.focus();
                 }, 100);
+            }
+        }
+
+        async function verifyFirstTimePassword() {
+            const inputEl = document.getElementById("webAccessPasswordInput");
+            const btnEl = document.getElementById("btnVerifyWebPass");
+            const errEl = document.getElementById("webPassErrorMsg");
+            const password = inputEl ? inputEl.value.trim() : "";
+
+            if (!password) {
+                errEl.textContent = "⚠️ กรุณากรอกรหัสผ่านก่อนกดยืนยัน";
+                return;
+            }
+
+            btnEl.disabled = true;
+            btnEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> กำลังตรวจสอบ...`;
+            errEl.textContent = "";
+
+            try {
+                const res = await fetch(`${webAppUrl}?action=verifyWebPassword&password=${encodeURIComponent(password)}&_t=${Date.now()}`, { cache: "no-store" });
+                const result = await res.json();
+
+                if (result.status === "success" && result.token) {
+                    // จำ Token ที่ได้จากเซิร์ฟเวอร์ไว้ในเครื่อง (เข้าครั้งหน้าไม่ต้องกรอกซ้ำ)
+                    localStorage.setItem("adminAccessToken", result.token);
+                    document.getElementById("password-gate-overlay").classList.add("hidden");
+
+                    // สั่งโหลดข้อมูลตารางทันทีหลังยืนยันรหัสผ่านสำเร็จ
+                    const startVal = document.getElementById('startDate').value;
+                    const endVal = document.getElementById('endDate').value;
+                    if (typeof window.fetchData === "function") {
+                        window.fetchData(startVal, endVal);
+                    }
+                } else {
+                    errEl.textContent = "❌ " + (result.message || "รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่");
+                    inputEl.value = "";
+                    inputEl.focus();
+                }
+            } catch (err) {
+                console.error("Password check error:", err);
+                errEl.textContent = "⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์ กรุณาลองใหม่";
+            } finally {
+                btnEl.disabled = false;
+                btnEl.innerHTML = `<i class="fas fa-unlock-alt"></i> ยืนยันรหัสผ่าน`;
             }
         }
 
