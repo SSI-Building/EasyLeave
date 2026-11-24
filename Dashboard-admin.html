@@ -2150,25 +2150,45 @@
             if (overlay) overlay.classList.remove('visible');
         }
 
-        // ฟังก์ชันคำนวณอันดับพนักงานที่ลามากที่สุดเฉพาะเดือนปัจจุบัน (ชื่อ-นามสกุล + รายละเอียดเจาะลึก)
-        function buildCurrentMonthTopLeavers(sourceDataset) {
+        // ตัวช่วยแปลงวันที่ของใบลาให้แม่นยำ (รองรับทั้ง ISO และ dd/mm/yyyy พ.ศ./ค.ศ.)
+        function parseSafeLeaveDate(rawVal) {
+            if (!rawVal) return null;
+            if (rawVal instanceof Date && !isNaN(rawVal.getTime())) return rawVal;
+            const str = String(rawVal).trim();
+
+            const dmyMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            if (dmyMatch) {
+                const day = parseInt(dmyMatch[1], 10);
+                const month = parseInt(dmyMatch[2], 10) - 1;
+                let year = parseInt(dmyMatch[3], 10);
+                if (year > 2400) year -= 543;
+                return new Date(year, month, day);
+            }
+
+            const parsed = new Date(str);
+            return isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        // คัดกรองเฉพาะรายการที่ "วันที่เริ่มลา (row[5])" อยู่ในเดือนและปีปัจจุบันเท่านั้น
+        function getCurrentMonthOnlyRows(sourceDataset) {
             const now = new Date();
             const thNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
             const currentYear = thNow.getFullYear();
             const currentMonth = thNow.getMonth();
 
-            const currentMonthRows = (sourceDataset || []).filter(row => {
-                const submitDate = new Date(row[11]);
-                const leaveStartDate = new Date(row[5]);
-                const checkDate = !isNaN(submitDate.getTime()) ? submitDate : leaveStartDate;
-                if (isNaN(checkDate.getTime())) return false;
-                return checkDate.getFullYear() === currentYear && checkDate.getMonth() === currentMonth;
+            return (sourceDataset || []).filter(row => {
+                const leaveStartDate = parseSafeLeaveDate(row[5]);
+                if (!leaveStartDate) return false;
+                return leaveStartDate.getFullYear() === currentYear && leaveStartDate.getMonth() === currentMonth;
             });
+        }
 
+        // ฟังก์ชันคำนวณอันดับพนักงานที่ลามากที่สุดเฉพาะเดือนปัจจุบัน (ชื่อ-นามสกุล + รายละเอียดเจาะลึก)
+        function buildCurrentMonthTopLeavers(sourceDataset) {
+            const currentMonthRows = getCurrentMonthOnlyRows(sourceDataset);
             const personMap = {};
 
             currentMonthRows.forEach(row => {
-                // ดึงเฉพาะ ชื่อ-นามสกุล (ตัดรหัสพนักงานออก)
                 const rawName = String(row[1] || 'ไม่ระบุชื่อ').trim();
                 const cleanName = rawName.replace(/^[A-Z]\d+\s*[-:]?\s*/i, '').trim();
 
@@ -2213,6 +2233,7 @@
 
             return Object.values(personMap).sort((a, b) => b.totalCount - a.totalCount);
         }
+
 
         function toggleTopLeaveDetail(idx) {
             const item = document.getElementById(`topLeaveItem_${idx}`);
@@ -2460,13 +2481,8 @@
             ];
             const monthLabel = `${thaiMonths[currentMonth]} ${currentYear + 543}`;
 
-            const currentMonthRows = (sourceDataset || []).filter(row => {
-                const submitDate = new Date(row[11]);
-                const leaveStartDate = new Date(row[5]);
-                const checkDate = !isNaN(submitDate.getTime()) ? submitDate : leaveStartDate;
-                if (isNaN(checkDate.getTime())) return false;
-                return checkDate.getFullYear() === currentYear && checkDate.getMonth() === currentMonth;
-            });
+            // ดึงเฉพาะใบลาที่ลาในเดือนปัจจุบันจริงๆ
+            const currentMonthRows = getCurrentMonthOnlyRows(sourceDataset);
 
             const stats = {
                 monthLabel: monthLabel,
