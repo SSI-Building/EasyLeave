@@ -983,6 +983,135 @@
     color: #475569;
     line-height: 1.6;
 }
+/* ==================== Clean AI Quick Action Bar ==================== */
+.quick-chips-bar {
+    display: flex;
+    gap: 6px;
+    padding: 8px 10px;
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none; /* ซ่อน scrollbar ใน Firefox */
+}
+.quick-chips-bar::-webkit-scrollbar {
+    display: none; /* ซ่อน scrollbar ใน Chrome/Safari */
+}
+.quick-chip-btn {
+    flex-shrink: 0;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.quick-chip-btn:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+}
+.chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.chat-header-actions button {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+.chat-header-actions button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+/* ==================== Summary Card inside AI Chat ==================== */
+.chat-summary-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 4px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    font-size: 0.85rem;
+}
+.chat-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+.chat-summary-total-badge {
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+}
+.chat-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.chat-stat-mini {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 6px 4px;
+    border: 1px solid #f1f5f9;
+}
+.chat-stat-mini span {
+    display: block;
+    font-size: 0.72rem;
+    color: #64748b;
+}
+.chat-stat-mini strong {
+    font-size: 1.05rem;
+    line-height: 1.2;
+}
+.chat-queue-bar {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+    border-radius: 8px;
+    padding: 5px 8px;
+    font-size: 0.76rem;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.chat-type-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px 10px;
+    font-size: 0.78rem;
+    color: #475569;
+    padding-top: 8px;
+    border-top: 1px dashed #e2e8f0;
+}
+.chat-type-item {
+    display: flex;
+    justify-content: space-between;
+}
+.chat-type-item b {
+    color: #1e293b;
+}
     </style>
 </head>
 <body>
@@ -1107,16 +1236,27 @@
         <i class="fas fa-comment-dots"></i>
         <span id="chatBadge" class="chat-badge" style="display: none;">0</span>
     </div>
-    <div id="ai-chat-window" class="hidden">
+<div id="ai-chat-window" class="hidden">
         <div class="chat-header">
-            <span><i class="fas fa-robot"></i> AI Assistant</span>
-            <button id="close-chat-btn"><i class="fas fa-times"></i></button>
+            <span><i class="fas fa-robot"></i> AI ผู้ช่วยใบลา</span>
+            <div class="chat-header-actions">
+                <button onclick="clearChatWindow()" title="ล้างประวัติแชท"><i class="fas fa-trash-alt"></i></button>
+                <button id="close-chat-btn" title="ปิดหน้าต่าง"><i class="fas fa-times"></i></button>
+            </div>
         </div>
         <div class="chat-body" id="chat-messages">
-            <div class="message ai-message">สวัสดีครับ! ผมคือ AI ผู้ช่วย มีอะไรให้ผมช่วยดูข้อมูลการลาไหมครับ?</div>
+            <div class="message ai-message">สวัสดีครับ! มีข้อมูลการลาส่วนไหนให้ช่วยดูหรือสรุปไหมครับ? 😊</div>
+        </div>
+        <!-- แถบปุ่มลัดมาตรฐานแบบเลื่อนแนวนอน ไม่รกหน้าจอ -->
+        <div class="quick-chips-bar">
+            <button type="button" class="quick-chip-btn" onclick="triggerQuickChip('ขอสรุปเป็นกราฟวงกลม')">📈 กราฟเดือนนี้</button>
+            <button type="button" class="quick-chip-btn" onclick="triggerQuickChip('ขอดูงานของฉัน')">⚡ งานรอฉันอนุมัติ</button>
+            <button type="button" class="quick-chip-btn" onclick="triggerQuickChip('สรุปภาพรวมใบลา')">📊 สรุปตัวเลข</button>
+            <button type="button" class="quick-chip-btn" onclick="triggerQuickChip('อนุมัติ')">✅ ช่วยอนุมัติ</button>
+            <button type="button" class="quick-chip-btn" onclick="triggerQuickChip('ปริ้น')">🖨️ พิมพ์ใบลา</button>
         </div>
         <div class="chat-footer">
-            <input type="text" id="chat-input" placeholder="พิมพ์ถามข้อมูล...">
+            <input type="text" id="chat-input" placeholder="พิมพ์ถามข้อมูลการลา...">
             <button id="send-chat-btn"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
@@ -2399,6 +2539,17 @@
             });
         }
 
+        function triggerQuickChip(cmdText) {
+            chatInput.value = cmdText;
+            handleSendMessage();
+        }
+
+        function clearChatWindow() {
+            chatMessages.innerHTML = '';
+            chatHistory.length = 0;
+            appendMessage('ล้างหน้าจอแชทเรียบร้อยครับ มีอะไรให้ช่วยเพิ่มเติมพิมพ์ถามได้เลยครับ 😊', 'ai-message');
+        }
+
         chatToggleBtn.addEventListener('click', () => {
             chatWindow.classList.remove('hidden');
             const badgeEl = document.getElementById('chatBadge');
@@ -2419,7 +2570,7 @@
                 }
 
                 const notifyMessage = `คุณ${firstName}\n`
-                    + `มีรายการรออนุมัติในคิวของคุณทั้งหมด (${pendingQueueAlertItems.length} รายการ) ดังนี้ครับ:\n\n`
+                    + `มีรายการรออนุมัติในคิวของคุณ (${pendingQueueAlertItems.length} รายการ):\n\n`
                     + `${nameLines.join("\n")}\n\n`
                     + `ให้ฉันอนุมัติแทนทั้งหมดเลยไหมครับ?`;
 
@@ -2429,20 +2580,6 @@
                 ]);
 
                 pendingQueueAlertItems = [];
-            } 
-            else if (chatMessages.children.length === 1 && !chatMessages.querySelector('button')) {
-                chatMessages.innerHTML = '';
-                appendMessage(
-                    'สวัสดีครับ! ผมคือ AI ผู้ช่วยจัดการใบลา (รองรับระบบคิว N1 → N2 → N3) เลือกคำสั่งด่วนด้านล่าง หรือพิมพ์ถามข้อมูลได้เลยครับ 😊',
-                    'ai-message',
-                    [
-                        { label: '📈 กราฟเดือนนี้', value: 'ขอสรุปเป็นกราฟวงกลม' },
-                        { label: '⚡ งานรอฉันอนุมัติ', value: 'ขอดูงานของฉัน' },
-                        { label: '📊 สรุปเดือนปัจจุบัน', value: 'สรุปภาพรวมใบลา' },
-                        { label: '✅ ช่วยอนุมัติ', value: 'อนุมัติ' },
-                        { label: '🖨️ ช่วยพิมพ์ใบลา', value: 'ปริ้น' }
-                    ]
-                );
             }
         });
 
@@ -2533,7 +2670,7 @@
                         const mode = /ลามากสุด|ใครลาเยอะ|อันดับ/i.test(t) ? 'top' : (/สถานะ|อนุมัติ|คิว|n1|n2|n3/i.test(t) ? 'status' : 'type');
                         openFloatingPieChart(mode);
                     }, 
-                    reply: "📊 แสดงกราฟวงกลมสรุปข้อมูลการลาเฉพาะเดือนปัจจุบันให้บนหน้าจอแล้วครับ! (สามารถกดสลับดูแยกตามประเภทการลา หรือแยกตามสถานะการอนุมัติบนกราฟได้เลยครับ)" 
+                    reply: "📊 เปิดกราฟสรุปข้อมูลเดือนปัจจุบันให้แล้วครับ" 
                 },
                 { regex: /รีเฟรช|refresh|โหลดใหม่/, action: () => document.getElementById('loadDataButton').click(), reply: "รีเฟรชข้อมูลล่าสุดจากชีตให้เรียบร้อยแล้วครับ 🔄" },
                 { 
@@ -2545,21 +2682,70 @@
                     }, 
                     reply: "ล้างค่าตัวกรอง ประวัติแชท และสถิติให้กลับไปเป็นค่าเริ่มต้นเรียบร้อยครับ 🧹" 
                 },
-                { regex: /^มีกี่คน|ทั้งหมดกี่คน|จำนวนพนักงาน|สรุปภาพรวมใบลา|สรุปข้อมูล/, action: () => null, 
-                    reply: (() => {
+                { 
+                    regex: /^มีกี่คน|ทั้งหมดกี่คน|จำนวนพนักงาน|สรุปภาพรวมใบลา|สรุปข้อมูล/, 
+                    action: () => {
                         const s = buildCurrentMonthSummaryStats(allData);
-                        return `📊 สรุปข้อมูลใบลาประจำเดือน${s.monthLabel} (ทั้งหมด ${s.total} รายการ):\n`
-                             + `• อนุมัติครบแล้ว: ${s.approved} รายการ\n`
-                             + `• รออนุมัติรวม: ${s.pendingTotal} รายการ (รอ N1: ${s.waitN1} | รอ N2: ${s.waitN2} | รอ N3: ${s.waitN3})\n`
-                             + `• ไม่อนุมัติ: ${s.rejected} รายการ\n`
-                             + `• แยกประเภท: พักร้อน ${s.byType.AL}, ป่วยมีใบรับรอง ${s.byType.SL_Paid}, ป่วยไม่มีใบรับรอง ${s.byType.SL_Unpaid}, ลากิจ ${s.byType.BL} รายการ`;
-                    })(),
-                    options: [
-                        { label: '📈 ดูเป็นกราฟวงกลม', value: 'ขอสรุปเป็นกราฟวงกลม' },
-                        { label: '⚡ ดูงานรอฉันอนุมัติ', value: 'ขอดูงานของฉัน' },
-                        { label: '⏳ ดูงานรอ N1', value: 'ขอดูงานรอ N1' },
-                        { label: '⏳ ดูงานรอ N2', value: 'ขอดูงานรอ N2' }
-                    ]
+                        const queueHtml = s.pendingTotal > 0 
+                            ? `<div class="chat-queue-bar">⏳ คิวรออนุมัติ: <b>N1</b> (${s.waitN1}) • <b>N2</b> (${s.waitN2}) • <b>N3</b> (${s.waitN3})</div>`
+                            : '';
+
+                        const cardHtml = `
+                            <div class="chat-summary-card">
+                                <div class="chat-summary-header">
+                                    <span>📊 เดือน${s.monthLabel}</span>
+                                    <span class="chat-summary-total-badge">รวม ${s.total} รายการ</span>
+                                </div>
+                                <div class="chat-stat-grid">
+                                    <div class="chat-stat-mini">
+                                        <span>อนุมัติครบ</span>
+                                        <strong style="color:#16a34a;">${s.approved}</strong>
+                                    </div>
+                                    <div class="chat-stat-mini">
+                                        <span>รออนุมัติ</span>
+                                        <strong style="color:#d97706;">${s.pendingTotal}</strong>
+                                    </div>
+                                    <div class="chat-stat-mini">
+                                        <span>ไม่อนุมัติ</span>
+                                        <strong style="color:#dc2626;">${s.rejected}</strong>
+                                    </div>
+                                </div>
+                                ${queueHtml}
+                                <div class="chat-type-list">
+                                    <div class="chat-type-item"><span>🌴 พักร้อน</span><b>${s.byType.AL}</b></div>
+                                    <div class="chat-type-item"><span>💼 ลากิจ</span><b>${s.byType.BL}</b></div>
+                                    <div class="chat-type-item"><span>🏥 ป่วย (มีใบฯ)</span><b>${s.byType.SL_Paid}</b></div>
+                                    <div class="chat-type-item"><span>🤒 ป่วย (ไม่มีใบฯ)</span><b>${s.byType.SL_Unpaid}</b></div>
+                                </div>
+                            </div>
+                        `;
+
+                        const msgDiv = document.createElement('div');
+                        msgDiv.classList.add('message', 'ai-message');
+                        msgDiv.style.width = '90%';
+                        msgDiv.innerHTML = cardHtml;
+
+                        // แสดงเฉพาะปุ่มที่เกี่ยวข้องจริงๆ
+                        const smartOptions = [{ label: '📈 เปิดกราฟวงกลม', value: 'ขอสรุปเป็นกราฟวงกลม' }];
+                        if (s.pendingTotal > 0) {
+                            smartOptions.push({ label: '⚡ งานรอฉันอนุมัติ', value: 'ขอดูงานของฉัน' });
+                        }
+
+                        const optionsDiv = document.createElement('div');
+                        optionsDiv.style.cssText = 'display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;';
+                        smartOptions.forEach(opt => {
+                            const btn = document.createElement('button');
+                            btn.textContent = opt.label;
+                            btn.style.cssText = 'padding:5px 12px; border:1px solid #3498db; background:#fff; color:#3498db; border-radius:15px; cursor:pointer; font-size:0.8em; font-family:Kanit,sans-serif;';
+                            btn.onclick = () => { chatInput.value = opt.value; handleSendMessage(); };
+                            optionsDiv.appendChild(btn);
+                        });
+                        msgDiv.appendChild(optionsDiv);
+
+                        chatMessages.appendChild(msgDiv);
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }, 
+                    reply: null
                 },
                 { 
                     regex: /^เดี๋ยวฉันอนุมัติเอง$/i, 
