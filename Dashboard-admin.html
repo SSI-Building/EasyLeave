@@ -9,11 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-              <link 
+    <link 
     rel="icon" 
     type="image/png" 
     href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAARnSURBVFiF7ZZrUFR1GMZ/57LA7gILyGUhQBuveKnGbpRklpmXLjpSmjZBzuSHTG0iw6aZLo5mQ45aY8qU00wTDkNYWDBh012bvCIiAhtXRQOUlAWXXfZ2zunD0g63lHGxL/nMnA/nPc85zzPv//m//wM38X+HAIwxRoQVuntc0xCG8YYGwSHBJ7u7bE8DLQEbMEaElS1at3T6/YtnDUceTdM4mP+DWrpr3+/dVtvMgA3ogoN6tpd/GmIIgii9giRo/0pWVOjokbG7NLLufsHhcbqNgRqQQUMQBEbpvYi94mU/V7J9zW4EBBAg++MXuW1GCpIIUXovPV4daJoYqDiACCCg+cUBGiubeWv9KjpbjvHqmhU0nm72P5NGRHaAgYGISYzi8PEKHA4nh49XEJsUPbKq1zIwc1EqNtnJmKmzEaNk7ps3/YYZkIcqdlvtpKSOJ35cHJGxJmyddkyjwv4bA/WnzrIx40NuTRqLXqenx93I5+9+xYaCLMZMSrzxBnLX5/HQvY+QlJDkryXGJfPJG/lsLsoecQODMtDS1NZPHGB04mjO1JzrV5v/Uvq+kTAwqAOaNngQdXR24HK5+XJnKQCdTpG2hpYYYH0A2q3AFwIw5OgTBIHcHR8QFxvDmrWryXziLkIMwQHo9cfRyrP2Q+VNBwWj0eDpbi+XMUwckvh+Tg5X6n8ke+UcdPqRM6CqGtGp2c5rzjW320WQLAHwzU+VfPtrFQA1DW08sHwbacu3UlnrOxQPnWwie4svGqs2FOBwunG6PKzeWIil8YKfX2H5E1H0nX3+DNTU1FBSUtJPPD09vd997ZmLyJLIY7Omcq7NSnysiZx1i0hOiATgoz0HKD1QxSvPP4zd4Wb/wWp0soS1y875Nitx0WFsyV7s50OfXaCq6hBtGlzri+Onm3l5017aL9vo6LRzpOIMK5ekkV9SxpL50yncX07R9xUsfvQOAE5Un2ftpkIuXrINNiCKg1djqFpf3D7pFjZnPYk5OpyC0hN4vAq/lTWwp/gYc2akcKyymV+O1jE3bTIA0yYk8F7WQszR4dfXAVkS+azoCOtyipAlkVN/tPD61q+prm9j73fl7Hx7KbnvPEOoIZjapgsseHAKaXeOJdQQjCSJnK5r7eW3+r/p3wWWZpXi4mIAzGYzmZmZKIrCwsfnMjsllBXpqbhFkYbmdiJNBhLNkVTXt6JpMGV8PJes3cTHmABov2xjVKQRR48HVVUxhelRVJWqOh9/8rh4gnQSUfe85uwNoYbX4/a7UhQFRVF4btlThHgu8eyCmSguLxIwMTYCALfVzvhon6Cn04FJEHH0rm0o4OqwIwES4HD56v/wvV0OLOf+wqjXKYIx1OCxXSiTBTkcgswg+LZcXl4eGRkZhIfqB2TBN7c0TdMURVWuGpKrICRI53S51WUkJJstu3dt1NTuGk2zW4Z17dj2ppaQGHfyesX7QgBGJySbS7s6rkwY5l85psgwS+v5i/PwzfObuImA8DflOdqDG+EpCwAAAABJRU5ErkJggg=="
 	>
+
 
     <style>
         /* ==================== 1. Theme & Variables ==================== */
@@ -744,6 +745,244 @@
     margin-top: 10px;
     min-height: 20px;
 }
+
+/* ==================== 10. Floating Pie Chart Overlay ==================== */
+#ai-chart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 15000;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#ai-chart-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+.ai-chart-modal {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 540px;
+    padding: 28px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    font-family: 'Kanit', sans-serif;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+#ai-chart-overlay.visible .ai-chart-modal {
+    transform: scale(1) translateY(0);
+}
+.ai-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+.ai-chart-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+}
+.ai-chart-subtitle {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+.ai-chart-close {
+    background: #f1f5f9;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #475569;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.ai-chart-close:hover {
+    background: #fee2e2;
+    color: #ef4444;
+    transform: rotate(90deg);
+}
+.ai-chart-tabs {
+    display: flex;
+    gap: 8px;
+    background: #f1f5f9;
+    padding: 5px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+}
+.ai-chart-tab {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #64748b;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.ai-chart-tab.active {
+    background: #ffffff;
+    color: var(--primary-color);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    font-weight: 600;
+}
+.ai-chart-canvas-wrap {
+    position: relative;
+    height: 290px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.ai-chart-footer-stats {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+.chart-stat-box span {
+    display: block;
+    font-size: 0.78rem;
+    color: #64748b;
+}
+.chart-stat-box strong {
+    font-size: 1.15rem;
+    color: var(--primary-color);
+}
+/* ==================== Top Leave Ranking & Drill-down ==================== */
+.top-leave-list {
+    max-height: 290px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+    text-align: left;
+}
+.top-leave-list::-webkit-scrollbar { width: 6px; }
+.top-leave-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+.top-leave-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+.top-leave-item:hover {
+    border-color: #94a3b8;
+    background: #f1f5f9;
+}
+.top-leave-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 14px;
+    cursor: pointer;
+    user-select: none;
+}
+.top-rank-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.rank-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+    background: #e2e8f0;
+    color: #475569;
+}
+.rank-badge.top-1 { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+.rank-badge.top-2 { background: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; }
+.rank-badge.top-3 { background: #fed7aa; color: #9a3412; border: 1px solid #fdba74; }
+
+.emp-clean-name {
+    font-weight: 600;
+    font-size: 0.96rem;
+    color: #1e293b;
+}
+.top-rank-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.leave-count-pill {
+    background: #dbeafe;
+    color: #1d4ed8;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.drill-arrow {
+    color: #64748b;
+    font-size: 0.85rem;
+    transition: transform 0.25s ease;
+}
+.top-leave-item.open .drill-arrow {
+    transform: rotate(180deg);
+}
+.top-leave-detail {
+    display: none;
+    padding: 10px 14px 14px 14px;
+    background: #ffffff;
+    border-top: 1px dashed #cbd5e1;
+    font-size: 0.85rem;
+}
+.top-leave-item.open .top-leave-detail {
+    display: block;
+}
+.detail-type-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.detail-chip {
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+.chip-al { background: #e0f2fe; color: #0369a1; }
+.chip-sl-paid { background: #dcfce7; color: #15803d; }
+.chip-sl-unpaid { background: #fef3c7; color: #b45309; }
+.chip-bl { background: #f3e8ff; color: #7e22ce; }
+
+.detail-history-list {
+    margin: 0;
+    padding-left: 16px;
+    color: #475569;
+    line-height: 1.6;
+}
     </style>
 </head>
 <body>
@@ -881,11 +1120,51 @@
             <button id="send-chat-btn"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
+
+<!-- Floating Pie Chart & Top Ranking Overlay -->
+    <div id="ai-chart-overlay" onclick="if(event.target === this) closeFloatingPieChart()">
+        <div class="ai-chart-modal">
+            <div class="ai-chart-header">
+                <div>
+                    <h3 class="ai-chart-title" id="aiChartTitle">📊 สรุปข้อมูลการลาประจำเดือน</h3>
+                    <div class="ai-chart-subtitle" id="aiChartSubtitle">ข้อมูลเฉพาะเดือนปัจจุบันเท่านั้น</div>
+                </div>
+                <button class="ai-chart-close" onclick="closeFloatingPieChart()" title="ปิดหน้าต่างกราฟ">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="ai-chart-tabs">
+                <button class="ai-chart-tab active" id="tabChartType" onclick="switchFloatingChartMode('type')">
+                    🏷️ ประเภทการลา
+                </button>
+                <button class="ai-chart-tab" id="tabChartStatus" onclick="switchFloatingChartMode('status')">
+                    ⏳ สถานะอนุมัติ
+                </button>
+                <button class="ai-chart-tab" id="tabChartTop" onclick="switchFloatingChartMode('top')">
+                    🏆 ลามากสุด
+                </button>
+            </div>
+
+            <!-- ส่วนแสดงกราฟวงกลม -->
+            <div class="ai-chart-canvas-wrap" id="chartCanvasContainer">
+                <canvas id="floatingPieCanvas"></canvas>
+            </div>
+
+            <!-- ส่วนแสดงอันดับคนลามากสุด + เจาะลึกรายละเอียด -->
+            <div id="topLeaveRankContainer" style="display: none;"></div>
+
+            <div class="ai-chart-footer-stats" id="aiChartFooterStats"></div>
+        </div>
+    </div>
     
     <!-- LINE LIFF SDK & External Libraries -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> 
+    <!-- เพิ่ม Chart.js สำหรับสร้างกราฟวงกลมลอยทับหน้าจอ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     
     <!-- Main JavaScript Logic -->
     <script>
@@ -1849,6 +2128,256 @@
         const chatHistory = [];
         let pendingQueueAlertItems = [];
 
+        let floatingPieChartInstance = null;
+        let currentChartMode = 'type'; // 'type' | 'status' | 'top'
+
+        function openFloatingPieChart(mode = 'type') {
+            const stats = buildCurrentMonthSummaryStats(allData);
+            const overlay = document.getElementById('ai-chart-overlay');
+            const titleEl = document.getElementById('aiChartTitle');
+            const subEl = document.getElementById('aiChartSubtitle');
+
+            if (!overlay) return;
+            titleEl.textContent = `📊 กราฟสรุปการลา เดือน${stats.monthLabel}`;
+            subEl.textContent = `คัดกรองเฉพาะข้อมูลในเดือน${stats.monthLabel} (รวมทั้งสิ้น ${stats.total} รายการ)`;
+
+            overlay.classList.add('visible');
+            switchFloatingChartMode(mode);
+        }
+
+        function closeFloatingPieChart() {
+            const overlay = document.getElementById('ai-chart-overlay');
+            if (overlay) overlay.classList.remove('visible');
+        }
+
+        // ฟังก์ชันคำนวณอันดับพนักงานที่ลามากที่สุดเฉพาะเดือนปัจจุบัน (ชื่อ-นามสกุล + รายละเอียดเจาะลึก)
+        function buildCurrentMonthTopLeavers(sourceDataset) {
+            const now = new Date();
+            const thNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+            const currentYear = thNow.getFullYear();
+            const currentMonth = thNow.getMonth();
+
+            const currentMonthRows = (sourceDataset || []).filter(row => {
+                const submitDate = new Date(row[11]);
+                const leaveStartDate = new Date(row[5]);
+                const checkDate = !isNaN(submitDate.getTime()) ? submitDate : leaveStartDate;
+                if (isNaN(checkDate.getTime())) return false;
+                return checkDate.getFullYear() === currentYear && checkDate.getMonth() === currentMonth;
+            });
+
+            const personMap = {};
+
+            currentMonthRows.forEach(row => {
+                // ดึงเฉพาะ ชื่อ-นามสกุล (ตัดรหัสพนักงานออก)
+                const rawName = String(row[1] || 'ไม่ระบุชื่อ').trim();
+                const cleanName = rawName.replace(/^[A-Z]\d+\s*[-:]?\s*/i, '').trim();
+
+                if (!personMap[cleanName]) {
+                    personMap[cleanName] = {
+                        name: cleanName,
+                        totalCount: 0,
+                        counts: { AL: 0, SL_Paid: 0, SL_Unpaid: 0, BL: 0 },
+                        records: []
+                    };
+                }
+
+                const p = personMap[cleanName];
+                p.totalCount++;
+
+                const lType = String(row[4] || '');
+                const hasDoc = String(row[14] || '') === 'มี';
+                let typeLabel = getLeaveTypeDisplay(lType);
+
+                if (lType.startsWith('AL')) {
+                    p.counts.AL++;
+                } else if (lType.startsWith('SL')) {
+                    if (hasDoc) {
+                        p.counts.SL_Paid++;
+                        typeLabel = 'ลาป่วย (มีใบรับรอง)';
+                    } else {
+                        p.counts.SL_Unpaid++;
+                        typeLabel = 'ลาป่วย (ไม่มีใบรับรอง)';
+                    }
+                } else if (lType.startsWith('BL')) {
+                    p.counts.BL++;
+                }
+
+                const startStr = typeof formatDateThailand === 'function' ? formatDateThailand(row[5]) : (row[5] || '');
+                const reasonStr = String(row[12] || '-').trim();
+                p.records.push({
+                    typeLabel,
+                    date: startStr,
+                    reason: reasonStr
+                });
+            });
+
+            return Object.values(personMap).sort((a, b) => b.totalCount - a.totalCount);
+        }
+
+        function toggleTopLeaveDetail(idx) {
+            const item = document.getElementById(`topLeaveItem_${idx}`);
+            if (item) item.classList.toggle('open');
+        }
+
+        function switchFloatingChartMode(mode) {
+            currentChartMode = mode;
+            const tabType = document.getElementById('tabChartType');
+            const tabStatus = document.getElementById('tabChartStatus');
+            const tabTop = document.getElementById('tabChartTop');
+            if (tabType) tabType.classList.toggle('active', mode === 'type');
+            if (tabStatus) tabStatus.classList.toggle('active', mode === 'status');
+            if (tabTop) tabTop.classList.toggle('active', mode === 'top');
+
+            const stats = buildCurrentMonthSummaryStats(allData);
+            const canvasContainer = document.getElementById('chartCanvasContainer');
+            const topRankContainer = document.getElementById('topLeaveRankContainer');
+            const canvas = document.getElementById('floatingPieCanvas');
+            const footerStats = document.getElementById('aiChartFooterStats');
+
+            if (footerStats) {
+                footerStats.innerHTML = `
+                    <div class="chart-stat-box"><span>ทั้งหมดเดือนนี้</span><strong>${stats.total}</strong></div>
+                    <div class="chart-stat-box"><span>อนุมัติแล้ว</span><strong style="color:#27ae60;">${stats.approved}</strong></div>
+                    <div class="chart-stat-box"><span>รออนุมัติ</span><strong style="color:#f39c12;">${stats.pendingTotal}</strong></div>
+                    <div class="chart-stat-box"><span>ไม่อนุมัติ</span><strong style="color:#e74c3c;">${stats.rejected}</strong></div>
+                `;
+            }
+
+            // กรณีเลือกแท็บ "🏆 ลามากสุด"
+            if (mode === 'top') {
+                canvasContainer.style.display = 'none';
+                topRankContainer.style.display = 'block';
+
+                const ranking = buildCurrentMonthTopLeavers(allData);
+                if (ranking.length === 0) {
+                    topRankContainer.innerHTML = `<div style="text-align:center; padding:40px 10px; color:#64748b;">ยังไม่มีประวัติการลาในเดือนนี้ครับ</div>`;
+                    return;
+                }
+
+                let html = `<div style="font-size:0.8rem; color:#64748b; margin-bottom:8px; text-align:left;">💡 คลิกที่ชื่อพนักงานเพื่อเจาะลึกรายละเอียดประเภทและวันที่ลา</div>`;
+                html += `<div class="top-leave-list">`;
+
+                ranking.forEach((person, index) => {
+                    const rankNum = index + 1;
+                    const badgeClass = rankNum === 1 ? 'top-1' : rankNum === 2 ? 'top-2' : rankNum === 3 ? 'top-3' : '';
+                    const medal = rankNum === 1 ? '🥇' : rankNum === 2 ? '🥈' : rankNum === 3 ? '🥉' : rankNum;
+
+                    // สร้างป้ายสรุปประเภทการลาของคนนี้
+                    let chipsHtml = '';
+                    if (person.counts.AL > 0) chipsHtml += `<span class="detail-chip chip-al">พักร้อน ${person.counts.AL} ครั้ง</span>`;
+                    if (person.counts.SL_Paid > 0) chipsHtml += `<span class="detail-chip chip-sl-paid">ป่วยมีใบรับรอง ${person.counts.SL_Paid} ครั้ง</span>`;
+                    if (person.counts.SL_Unpaid > 0) chipsHtml += `<span class="detail-chip chip-sl-unpaid">ป่วยไม่มีใบรับรอง ${person.counts.SL_Unpaid} ครั้ง</span>`;
+                    if (person.counts.BL > 0) chipsHtml += `<span class="detail-chip chip-bl">ลากิจ ${person.counts.BL} ครั้ง</span>`;
+
+                    // รายการวันที่และเหตุผลแบบเจาะลึก
+                    const historyItems = person.records.map(r => 
+                        `<li><b>${r.typeLabel}</b> • วันที่ ${r.date} <span style="color:#64748b;">(${r.reason})</span></li>`
+                    ).join('');
+
+                    html += `
+                        <div class="top-leave-item" id="topLeaveItem_${index}">
+                            <div class="top-leave-row" onclick="toggleTopLeaveDetail(${index})">
+                                <div class="top-rank-left">
+                                    <span class="rank-badge ${badgeClass}">${medal}</span>
+                                    <span class="emp-clean-name">${person.name}</span>
+                                </div>
+                                <div class="top-rank-right">
+                                    <span class="leave-count-pill">ลา ${person.totalCount} ครั้ง</span>
+                                    <i class="fas fa-chevron-down drill-arrow"></i>
+                                </div>
+                            </div>
+                            <div class="top-leave-detail">
+                                <div class="detail-type-chips">${chipsHtml}</div>
+                                <ul class="detail-history-list">${historyItems}</ul>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+                topRankContainer.innerHTML = html;
+                return;
+            }
+
+            // กรณีเลือกแท็บกราฟวงกลม ('type' หรือ 'status')
+            topRankContainer.style.display = 'none';
+            canvasContainer.style.display = 'flex';
+
+            if (floatingPieChartInstance) {
+                floatingPieChartInstance.destroy();
+            }
+
+            let labels = [];
+            let dataValues = [];
+            let bgColors = [];
+
+            if (mode === 'type') {
+                labels = ['ลาพักร้อน (AL)', 'ลาป่วย (มีใบรับรอง)', 'ลาป่วย (ไม่มีใบรับรอง)', 'ลากิจ (BL)'];
+                dataValues = [stats.byType.AL, stats.byType.SL_Paid, stats.byType.SL_Unpaid, stats.byType.BL];
+                bgColors = ['#3498db', '#2ecc71', '#f39c12', '#9b59b6'];
+            } else {
+                labels = ['อนุมัติครบแล้ว', 'รอคิว N1', 'รอคิว N2', 'รอคิว N3', 'ไม่อนุมัติ'];
+                dataValues = [stats.approved, stats.waitN1, stats.waitN2, stats.waitN3, stats.rejected];
+                bgColors = ['#27ae60', '#3498db', '#f39c12', '#8e44ad', '#e74c3c'];
+            }
+
+            const totalSum = dataValues.reduce((a, b) => a + b, 0);
+
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+
+            floatingPieChartInstance = new Chart(canvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: totalSum === 0 ? [1] : dataValues,
+                        backgroundColor: totalSum === 0 ? ['#e2e8f0'] : bgColors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Kanit', size: 12 },
+                                padding: 14,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            enabled: totalSum > 0,
+                            titleFont: { family: 'Kanit', size: 13 },
+                            bodyFont: { family: 'Kanit', size: 13 },
+                            callbacks: {
+                                label: (ctx) => {
+                                    const val = ctx.raw;
+                                    const pct = totalSum > 0 ? ((val / totalSum) * 100).toFixed(1) : 0;
+                                    return ` ${ctx.label}: ${val} รายการ (${pct}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display: totalSum > 0,
+                            color: '#ffffff',
+                            font: { family: 'Kanit', weight: 'bold', size: 12 },
+                            formatter: (value) => {
+                                if (value === 0) return '';
+                                const pct = ((value / totalSum) * 100).toFixed(0);
+                                return `${value}\n(${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         chatToggleBtn.addEventListener('click', () => {
             chatWindow.classList.remove('hidden');
             const badgeEl = document.getElementById('chatBadge');
@@ -1886,6 +2415,7 @@
                     'สวัสดีครับ! ผมคือ AI ผู้ช่วยจัดการใบลา (รองรับระบบคิว N1 → N2 → N3) เลือกคำสั่งด่วนด้านล่าง หรือพิมพ์ถามข้อมูลได้เลยครับ 😊',
                     'ai-message',
                     [
+                        { label: '📈 กราฟเดือนนี้', value: 'ขอสรุปเป็นกราฟวงกลม' },
                         { label: '⚡ งานรอฉันอนุมัติ', value: 'ขอดูงานของฉัน' },
                         { label: '📊 สรุปเดือนปัจจุบัน', value: 'สรุปภาพรวมใบลา' },
                         { label: '✅ ช่วยอนุมัติ', value: 'อนุมัติ' },
@@ -1981,6 +2511,14 @@
             const typingMsg = appendMessage('กำลังประมวลผล...', 'ai-message');
             const t = text.toLowerCase();
             const localCommands = [
+                { 
+                    regex: /กราฟ|pie|ชาร์ต|chart|แผนภูมิ/i, 
+                    action: () => {
+                        const mode = /ลามากสุด|ใครลาเยอะ|อันดับ/i.test(t) ? 'top' : (/สถานะ|อนุมัติ|คิว|n1|n2|n3/i.test(t) ? 'status' : 'type');
+                        openFloatingPieChart(mode);
+                    }, 
+                    reply: "📊 แสดงกราฟวงกลมสรุปข้อมูลการลาเฉพาะเดือนปัจจุบันให้บนหน้าจอแล้วครับ! (สามารถกดสลับดูแยกตามประเภทการลา หรือแยกตามสถานะการอนุมัติบนกราฟได้เลยครับ)" 
+                },
                 { regex: /รีเฟรช|refresh|โหลดใหม่/, action: () => document.getElementById('loadDataButton').click(), reply: "รีเฟรชข้อมูลล่าสุดจากชีตให้เรียบร้อยแล้วครับ 🔄" },
                 { 
                     regex: /รีเซ็ต|ล้างค่า|เริ่มใหม่|แสดงทั้งหมด/, 
@@ -2001,10 +2539,10 @@
                              + `• แยกประเภท: พักร้อน ${s.byType.AL}, ป่วยมีใบรับรอง ${s.byType.SL_Paid}, ป่วยไม่มีใบรับรอง ${s.byType.SL_Unpaid}, ลากิจ ${s.byType.BL} รายการ`;
                     })(),
                     options: [
+                        { label: '📈 ดูเป็นกราฟวงกลม', value: 'ขอสรุปเป็นกราฟวงกลม' },
                         { label: '⚡ ดูงานรอฉันอนุมัติ', value: 'ขอดูงานของฉัน' },
                         { label: '⏳ ดูงานรอ N1', value: 'ขอดูงานรอ N1' },
-                        { label: '⏳ ดูงานรอ N2', value: 'ขอดูงานรอ N2' },
-                        { label: '⏳ ดูงานรอ N3', value: 'ขอดูงานรอ N3' }
+                        { label: '⏳ ดูงานรอ N2', value: 'ขอดูงานรอ N2' }
                     ]
                 },
                 { 
@@ -2200,9 +2738,10 @@ ${memoryText}
 1. ตอบคำถามด้วยภาษาไทยที่สุภาพ กระชับ เป็นกันเอง หากผู้ใช้ถามภาพรวมหรือจำนวนสรุป ให้อ้างอิงจาก currentMonthSummary (เฉพาะเดือนปัจจุบัน) เสมอ
 2. ระบบนี้เป็นการอนุมัติ 3 ลำดับขั้น: N1 -> N2 -> N3 (และ VIP อนุมัติได้ทุกระดับ) โดยดูคิวปัจจุบันของแต่ละคนได้จากฟิลด์ queueTurn (N1, N2, N3, DONE=อนุมัติครบ, REJECTED=ไม่อนุมัติ)
 3. เงื่อนไขการรับเงิน (Paid): ลาพักร้อน (AL) ได้เงินเสมอ, ส่วนลาป่วย (SL) และลากิจ (BL) ต้องมีเอกสารประกอบ (hasDoc="มี") จึงจะได้เงิน
-4. หากผู้ใช้สั่งให้ค้นหา กรองตาราง เปลี่ยนคิว เรียงลำดับ เปิดหน้าสรุป หรือรีเซ็ต ให้ตอบกลับเป็น JSON Object ตามรูปแบบ AVAILABLE TOOLS เท่านั้น (ห้ามมีข้อความอื่นปนเด็ดขาด หากเป็นคำถามทั่วไปให้ตอบเป็นข้อความปกติ)`;
+4. หากผู้ใช้สั่งให้ค้นหา กรองตาราง เปลี่ยนคิว เรียงลำดับ เปิดหน้าสรุป แสดงกราฟวงกลม หรือรีเซ็ต ให้ตอบกลับเป็น JSON Object ตามรูปแบบ AVAILABLE TOOLS เท่านั้น (ห้ามมีข้อความอื่นปนเด็ดขาด หากเป็นคำถามทั่วไปให้ตอบเป็นข้อความปกติ)`;
 
             const TOOL_REGISTRY = [
+                { action: "show_pie_chart", chartMode: "type (แยกประเภทการลา) หรือ status (แยกสถานะอนุมัติ)" },
                 { action: "search", keyword: "ชื่อพนักงานที่ต้องการค้นหา" },
                 { action: "filter_type", type: "SL1 หรือ AL1 หรือ BL1 หรือ ค่าว่างเพื่อดูทั้งหมด" },
                 { action: "filter_status", status: "Approved หรือ pending หรือ Rejected หรือ ค่าว่าง" },
@@ -2246,10 +2785,14 @@ ${memoryText}
                 if (!jsonMatch) throw new Error("Not a JSON tool response");
 
                 const command = JSON.parse(jsonMatch[0]);
-                const validActions = ["search", "summary", "filter_type", "filter_status", "filter_queue", "sort", "reset"];
+                const validActions = ["show_pie_chart", "search", "summary", "filter_type", "filter_status", "filter_queue", "sort", "reset"];
                 if (!validActions.includes(command.action)) throw new Error("Invalid Tool");
 
-                if (command.action === "search") {
+                if (command.action === "show_pie_chart") {
+                    const mode = command.chartMode === 'status' ? 'status' : 'type';
+                    openFloatingPieChart(mode);
+                    appendMessage('📊 แสดงกราฟวงกลมสรุปข้อมูลเฉพาะเดือนปัจจุบันให้บนหน้าจอเรียบร้อยครับ!', 'ai-message');
+                } else if (command.action === "search") {
                     appendMessage(`กำลังค้นหารายชื่อที่มีคำว่า "${command.keyword}" บนตารางให้ครับ 🔍`, 'ai-message');
                     document.getElementById('searchName').value = command.keyword || '';
                     document.getElementById('searchName').dispatchEvent(new Event('input'));
