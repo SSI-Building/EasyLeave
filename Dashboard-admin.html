@@ -24,6 +24,7 @@
             --secondary-color: #7f8c8d;
             --background-color: #ecf0f1;
             --card-background: #ffffff;
+            --surface-muted: #f8fafc;
             --text-color: #34495e;
             --text-light: #95a5a6;
             --border-color: #bdc3c7;
@@ -31,6 +32,14 @@
             --approved-color: #27ae60;
             --rejected-color: #c0392b;
             --pending-color: #f39c12;
+
+            /* ตัวแปรสีปุ่มและองค์ประกอบเฉพาะจุด */
+            --sort-btn-bg: #3498db;
+            --reset-btn-bg: #7f8c8d;
+            --export-btn-bg: #1D6F42;
+            --approve-btn-bg: #2ecc71;
+            --reject-btn-bg: #e74c3c;
+            --pagination-active-bg: #0056b3;
         }
         
         /* ==================== 2. Base & Full-Screen Fit Layout ==================== */
@@ -66,7 +75,8 @@
             max-width: none;
             min-width: 0;
             height: calc(100dvh - 28px);
-            background-color: rgba(255, 255, 255, 0.96);
+            background-color: var(--card-background);
+            color: var(--text-color);
             border-radius: 16px;
             box-shadow: var(--box-shadow);
             padding: 18px 28px 14px 28px;
@@ -77,6 +87,7 @@
             flex-direction: column;
             justify-content: space-between;
             overflow: hidden;
+            transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
         }
 
         /* ==================== 3. Unified Header + Compact LINE Auth Pill ==================== */
@@ -196,6 +207,14 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            #resetButton { background: var(--reset-btn-bg); }
+            #resetButton:hover { filter: brightness(0.9); transform: translateY(-3px); }
+            
+            #sortButton { background: var(--sort-btn-bg); }
+            #sortButton:hover { filter: brightness(0.9); transform: translateY(-3px); }
+            
+            #exportHistoryButton { background: var(--export-btn-bg); }
+            #exportHistoryButton:hover { filter: brightness(0.9); transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.18); }
         }
         
         #loadDataButton, #summaryButton, #summaryButton2, #AddButton {
@@ -432,12 +451,116 @@
             align-items: center;
             gap: 8px;
         }
+.auth-user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative; /* สำคัญ: เพื่อให้เมนูธีมลอยอ้างอิงตำแหน่งจากกล่องนี้ */
+        }
+        .avatar-theme-trigger {
+            position: relative;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+        .avatar-theme-trigger:hover {
+            transform: scale(1.08);
+        }
         .auth-avatar {
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid #06C755;
+            display: block;
+        }
+        .avatar-palette-badge {
+            position: absolute;
+            bottom: -2px;
+            right: -3px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: #ffffff;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+
+        /* หน้าต่าง Popover เลือกธีมสี */
+        .theme-picker-popover {
+            position: absolute;
+            top: 44px;
+            left: 0;
+            width: 245px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+            z-index: 10000;
+            font-family: 'Kanit', sans-serif;
+            display: none;
+            animation: fadeDrop 0.2s ease-out;
+        }
+        .theme-picker-popover.open {
+            display: block;
+        }
+        @keyframes fadeDrop {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .theme-picker-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .theme-swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .theme-swatch-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 7px 4px;
+            border-radius: 10px;
+            border: 1.5px solid #f1f5f9;
+            background: #f8fafc;
+            cursor: pointer;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.74rem;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .theme-swatch-btn:hover {
+            background: #f1f5f9;
+            transform: translateY(-1px);
+        }
+        .theme-swatch-btn.active {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+            color: #0f172a;
+            font-weight: 600;
+        }
+        .swatch-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         }
         #adminSubText {
             display: none;
@@ -560,10 +683,21 @@
             flex-wrap: wrap;
         }
         .btn-step-approve, .btn-approve-step {
-            background: #2ecc71;
+            background: var(--approve-btn-bg);
             color: white;
             border: none;
             padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-weight: 600;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+        }
+        .btn-step-reject, .btn-reject-step {
+            background: var(--reject-btn-bg);
+            color: white;
+            border: none;
+            padding: 5px 9px;
             border-radius: 8px;
             font-size: 0.8em;
             font-weight: 600;
@@ -1198,7 +1332,301 @@
 .chat-type-item b {
     color: #1e293b;
 }
-    </style>
+/* ==================== Theme-Synced Buttons & Surfaces (วางท้ายสุด) ==================== */
+        #loadDataButton, #summaryButton, #summaryButton2, #AddButton {
+            background: var(--primary-gradient) !important;
+            color: #ffffff !important;
+        }
+        #resetButton {
+            background: var(--reset-btn-bg) !important;
+            color: #ffffff !important;
+        }
+        #sortButton {
+            background: var(--sort-btn-bg) !important;
+            color: #ffffff !important;
+        }
+        #exportHistoryButton {
+            background: var(--export-btn-bg) !important;
+            color: #ffffff !important;
+        }
+        #resetButton:hover, #sortButton:hover, #exportHistoryButton:hover {
+            filter: brightness(0.92);
+            transform: translateY(-2px);
+        }
+
+        .btn-step-approve, .btn-approve-step {
+            background: var(--approve-btn-bg) !important;
+            color: #ffffff !important;
+        }
+        .btn-step-reject, .btn-reject-step {
+            background: var(--reject-btn-bg) !important;
+            color: #ffffff !important;
+        }
+
+        .pagination-button.active {
+            background-color: var(--pagination-active-bg) !important;
+            border-color: var(--pagination-active-bg) !important;
+            color: #ffffff !important;
+        }
+
+        .admin-auth-bar,
+        .theme-picker-popover,
+        #ai-chat-window,
+        .chat-footer,
+        .quick-chips-bar,
+        .ai-chart-modal {
+            background-color: var(--card-background);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+        .chat-body {
+            background-color: var(--surface-muted);
+        }
+        .chat-footer input,
+        .controls input[type="date"],
+        .filter-controls input[type="text"],
+        .filter-controls select,
+        #roleQueueFilter {
+            background-color: var(--surface-muted);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+        table tbody tr {
+            background-color: var(--card-background);
+            color: var(--text-color);
+        }
+        table tbody tr:hover {
+            background-color: var(--surface-muted);
+        }
+        table td {
+            border-bottom-color: var(--border-color);
+        }
+
+        /* ==================== Enhanced Theme System ==================== */
+        body {
+            background: var(--background-color) !important;
+            transition: background-color .28s ease, color .28s ease;
+        }
+        .container {
+            background: var(--card-background) !important;
+            color: var(--text-color) !important;
+            border: 1px solid var(--border-color);
+            transition: background-color .28s ease, color .28s ease, border-color .28s ease, box-shadow .28s ease;
+        }
+        .header-auth-row, .table-scroll-box { border-color: var(--border-color) !important; }
+        .header-divider { color: var(--border-color) !important; }
+        h1, .ai-chart-title, .chart-stat-box strong, .chat-summary-header {
+            color: var(--primary-color) !important;
+        }
+        table thead th { background: var(--primary-color) !important; }
+        table tbody tr, table tbody tr td {
+            background-color: var(--card-background);
+            color: var(--text-color);
+        }
+        table tbody tr:hover, table tbody tr:hover td {
+            background-color: var(--surface-muted) !important;
+        }
+        .theme-picker-popover {
+            background: var(--card-background) !important;
+            color: var(--text-color) !important;
+            border-color: var(--border-color) !important;
+            backdrop-filter: blur(16px);
+        }
+        .theme-picker-title { color: var(--primary-color) !important; }
+        .theme-swatch-btn {
+            background: var(--surface-muted);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+        .theme-swatch-btn.active {
+            background: var(--surface-muted) !important;
+            color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 16%, transparent);
+        }
+        .admin-auth-bar, .chat-footer, .quick-chips-bar, .ai-chart-modal,
+        .chat-summary-card, .top-leave-item, .top-leave-detail, .export-options-container {
+            background-color: var(--card-background);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+        .chat-body, .chat-stat-mini, .quick-chip-btn, .export-option-label {
+            background-color: var(--surface-muted);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+        .chat-footer input, .controls input[type="date"], .filter-controls input[type="text"],
+        .filter-controls select, #roleQueueFilter {
+            background-color: var(--surface-muted) !important;
+            color: var(--text-color) !important;
+            border-color: var(--border-color) !important;
+        }
+        .chat-header, .chat-footer button { background: var(--primary-color) !important; }
+        .spinner { border-color: var(--border-color); border-top-color: var(--primary-color); }
+        .avatar-palette-badge { background: var(--primary-gradient) !important; }
+
+        /* ==================== Midnight / All-theme AI Chat Contrast Fix ==================== */
+        #ai-chat-window {
+            background: var(--card-background) !important;
+            color: var(--text-color) !important;
+            border: 1px solid var(--border-color);
+        }
+        #ai-chat-window .chat-body {
+            background: var(--background-color) !important;
+            color: var(--text-color) !important;
+        }
+        #ai-chat-window .message.ai-message {
+            background: var(--surface-muted) !important;
+            color: var(--text-color) !important;
+            border: 1px solid var(--border-color);
+        }
+        #ai-chat-window .message.user-message {
+            background: var(--primary-color) !important;
+            color: #ffffff !important;
+        }
+        #ai-chat-window .chat-footer {
+            background: var(--card-background) !important;
+            border-top: 1px solid var(--border-color) !important;
+        }
+        #ai-chat-window .chat-footer input {
+            background: var(--surface-muted) !important;
+            color: var(--text-color) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+        #ai-chat-window .chat-footer input::placeholder {
+            color: var(--text-color) !important;
+            opacity: .62;
+        }
+        #ai-chat-window .chat-summary-card,
+        #ai-chat-window .chat-summary-card * {
+            color: var(--text-color);
+        }
+        #ai-chat-window .chat-summary-card {
+            background: var(--card-background) !important;
+            border-color: var(--border-color) !important;
+        }
+        #ai-chat-window .chat-summary-header {
+            color: var(--primary-color) !important;
+            border-bottom-color: var(--border-color) !important;
+        }
+        #ai-chat-window .chat-summary-total-badge {
+            background: var(--surface-muted) !important;
+            color: var(--primary-color) !important;
+            border: 1px solid var(--border-color);
+        }
+        #ai-chat-window .chat-stat-mini {
+            background: var(--surface-muted) !important;
+            border-color: var(--border-color) !important;
+        }
+        #ai-chat-window .chat-stat-mini span {
+            color: var(--text-color) !important;
+            opacity: .78;
+        }
+        #ai-chat-window .chat-stat-mini strong,
+        #ai-chat-window .chat-type-item b {
+            color: var(--text-color) !important;
+        }
+        #ai-chat-window .chat-type-list {
+            color: var(--text-color) !important;
+            border-top-color: var(--border-color) !important;
+        }
+        #ai-chat-window .chat-queue-bar {
+            background: var(--surface-muted) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-color) !important;
+        }
+        /* Force nested response text (including inline-styled spans) to follow the theme.
+           Keep user bubbles, header controls and explicit semantic status colors intact. */
+        #ai-chat-window .ai-message p,
+        #ai-chat-window .ai-message div,
+        #ai-chat-window .ai-message span,
+        #ai-chat-window .ai-message li,
+        #ai-chat-window .ai-message small,
+        #ai-chat-window .ai-message label {
+            color: var(--text-color) !important;
+        }
+        #ai-chat-window .ai-message a {
+            color: var(--primary-color) !important;
+        }
+        #ai-chat-window .chat-header,
+        #ai-chat-window .chat-header * {
+            color: #ffffff !important;
+        }
+        #ai-chat-window .chat-footer button {
+            color: #ffffff !important;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+        }
+
+    
+        /* ==================== Midnight readability: Leave summary / ranking modal ==================== */
+        .ai-chart-modal {
+            color: var(--text-color) !important;
+        }
+        .ai-chart-modal .ai-chart-title,
+        .ai-chart-modal h1,
+        .ai-chart-modal h2,
+        .ai-chart-modal h3 {
+            color: var(--text-color) !important;
+        }
+        .ai-chart-modal .chart-stat-box span {
+            color: #b8c5d8 !important;
+            opacity: 1 !important;
+        }
+        .ai-chart-modal .chart-stat-box strong {
+            color: #43c7ff !important;
+        }
+        .ai-chart-modal .top-leave-list {
+            scrollbar-color: #71829b transparent;
+        }
+        .ai-chart-modal .top-leave-list::-webkit-scrollbar-thumb {
+            background: #71829b !important;
+        }
+        .ai-chart-modal .top-leave-item {
+            background: #172235 !important;
+            border-color: #3b4b63 !important;
+        }
+        .ai-chart-modal .top-leave-item:hover {
+            background: #1d2c43 !important;
+            border-color: #7187a5 !important;
+        }
+        .ai-chart-modal .emp-clean-name {
+            color: #edf4ff !important;
+        }
+        .ai-chart-modal .drill-arrow {
+            color: #a9bad1 !important;
+        }
+        .ai-chart-modal .leave-count-pill {
+            background: #dceaff !important;
+            color: #1248c8 !important;
+        }
+        .ai-chart-modal .top-leave-detail {
+            background: #111b2b !important;
+            color: #e5edf8 !important;
+            border-top-color: #3b4b63 !important;
+        }
+        .ai-chart-modal .detail-history-list,
+        .ai-chart-modal .detail-history-list li,
+        .ai-chart-modal .detail-history-list b {
+            color: #e5edf8 !important;
+        }
+        .ai-chart-modal .detail-history-list span {
+            color: #b8c5d8 !important;
+        }
+        .ai-chart-modal .top-leave-empty,
+        .ai-chart-modal .top-leave-hint {
+            color: #b8c5d8 !important;
+        }
+        .ai-chart-modal .top-leave-item,
+        .ai-chart-modal .top-leave-detail,
+        .ai-chart-modal .emp-clean-name,
+        .ai-chart-modal .chart-stat-box span {
+            text-shadow: none !important;
+        }
+
+</style>
 </head>
 <body>
     <div id="loading-overlay">
@@ -1234,13 +1662,52 @@
             </h1>
 
             <div class="admin-auth-bar" title="สถานะสิทธิ์การอนุมัติตามลำดับขั้น (N1 / N2 / N3 / VIP)">
-                <div class="auth-user-info">
-                    <img id="adminAvatar" class="auth-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar">
+<div class="auth-user-info">
+                    <!-- กดที่รูป Avatar เพื่อเปิดเมนูเปลี่ยนธีม -->
+                    <div class="avatar-theme-trigger" onclick="toggleThemeMenu(event)" title="คลิกที่รูปโปรไฟล์เพื่อเปลี่ยนธีมสี">
+                        <img id="adminAvatar" class="auth-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar">
+                        <span class="avatar-palette-badge"><i class="fas fa-palette"></i></span>
+                    </div>
+
                     <div style="font-weight: 600; font-size: 0.9em; white-space: nowrap;">
                         <span id="adminDisplayName">ผู้เยี่ยมชม</span>
                         <span id="adminRoleBadge" class="role-badge role-GUEST">Guest</span>
                     </div>
                     <span id="adminSubText"></span>
+
+                    <!-- เมนูเลือกธีมสี (Popover) -->
+                    <div id="themePickerPopover" class="theme-picker-popover" onclick="event.stopPropagation()">
+                        <div class="theme-picker-title">
+                            <span>🎨 เลือกธีมสีหน้าเว็บ</span>
+                            <span style="font-size:0.72rem; color:#94a3b8; font-weight:400;">บันทึกอัตโนมัติ</span>
+                        </div>
+                        <div class="theme-swatch-grid">
+                            <button type="button" class="theme-swatch-btn" data-theme="default" onclick="applyAppTheme('default')">
+                                <span class="swatch-circle" style="background: linear-gradient(45deg, #3498db, #2c3e50);"></span>
+                                <span>ค่าเริ่มต้น</span>
+                            </button>
+                            <button type="button" class="theme-swatch-btn" data-theme="emerald" onclick="applyAppTheme('emerald')">
+                                <span class="swatch-circle" style="background: linear-gradient(45deg, #10b981, #064e3b);"></span>
+                                <span>เขียวมรกต</span>
+                            </button>
+                            <button type="button" class="theme-swatch-btn" data-theme="royal" onclick="applyAppTheme('royal')">
+                                <span class="swatch-circle" style="background: linear-gradient(45deg, #8b5cf6, #312e81);"></span>
+                                <span>ม่วงรอยัล</span>
+                            </button>
+                            <button type="button" class="theme-swatch-btn" data-theme="rose" onclick="applyAppTheme('rose')">
+                                <span class="swatch-circle" style="background: linear-gradient(45deg, #f43f5e, #881337);"></span>
+                                <span>ชมพูโรส</span>
+                            </button>
+                            <button type="button" class="theme-swatch-btn" data-theme="sunset" onclick="applyAppTheme('sunset')">
+                                <span class="swatch-circle" style="background: linear-gradient(45deg, #f97316, #7c2d12);"></span>
+                                <span>ส้มซันเซ็ต</span>
+                            </button>
+                            <button type="button" class="theme-swatch-btn" data-theme="midnight" onclick="applyAppTheme('midnight')">
+                                <span class="swatch-circle" style="background: linear-gradient(45deg, #0ea5e9, #0f172a);"></span>
+                                <span>มิดไนท์</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
@@ -4040,6 +4507,226 @@ ${memoryText}
         window.addEventListener("DOMContentLoaded", () => {
             initAdminLiff();
         });
+        // ==================== 10. ระบบเปลี่ยนธีมสี (Avatar Theme Switcher) ====================
+const APP_THEMES = {
+            default: {
+                // ค่าเริ่มต้น = สีเดิมของเว็บ 100%
+                primary: '#2c3e50',
+                gradient: 'linear-gradient(45deg, #3498db, #2c3e50)',
+                bg: '#ecf0f1',
+                cardBg: '#ffffff',
+                surfaceMuted: '#f8fafc',
+                textColor: '#34495e',
+                borderColor: '#bdc3c7',
+                sortBtn: '#3498db',
+                resetBtn: '#7f8c8d',
+                exportBtn: '#1D6F42',
+                approveBtn: '#2ecc71',
+                rejectBtn: '#e74c3c',
+                statusApproved: '#27ae60',
+                statusPending: '#f39c12',
+                statusRejected: '#c0392b',
+                paginationActive: '#0056b3'
+            },
+            midnight: {
+                // ธีมมืดพรีเมียม (Dark Slate + Cyan/Indigo Accent)
+                primary: '#38bdf8',
+                gradient: 'linear-gradient(45deg, #0284c7, #1e293b)',
+                bg: '#0b1120',
+                cardBg: '#111827',
+                surfaceMuted: '#1e293b',
+                textColor: '#e2e8f0',
+                borderColor: '#334155',
+                sortBtn: '#0369a1',
+                resetBtn: '#475569',
+                exportBtn: '#0d9488',
+                approveBtn: '#059669',
+                rejectBtn: '#e11d48',
+                statusApproved: '#059669',
+                statusPending: '#d97706',
+                statusRejected: '#be123c',
+                paginationActive: '#0284c7'
+            },
+            emerald: {
+                // ธีมเขียวมรกตสดชื่นทั้งหน้า
+                primary: '#065f46',
+                gradient: 'linear-gradient(45deg, #10b981, #064e3b)',
+                bg: '#d1fae5',
+                cardBg: '#ffffff',
+                surfaceMuted: '#ecfdf5',
+                textColor: '#064e3b',
+                borderColor: '#a7f3d0',
+                sortBtn: '#059669',
+                resetBtn: '#4b7c6b',
+                exportBtn: '#047857',
+                approveBtn: '#10b981',
+                rejectBtn: '#e11d48',
+                statusApproved: '#059669',
+                statusPending: '#d97706',
+                statusRejected: '#be123c',
+                paginationActive: '#047857'
+            },
+            royal: {
+                // ธีมม่วงรอยัลหรูหราทั้งหน้า
+                primary: '#3730a3',
+                gradient: 'linear-gradient(45deg, #8b5cf6, #312e81)',
+                bg: '#ede9fe',
+                cardBg: '#ffffff',
+                surfaceMuted: '#f5f3ff',
+                textColor: '#1e1b4b',
+                borderColor: '#ddd6fe',
+                sortBtn: '#7c3aed',
+                resetBtn: '#6b648b',
+                exportBtn: '#4338ca',
+                approveBtn: '#6d28d9',
+                rejectBtn: '#db2777',
+                statusApproved: '#7c3aed',
+                statusPending: '#f59e0b',
+                statusRejected: '#be185d',
+                paginationActive: '#4c1d95'
+            },
+            rose: {
+                // ธีมชมพูโรสละมุนทั้งหน้า
+                primary: '#9f1239',
+                gradient: 'linear-gradient(45deg, #f43f5e, #881337)',
+                bg: '#ffe4e6',
+                cardBg: '#ffffff',
+                surfaceMuted: '#fff1f2',
+                textColor: '#4c0519',
+                borderColor: '#fecdd3',
+                sortBtn: '#e11d48',
+                resetBtn: '#886470',
+                exportBtn: '#9f1239',
+                approveBtn: '#ec4899',
+                rejectBtn: '#991b1b',
+                statusApproved: '#db2777',
+                statusPending: '#f59e0b',
+                statusRejected: '#9f1239',
+                paginationActive: '#be123c'
+            },
+            sunset: {
+                // ธีมส้มซันเซ็ตอบอุ่นทั้งหน้า
+                primary: '#9a3412',
+                gradient: 'linear-gradient(45deg, #f97316, #7c2d12)',
+                bg: '#ffedd5',
+                cardBg: '#ffffff',
+                surfaceMuted: '#fff7ed',
+                textColor: '#431407',
+                borderColor: '#fed7aa',
+                sortBtn: '#ea580c',
+                resetBtn: '#7c6a5e',
+                exportBtn: '#b45309',
+                approveBtn: '#d97706',
+                rejectBtn: '#dc2626',
+                statusApproved: '#ea580c',
+                statusPending: '#ca8a04',
+                statusRejected: '#b91c1c',
+                paginationActive: '#9a3412'
+            }
+        };
+
+
+        // Theme application: one source of truth for every theme-aware surface.
+        function toggleThemeMenu(event) {
+            if (event) event.stopPropagation();
+            const popover = document.getElementById('themePickerPopover');
+            if (!popover) return;
+            const opening = !popover.classList.contains('open');
+            popover.classList.toggle('open', opening);
+            const trigger = document.querySelector('.avatar-theme-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', String(opening));
+        }
+
+        function applyAppTheme(themeKey) {
+            const selectedKey = Object.prototype.hasOwnProperty.call(APP_THEMES, themeKey) ? themeKey : 'default';
+            const theme = APP_THEMES[selectedKey];
+            const root = document.documentElement;
+
+            const variables = {
+                '--primary-color': theme.primary,
+                '--primary-gradient': theme.gradient,
+                '--background-color': theme.bg,
+                '--card-background': theme.cardBg,
+                '--surface-muted': theme.surfaceMuted,
+                '--text-color': theme.textColor,
+                '--border-color': theme.borderColor,
+                '--sort-btn-bg': theme.sortBtn,
+                '--reset-btn-bg': theme.resetBtn,
+                '--export-btn-bg': theme.exportBtn,
+                '--approve-btn-bg': theme.approveBtn,
+                '--reject-btn-bg': theme.rejectBtn,
+                '--approved-color': theme.statusApproved,
+                '--pending-color': theme.statusPending,
+                '--rejected-color': theme.statusRejected,
+                '--pagination-active-bg': theme.paginationActive
+            };
+            Object.entries(variables).forEach(([name, value]) => root.style.setProperty(name, value));
+
+            // Explicitly update the page and main container as well.
+            document.body.style.backgroundColor = theme.bg;
+            document.body.style.color = theme.textColor;
+            const container = document.querySelector('.container');
+            if (container) {
+                container.style.backgroundColor = theme.cardBg;
+                container.style.color = theme.textColor;
+                container.style.borderColor = theme.borderColor;
+            }
+
+            document.querySelectorAll('.theme-swatch-btn').forEach(btn => {
+                const active = btn.dataset.theme === selectedKey;
+                btn.classList.toggle('active', active);
+                btn.setAttribute('aria-pressed', String(active));
+            });
+
+            try {
+                localStorage.setItem('bus_easyleave_theme', selectedKey);
+            } catch (error) {
+                console.warn('ไม่สามารถบันทึกธีมได้:', error);
+            }
+
+            const paletteBadge = document.querySelector('.avatar-palette-badge');
+            if (paletteBadge) paletteBadge.title = 'ธีมปัจจุบัน: ' + selectedKey;
+
+            const popover = document.getElementById('themePickerPopover');
+            if (popover) popover.classList.remove('open');
+            const trigger = document.querySelector('.avatar-theme-trigger');
+            if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        }
+
+        function initAppTheme() {
+            let savedTheme = 'default';
+            try {
+                savedTheme = localStorage.getItem('bus_easyleave_theme') || 'default';
+            } catch (error) {
+                console.warn('อ่านค่าธีมที่บันทึกไว้ไม่ได้:', error);
+            }
+            applyAppTheme(savedTheme);
+        }
+
+        // Restore the saved palette and close the picker with outside click / Escape.
+        document.addEventListener('DOMContentLoaded', () => {
+            initAppTheme();
+
+            document.addEventListener('click', event => {
+                const popover = document.getElementById('themePickerPopover');
+                const trigger = document.querySelector('.avatar-theme-trigger');
+                if (popover && popover.classList.contains('open') &&
+                    !popover.contains(event.target) && !(trigger && trigger.contains(event.target))) {
+                    popover.classList.remove('open');
+                    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    const popover = document.getElementById('themePickerPopover');
+                    const trigger = document.querySelector('.avatar-theme-trigger');
+                    if (popover) popover.classList.remove('open');
+                    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+
     </script>
 </body>
 </html>
