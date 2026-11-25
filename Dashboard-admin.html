@@ -1625,6 +1625,216 @@
         .ai-chart-modal .chart-stat-box span {
             text-shadow: none !important;
         }
+        /* ==================== UI Mode & Theme Layout Styles ==================== */
+.workspace-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    gap: 12px;
+}
+.sidebar-panel {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+.main-content-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+}
+.sidebar-section-title { display: none; }
+
+.theme-picker-popover {
+    position: absolute;
+    top: 46px;
+    left: 0;
+    width: 310px;
+    background: var(--card-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.25);
+    z-index: 10000;
+    font-family: 'Kanit', sans-serif;
+    display: none;
+    animation: fadeDrop 0.22s ease-out;
+}
+.theme-picker-popover.open { display: block; }
+.theme-section-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.layout-style-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--border-color);
+}
+.layout-style-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 9px 4px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border-color);
+    background: var(--surface-muted);
+    color: var(--text-color);
+    cursor: pointer;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.layout-style-btn i { font-size: 1.15rem; color: var(--primary-color); }
+.layout-style-btn:hover { transform: translateY(-2px); border-color: var(--primary-color); }
+.layout-style-btn.active {
+    background: var(--primary-gradient) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+}
+.layout-style-btn.active i { color: #ffffff !important; }
+
+/* โหมดที่ 2: แถบข้าง SaaS (2 คอลัมน์ ซ้าย-ขวา) */
+body[data-ui-layout="sidebar"] { padding: 0; }
+body[data-ui-layout="sidebar"] .container {
+    height: 100dvh;
+    border-radius: 0;
+    padding: 14px 20px;
+}
+body[data-ui-layout="sidebar"] .workspace-body {
+    flex-direction: row;
+    gap: 18px;
+    align-items: stretch;
+}
+body[data-ui-layout="sidebar"] .sidebar-panel {
+    width: 265px;
+    background: var(--surface-muted);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 14px;
+    overflow-y: auto;
+    gap: 10px;
+}
+body[data-ui-layout="sidebar"] .sidebar-section-title {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+body[data-ui-layout="sidebar"] .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 0;
+}
+body[data-ui-layout="sidebar"] .controls label { font-size: 0.82rem; margin-bottom: -4px; }
+body[data-ui-layout="sidebar"] .controls input[type="date"],
+body[data-ui-layout="sidebar"] .controls button,
+body[data-ui-layout="sidebar"] .controls .action-button {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    padding: 9px 12px;
+    font-size: 0.88rem;
+}
+body[data-ui-layout="sidebar"] #summaryButton::after { content: " ตารางสรุปทั้งหมด"; }
+body[data-ui-layout="sidebar"] #summaryButton2::after { content: " ข้อมูลรายบุคคล"; }
+body[data-ui-layout="sidebar"] #AddButton::after { content: " เพิ่ม/ลบ พนักงาน"; }
+body[data-ui-layout="sidebar"] #exportHistoryButton::after { content: " ส่งออกลงระบบ SSI"; }
+body[data-ui-layout="sidebar"] .filter-controls {
+    justify-content: flex-start;
+    background: var(--surface-muted);
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 10px;
+    gap: 10px;
+}
+body[data-ui-layout="sidebar"] .filter-controls input[type="text"] { flex: 1; min-width: 160px; }
+
+/* โหมดที่ 3: การ์ดฟีด (เปลี่ยนแถวตารางเป็นการ์ด) */
+body[data-ui-layout="cards"] .container {
+    background: color-mix(in srgb, var(--card-background) 88%, transparent) !important;
+    backdrop-filter: blur(16px);
+    border-radius: 24px;
+}
+body[data-ui-layout="cards"] .controls,
+body[data-ui-layout="cards"] .filter-controls {
+    background: var(--surface-muted);
+    padding: 8px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 8px;
+}
+body[data-ui-layout="cards"] .table-scroll-box { border: none; background: transparent; padding: 4px; }
+body[data-ui-layout="cards"] #dataTable,
+body[data-ui-layout="cards"] #dataTable tbody { display: block; width: 100%; box-shadow: none; }
+body[data-ui-layout="cards"] #dataTable thead { display: none; }
+body[data-ui-layout="cards"] #dataTable tbody {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 14px;
+}
+body[data-ui-layout="cards"] #dataTable tbody tr {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-background) !important;
+    border: 1px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 16px;
+    padding: 14px 16px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    gap: 6px;
+}
+body[data-ui-layout="cards"] #dataTable tbody tr:hover { transform: translateY(-3px); }
+body[data-ui-layout="cards"] #dataTable tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    border-bottom: 1px dashed color-mix(in srgb, var(--border-color) 60%, transparent);
+    font-size: 0.88rem;
+    text-align: right;
+    background: transparent !important;
+}
+body[data-ui-layout="cards"] #dataTable tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--primary-color);
+    opacity: 0.85;
+    text-align: left;
+    font-size: 0.82rem;
+}
+body[data-ui-layout="cards"] #dataTable tbody td[data-label="ชื่อ-สกุล"] {
+    order: -2;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary-color) !important;
+    border-bottom: 1.5px solid var(--border-color);
+    padding-bottom: 8px;
+}
+body[data-ui-layout="cards"] #dataTable tbody td[data-label="ชื่อ-สกุล"]::before { content: "👤 พนักงาน"; }
+body[data-ui-layout="cards"] #dataTable tbody td[data-label="ดำเนินการ"] {
+    border-bottom: none;
+    padding-top: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+}
+body[data-ui-layout="cards"] #dataTable tbody td[data-label="ดำเนินการ"]::before { display: none; }
 
 </style>
 </head>
@@ -1662,7 +1872,7 @@
             </h1>
 
             <div class="admin-auth-bar" title="สถานะสิทธิ์การอนุมัติตามลำดับขั้น (N1 / N2 / N3 / VIP)">
-<div class="auth-user-info">
+                <div class="auth-user-info">
                     <!-- กดที่รูป Avatar เพื่อเปิดเมนูเปลี่ยนธีม -->
                     <div class="avatar-theme-trigger" onclick="toggleThemeMenu(event)" title="คลิกที่รูปโปรไฟล์เพื่อเปลี่ยนธีมสี">
                         <img id="adminAvatar" class="auth-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar">
@@ -1675,39 +1885,57 @@
                     </div>
                     <span id="adminSubText"></span>
 
-                    <!-- เมนูเลือกธีมสี (Popover) -->
-                    <div id="themePickerPopover" class="theme-picker-popover" onclick="event.stopPropagation()">
-                        <div class="theme-picker-title">
-                            <span>🎨 เลือกธีมสีหน้าเว็บ</span>
-                            <span style="font-size:0.72rem; color:#94a3b8; font-weight:400;">บันทึกอัตโนมัติ</span>
+                        <div id="themePickerPopover" class="theme-picker-popover" onclick="event.stopPropagation()">
+                            <div class="theme-section-label">
+                                <span><i class="fas fa-columns"></i> รูปแบบโครงสร้างเว็บ (UI Mode)</span>
+                                <span style="font-size:0.7rem; opacity:0.7; font-weight:400;">3 สไตล์</span>
+                            </div>
+                            <div class="layout-style-grid">
+                                <button type="button" class="layout-style-btn" data-layout="classic" onclick="applyUiLayout('classic')">
+                                    <i class="fas fa-window-maximize"></i>
+                                    <span>คลาสสิก</span>
+                                </button>
+                                <button type="button" class="layout-style-btn" data-layout="sidebar" onclick="applyUiLayout('sidebar')">
+                                    <i class="fas fa-table-columns"></i>
+                                    <span>แถบข้าง SaaS</span>
+                                </button>
+                                <button type="button" class="layout-style-btn" data-layout="cards" onclick="applyUiLayout('cards')">
+                                    <i class="fas fa-grip"></i>
+                                    <span>การ์ดฟีด</span>
+                                </button>
+                            </div>
+
+                            <div class="theme-section-label">
+                                <span><i class="fas fa-palette"></i> โทนสีธีม (Color Theme)</span>
+                                <span style="font-size:0.7rem; opacity:0.7; font-weight:400;">บันทึกอัตโนมัติ</span>
+                            </div>
+                            <div class="theme-swatch-grid">
+                                <button type="button" class="theme-swatch-btn" data-theme="default" onclick="applyAppTheme('default')">
+                                    <span class="swatch-circle" style="background: linear-gradient(45deg, #3498db, #2c3e50);"></span>
+                                    <span>ค่าเริ่มต้น</span>
+                                </button>
+                                <button type="button" class="theme-swatch-btn" data-theme="emerald" onclick="applyAppTheme('emerald')">
+                                    <span class="swatch-circle" style="background: linear-gradient(45deg, #10b981, #064e3b);"></span>
+                                    <span>เขียวมรกต</span>
+                                </button>
+                                <button type="button" class="theme-swatch-btn" data-theme="royal" onclick="applyAppTheme('royal')">
+                                    <span class="swatch-circle" style="background: linear-gradient(45deg, #8b5cf6, #312e81);"></span>
+                                    <span>ม่วงรอยัล</span>
+                                </button>
+                                <button type="button" class="theme-swatch-btn" data-theme="rose" onclick="applyAppTheme('rose')">
+                                    <span class="swatch-circle" style="background: linear-gradient(45deg, #f43f5e, #881337);"></span>
+                                    <span>ชมพูโรส</span>
+                                </button>
+                                <button type="button" class="theme-swatch-btn" data-theme="sunset" onclick="applyAppTheme('sunset')">
+                                    <span class="swatch-circle" style="background: linear-gradient(45deg, #f97316, #7c2d12);"></span>
+                                    <span>ส้มซันเซ็ต</span>
+                                </button>
+                                <button type="button" class="theme-swatch-btn" data-theme="midnight" onclick="applyAppTheme('midnight')">
+                                    <span class="swatch-circle" style="background: linear-gradient(45deg, #0ea5e9, #0f172a);"></span>
+                                    <span>มิดไนท์</span>
+                                </button>
+                            </div>
                         </div>
-                        <div class="theme-swatch-grid">
-                            <button type="button" class="theme-swatch-btn" data-theme="default" onclick="applyAppTheme('default')">
-                                <span class="swatch-circle" style="background: linear-gradient(45deg, #3498db, #2c3e50);"></span>
-                                <span>ค่าเริ่มต้น</span>
-                            </button>
-                            <button type="button" class="theme-swatch-btn" data-theme="emerald" onclick="applyAppTheme('emerald')">
-                                <span class="swatch-circle" style="background: linear-gradient(45deg, #10b981, #064e3b);"></span>
-                                <span>เขียวมรกต</span>
-                            </button>
-                            <button type="button" class="theme-swatch-btn" data-theme="royal" onclick="applyAppTheme('royal')">
-                                <span class="swatch-circle" style="background: linear-gradient(45deg, #8b5cf6, #312e81);"></span>
-                                <span>ม่วงรอยัล</span>
-                            </button>
-                            <button type="button" class="theme-swatch-btn" data-theme="rose" onclick="applyAppTheme('rose')">
-                                <span class="swatch-circle" style="background: linear-gradient(45deg, #f43f5e, #881337);"></span>
-                                <span>ชมพูโรส</span>
-                            </button>
-                            <button type="button" class="theme-swatch-btn" data-theme="sunset" onclick="applyAppTheme('sunset')">
-                                <span class="swatch-circle" style="background: linear-gradient(45deg, #f97316, #7c2d12);"></span>
-                                <span>ส้มซันเซ็ต</span>
-                            </button>
-                            <button type="button" class="theme-swatch-btn" data-theme="midnight" onclick="applyAppTheme('midnight')">
-                                <span class="swatch-circle" style="background: linear-gradient(45deg, #0ea5e9, #0f172a);"></span>
-                                <span>มิดไนท์</span>
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
@@ -1731,6 +1959,10 @@
             </div>
         </div>
         
+<div class="workspace-body">
+    <!-- คอลัมน์ซ้าย (หรือแถบบนในโหมดคลาสสิก/การ์ด) -->
+    <aside class="sidebar-panel">
+        <div class="sidebar-section-title"><i class="fas fa-sliders-h"></i> ช่วงวันที่ & เมนูหลัก</div>
         <div class="controls">
             <label for="startDate"><i class="fas fa-calendar-alt"></i> วันที่เริ่มต้น:</label>
             <input type="date" id="startDate">
@@ -1743,50 +1975,57 @@
             <button class="action-button" id="AddButton" title="เพิ่ม/ลบ รายชื่อพนักงาน"><i class="fa-solid fa-user-plus"></i></button>
             <button class="action-button" id="exportHistoryButton" title="Update ข้อมูลการลาลงในระบบ SSI"><i class="fa-solid fa-link"></i></button>
         </div>
-        
-        <div class="filter-controls">
-            <label for="searchName"><i class="fas fa-user-circle"></i> ชื่อ-สกุล:</label>
-            <input type="text" id="searchName" placeholder="ค้นหาชื่อ...">
-            
-            <label for="filterType"><i class="fas fa-tags"></i> ประเภท:</label>
-            <select id="filterType">
-                <option value="">ทั้งหมด</option>
-                <option value="AL1">ลาพักร้อน</option>
-                <option value="SL1">ลาป่วย</option>
-                <option value="BL1">ลากิจ</option>
-            </select>
-            
-            <label for="filterStatus"><i class="fas fa-clipboard-check"></i> สถานะ:</label>
-            <select id="filterStatus">
-                <option value="">ทั้งหมด</option>
-                <option value="Approved">อนุมัติแล้ว</option>
-                <option value="Rejected">ไม่อนุมัติ</option>
-                <option value="pending">รออนุมัติ</option>
-            </select>
-            
-            <button id="sortButton"><i class="fas fa-sort-amount-down"></i> เรียงล่าสุด → เก่าสุด</button>
-        </div>
-        <div class="table-scroll-box">
-            <table id="dataTable">
-                <thead>
-                    <tr>
-                        <th><i class="fas fa-id-card-alt"></i> รหัสพนักงาน</th>
-                        <th><i class="fas fa-user"></i> ชื่อ-สกุล</th>
-                        <th><i class="fas fa-clipboard"></i> ประเภทการลา</th>
-                        <th><i class="fas fa-paperclip"></i> เอกสารประกอบ</th>
-                        <th><i class="fas fa-calendar-day"></i> ตั้งแต่วันที่</th>
-                        <th><i class="fas fa-clock"></i> เวลา(เริ่ม)</th>
-                        <th><i class="fas fa-calendar-day"></i> ถึงวันที่</th>
-                        <th><i class="fas fa-clock"></i> เวลา(สิ้นสุด)</th>
-                        <th><i class="fas fa-hourglass-half"></i> จำนวนวันลา</th>
-                        <th><i class="fas fa-check-circle"></i> สถานะ</th>
-                        <th><i class="fas fa-file-signature"></i> วันที่ยื่นคำร้อง</th>
-                        <th><i class="fas fa-cogs"></i> ดำเนินการ</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+    </aside>
+
+                <!-- พื้นที่หลักฝั่งขวา -->
+                <main class="main-content-panel">
+                    <div class="filter-controls">
+                        <label for="searchName"><i class="fas fa-user-circle"></i> ชื่อ-สกุล:</label>
+                        <input type="text" id="searchName" placeholder="ค้นหาชื่อ...">
+                        
+                        <label for="filterType"><i class="fas fa-tags"></i> ประเภท:</label>
+                        <select id="filterType">
+                            <option value="">ทั้งหมด</option>
+                            <option value="AL1">ลาพักร้อน</option>
+                            <option value="SL1">ลาป่วย</option>
+                            <option value="BL1">ลากิจ</option>
+                        </select>
+                        
+                        <label for="filterStatus"><i class="fas fa-clipboard-check"></i> สถานะ:</label>
+                        <select id="filterStatus">
+                            <option value="">ทั้งหมด</option>
+                            <option value="Approved">อนุมัติแล้ว</option>
+                            <option value="Rejected">ไม่อนุมัติ</option>
+                            <option value="pending">รออนุมัติ</option>
+                        </select>
+                        
+                        <button id="sortButton"><i class="fas fa-sort-amount-down"></i> เรียงล่าสุด → เก่าสุด</button>
+                    </div>
+
+                    <div class="table-scroll-box">
+                        <table id="dataTable">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-id-card-alt"></i> รหัสพนักงาน</th>
+                                    <th><i class="fas fa-user"></i> ชื่อ-สกุล</th>
+                                    <th><i class="fas fa-clipboard"></i> ประเภทการลา</th>
+                                    <th><i class="fas fa-paperclip"></i> เอกสารประกอบ</th>
+                                    <th><i class="fas fa-calendar-day"></i> ตั้งแต่วันที่</th>
+                                    <th><i class="fas fa-clock"></i> เวลา(เริ่ม)</th>
+                                    <th><i class="fas fa-calendar-day"></i> ถึงวันที่</th>
+                                    <th><i class="fas fa-clock"></i> เวลา(สิ้นสุด)</th>
+                                    <th><i class="fas fa-hourglass-half"></i> จำนวนวันลา</th>
+                                    <th><i class="fas fa-check-circle"></i> สถานะ</th>
+                                    <th><i class="fas fa-file-signature"></i> วันที่ยื่นคำร้อง</th>
+                                    <th><i class="fas fa-cogs"></i> ดำเนินการ</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div id="pagination"></div>
+                </main>
+            </div>
         <div id="pagination"></div>
     </div>
     
@@ -4726,6 +4965,44 @@ const APP_THEMES = {
                 }
             });
         });
+
+        // ==================== ตัวควบคุมรูปแบบ UI 3 สไตล์ ====================
+const _origCalcRows = typeof calculateDynamicRowsPerPage === 'function' ? calculateDynamicRowsPerPage : () => 12;
+window.calculateDynamicRowsPerPage = function() {
+    if (document.body.getAttribute('data-ui-layout') === 'cards') {
+        const box = document.querySelector('.table-scroll-box');
+        if (!box) return 9;
+        const cols = Math.max(1, Math.floor(box.clientWidth / 345));
+        const rows = Math.max(1, Math.floor(box.clientHeight / 340));
+        return Math.max(3, cols * rows);
+    }
+    return _origCalcRows();
+};
+
+window.applyUiLayout = function(layoutKey) {
+    const valid = ['classic', 'sidebar', 'cards'];
+    const target = valid.includes(layoutKey) ? layoutKey : 'classic';
+    document.body.setAttribute('data-ui-layout', target);
+    localStorage.setItem('busEasyLeaveLayout', target);
+
+    document.querySelectorAll('.layout-style-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-layout') === target);
+    });
+
+    if (typeof window.displayTableData === 'function') {
+        setTimeout(() => {
+            rowsPerPage = window.calculateDynamicRowsPerPage();
+            const maxPage = Math.max(1, Math.ceil((filteredAndSortedData || []).length / rowsPerPage));
+            if (currentPage > maxPage) currentPage = maxPage;
+            window.displayTableData();
+        }, 50);
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const savedLayout = localStorage.getItem('busEasyLeaveLayout') || 'classic';
+    window.applyUiLayout(savedLayout);
+});
 
     </script>
 </body>
